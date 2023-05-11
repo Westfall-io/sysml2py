@@ -96,13 +96,13 @@ if __name__ == '__main__':
     
 
     # print with tree_to_json
-    tree_to_json(tree)  # will print to stdout
+    #tree_to_json(tree)  # will print to stdout
     
     # build JSON string with tree_to_json_str
-    json_str = tree_to_json_str(tree)
+    #json_str = tree_to_json_str(tree)
 
-# test that above JSON string is valid
-import json
-parsed_json = json.loads(json_str)
-print(parsed_json)
+    # test that above JSON string is valid
+    #import json
+    #parsed_json = json.loads(json_str)
+    #print(parsed_json)
    
