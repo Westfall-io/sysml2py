@@ -13,11 +13,11 @@ if __name__ == '__main__':
     
     sysml_parser = lark.Lark(r"""
         start: package 
-            | type name dict
-            | definition name dict
+            | type name dict2
+            | definition name dict2
         
         
-        package: "package" name dict
+        package: "package" name dict2
         
         // Allow optional punctuation after each word
         type: WORD
@@ -25,7 +25,7 @@ if __name__ == '__main__':
         name: WORD
         pointer: WORD
         
-        dict: "{" [pair+ | doc | "@" word dict] "}"
+        dict2: "{" [pair+ | doc | "@" word dict2] "}"
         
         word: WORD ["," | "!" | "." | ":"]
         variable: (word ["_"])*
@@ -41,16 +41,16 @@ if __name__ == '__main__':
         WORD: LETTER+
         
         import: "import" iname ";"
-        str: ESCAPED_STRING
-        keyv: word "=" str ";"
-            | "in" variable ":" word dict
-            | "out" variable ":" word dict
+        str2: ESCAPED_STRING
+        keyv: word "=" str2 ";"
+            | "in" variable ":" word dict2
+            | "out" variable ":" word dict2
         
         pair: type name ":" pointer ";"
-            | type dict
+            | type dict2
             | import
-            | type name dict 
-            | definition name dict
+            | type name dict2
+            | definition name dict2
             | keyv
             
         doc: "doc" "/*" [word* ("*" word*)*] "*/"
@@ -76,26 +76,53 @@ if __name__ == '__main__':
             
         if isinstance(item, lark.Tree):
             #print("tree {}".format(level))
+            
             b = {str(item.data):{}}
+            
+            print("")
+        
             for child in item.children:
                 #print("child: {}".format(level))
                 #a[item][child.type] = child
                 c = _tree_to_json(child, level+1)
                 if type(c) == type(dict()):
-                    for key in c.keys():
-                        if not key in b[str(item.data)]:
-                            # Key did not exist
-                            b[str(item.data)][key] = c[key]
-                        elif type(b[str(item.data)][key]) == type(list()):
-                            b[str(item.data)][key].append(c[key])
-                        else:
-                            # Don't overwrite values, make a list
-                            v = b[str(item.data)][key]
-                            b[str(item.data)][key] = [v]
-                            b[str(item.data)][key].append(c[key])
+                    if type(b[str(item.data)]) == type(dict()):
+                        # Empty
+                        for key in c.keys():
+                            if not key in b[str(item.data)]:
+                                # Key did not exist
+                                b[str(item.data)][key] = c[key]
+                            elif type(b[str(item.data)][key]) == type(list()):
+                                b[str(item.data)][key].append(c[key])
+                            else:
+                                # Don't overwrite values, make a list
+                                v = b[str(item.data)][key]
+                                b[str(item.data)][key] = [v]
+                                b[str(item.data)][key].append(c[key])
+                    else:
+                        b = {str(item.data):{b[str(item.data)]:c}}
                 else:
-                    b[str(item.data)] = c
-            return b
+                    if type(b[str(item.data)]) == type(dict()):
+                        b[str(item.data)] = c
+                    else:
+                        v = b[str(item.data)]
+                        b[str(item.data)] = [v]
+                        b[str(item.data)].append(c)
+            
+            if str(item.data) == "word" or str(item.data) == 'str2' or str(item.data) == "dict2":
+                a = b[str(item.data)] # eliminate the extra step
+            else:
+                a = b
+                
+            if "keyv" in a:
+                if type(a["keyv"]) == type(list()):
+                    if len(a["keyv"]) == 2:
+                        a = {a["keyv"][0]:a["keyv"][1]}
+            elif "pair" in a:
+                if type(a["pair"]) == type(list()):
+                    if len(a["pair"]) == 2 and type(a["pair"][0]) == type(str()):
+                        a = {a["pair"][0]:a["pair"][1]}
+            return a
         elif isinstance(item, lark.Token):
             #print("item: {}".format(item.type))
             if item.type == 'WORD':
