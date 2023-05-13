@@ -10,7 +10,7 @@ import yaml
 import ast
 
 if __name__ == '__main__':
-    from examples import sysml
+    from examples import sysml2
     
     sysml_parser = lark.Lark(r"""
         start: package 
@@ -71,7 +71,7 @@ if __name__ == '__main__':
         """, start='start', maybe_placeholders=False)
         
         
-    tree = sysml_parser.parse(sysml)
+    tree = sysml_parser.parse(sysml2)
     
     def _tree_to_json(item, level=0):
             
@@ -132,6 +132,13 @@ if __name__ == '__main__':
             if "doc" in a:
                 if type(a["doc"]) == type(list()):
                     a["doc"] = " ".join(a["doc"])
+        
+            # Removed, tried to keep headers to be objects
+            # if type(a) == type(dict()):
+            #     v = [k for k in a.keys()][0]
+            #     if type(a[v]) == type(dict()):
+            #         if len(a[v].keys()) == 2 and "name" in a[v].keys() and "pair" in a[v].keys():
+            #             a = {v:{a[v]['name']:a[v]['pair']}}
                 
             return a
         elif isinstance(item, lark.Token):
