@@ -6,43 +6,12 @@ Created on Sun May  7 11:20:32 2023
 @author: christophercox
 """
 import lark
-import sys
+import json
 
-def tree_to_json_str(item):
-    output = []
-    tree_to_json(tree, output.append)  # will build output in memory
-    return ''.join(output)
-
-def tree_to_json(item, write=None):
-    """ Writes a Lark tree as a JSON dictionary. """
-    if write is None: write = sys.stdout.write
-    _tree_to_json(item, write, 0)
-
-def _tree_to_json(item, write, level):
-    indent = '  ' * level
-    level += 1
-    if isinstance(item, lark.Tree):
-        #write(f'{indent}{{ "type": "{item.data}", "children": [\n')
-        write(f'{indent}{{ "{item.data}": \n')
-        sep = ''
-        for child in item.children:
-            write(indent)
-            write(sep)
-            _tree_to_json(child, write, level)
-            sep = ',\n'
-        write(f'{indent} }}\n')
-    elif isinstance(item, lark.Token):
-        # reminder: Lark Tokens are directly strings
-        # token attrs include: line, end_line, column, end_column, pos_in_stream, end_pos
-        write(f'{indent}{{ "type": "{item.type}", "text": "{item}" }}\n')
-    else:
-        assert False, item  # fall-through
-    
 if __name__ == '__main__':
     from examples import sysml2
     
     sysml_parser = lark.Lark(r"""
-        // A bunch of words
         start: package 
             | type name dict
             | definition name dict
@@ -58,13 +27,22 @@ if __name__ == '__main__':
         
         dict: "{" [pair+ | doc | "@" word dict] "}"
         
-        all: "*"
-        
-        word: WORD ["," | "!" | "."]
+        word: WORD ["," | "!" | "." | ":"]
         variable: (word ["_"])*
         
-        import: "import" word [("::" word)* | ("::" all)*]* ";"
-        keyv: word "=" ESCAPED_STRING ";"
+        iname3: "::" word
+        iname2: "::" word [iname3]
+        iname: word ("::" word)*
+        
+        LCASE_LETTER: "a".."z" | "*"
+        UCASE_LETTER: "A".."Z"
+
+        LETTER: UCASE_LETTER | LCASE_LETTER
+        WORD: LETTER+
+        
+        import: "import" iname ";"
+        str: ESCAPED_STRING
+        keyv: word "=" str ";"
             | "in" variable ":" word dict
             | "out" variable ":" word dict
         
@@ -79,30 +57,55 @@ if __name__ == '__main__':
         
         // imports WORD from library
         %import common.ESCAPED_STRING
-        %import common.WORD
+        //%import common.WORD
+        //%import common.LETTER
         %import common.WS
+        %import lark.STRING
         %ignore WS
         
         // Disregard spaces in text
-        %ignore " "  
+        %ignore " "   
    
     
-        """, start='start')
-                        
+        """, start='start', maybe_placeholders=False)
+        
+        
     tree = sysml_parser.parse(sysml2)
     
-    print(tree.pretty())
-    
-    
-
-    # print with tree_to_json
-    #tree_to_json(tree)  # will print to stdout
-    
-    # build JSON string with tree_to_json_str
-    #json_str = tree_to_json_str(tree)
-
-    # test that above JSON string is valid
-    #import json
-    #parsed_json = json.loads(json_str)
-    #print(parsed_json)
-   
+    def _tree_to_json(item, level=0):
+            
+        if isinstance(item, lark.Tree):
+            #print("tree {}".format(level))
+            b = {str(item.data):{}}
+            for child in item.children:
+                #print("child: {}".format(level))
+                #a[item][child.type] = child
+                c = _tree_to_json(child, level+1)
+                if type(c) == type(dict()):
+                    for key in c.keys():
+                        if not key in b[str(item.data)]:
+                            # Key did not exist
+                            b[str(item.data)][key] = c[key]
+                        elif type(b[str(item.data)][key]) == type(list()):
+                            b[str(item.data)][key].append(c[key])
+                        else:
+                            # Don't overwrite values, make a list
+                            v = b[str(item.data)][key]
+                            b[str(item.data)][key] = [v]
+                            b[str(item.data)][key].append(c[key])
+                else:
+                    b[str(item.data)] = c
+            return b
+        elif isinstance(item, lark.Token):
+            #print("item: {}".format(item.type))
+            if item.type == 'WORD':
+                b = {str(item.type):"".join(item)}
+                b = "".join(item)
+            elif item.type == 'ESCAPED_STRING':
+                b = str(item)
+            else:
+                b = {str(item.type):"".join(item)}
+            return b
+            
+    a = _tree_to_json(tree)
+    print(json.dumps(a['start']))
