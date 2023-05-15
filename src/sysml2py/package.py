@@ -9,6 +9,7 @@ Created on Sat May 13 23:31:01 2023
 import yaml
 
 from _import import Import
+from action import Action
 from base import BaseNode
 
 node_factory = {cls.__name__.lower(): cls for cls in BaseNode.__subclasses__()}
@@ -32,7 +33,16 @@ class Package(BaseNode):
             self.subnodes = []
             
             for subnode in range(subnodes):
-                node_type = list(a['package']['pair'][subnode].keys())[0]
+                if not list(a['package']['pair'][subnode].keys())[0] == 'definition':
+                    node_type = list(a['package']['pair'][subnode].keys())[0]
+                else:
+                    # Subnode is definition
+                    if 'type' in a['package']['pair'][subnode]['definition']:
+                        node_type = a['package']['pair'][subnode]['definition']['type']
+                    else:
+                        # WARNING
+                        pass
+                    
                 new_node_fn = node_factory.get(node_type, None)
                 
                 if new_node_fn is None:
@@ -53,79 +63,8 @@ class Package(BaseNode):
         self.text += "\n}"
             
 if __name__ == '__main__':
-    y = '''
-package:
-    name: AnalysisAnnotation
-    pair:
-    - import:
-      - ScalarValues
-      - Real
-    - import:
-      - AnalysisTooling
-      - '*'
-    - import:
-      - ISQ
-      - '*'
-    - definition:
-        type: action
-      name: ComputeDynamics
-      pair:
-      - name: ToolExecution
-        pair:
-        - toolName: '"ModelCenter"'
-        - uri: '"aserv://localhost/Vehicle/Equation1"'
-        type: metadata
-      - keyv:
-          TimeValue:
-            ToolVariable:
-              pair:
-                name: '"deltaT"'
-      - keyv:
-          PowerValue:
-            ToolVariable:
-              pair:
-                name: '"power"'
-      - keyv:
-          Real:
-            ToolVariable:
-              pair:
-                name: '"C_D"'
-      - keyv:
-          Real:
-            ToolVariable:
-              pair:
-                name: '"C_F"'
-      - keyv:
-          MassValue:
-            ToolVariable:
-              pair:
-                name: '"mass"'
-      - keyv:
-          SpeedValue:
-            ToolVariable:
-              pair:
-                name: '"v0"'
-      - keyv:
-          LengthValue:
-            ToolVariable:
-              pair:
-                name: '"x0"'
-      - keyv:
-          AccelerationValue:
-            ToolVariable:
-              pair:
-                name: '"a"'
-      - keyv:
-          SpeedValue:
-            ToolVariable:
-              pair:
-                name: '"v"'
-      - keyv:
-          LengthValue:
-            ToolVariable:
-              pair:
-                name: '"x"'
-'''
-                  
+    from examples import sysml2
+    from loads import loads
+    y = yaml.dump(loads(sysml2)['start'])              
     p = Package(y)
     p.dump()
