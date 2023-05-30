@@ -1,0 +1,37 @@
+name: PackageBodyElement
+ownedRelationship:
+- name: PackageMember
+  ownedRelatedElement:
+  - body:
+      name: PackageBody
+      ownedRelationship:
+      - name: PackageMember
+        ownedRelatedElement:
+        - body:
+            name: PackageBody
+            ownedRelationship: []
+          dec:
+            id:
+            - declaredName: Package2
+              declaredShortName: null
+              name: Identification
+            name: PackageDeclaration
+          name: Package
+          ownedRelationship: []
+        - partdef
+        pre: null
+      - name: PackageMember
+        ownedRelatedElement:
+        - declaredName: part2
+          declaredShortName: null
+          name: Identification
+        pre: null
+    dec:
+      id:
+      - declaredName: Package1
+        declaredShortName: null
+        name: Identification
+      name: PackageDeclaration
+    name: Package
+    ownedRelationship: []
+  pre: null
