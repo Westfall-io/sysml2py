@@ -1,0 +1,50 @@
+name: PackageBodyElement
+ownedRelationship:
+- name: PackageMember
+  ownedRelatedElement:
+  - body:
+      name: PackageBody
+      ownedRelationship:
+      - membership_namespace:
+          import_prefix:
+            isImportAll: false
+            name: ImportPrefix
+            visibility: null
+          importedNamespace:
+            importedNamespace:
+            - 'Package2::'
+            isRecursive: false
+            name: ImportedNamespace
+          name: NamespaceImport
+          ownedRelatedElement: []
+        name: Import
+        relationship_body:
+          name: RelationshipBody
+          ownedRelationship: []
+      - membership_namespace:
+          import_prefix:
+            isImportAll: false
+            name: ImportPrefix
+            visibility:
+              name: VisibilityIndicator
+              private: private
+              protected: ''
+              public: ''
+          imported_membership:
+            importedMembership: Package3
+            isRecursive: false
+            name: ImportedMembership
+          name: MembershipImport
+        name: Import
+        relationship_body:
+          name: RelationshipBody
+          ownedRelationship: []
+    dec:
+      id:
+      - declaredName: Package1
+        declaredShortName: null
+        name: Identification
+      name: PackageDeclaration
+    name: Package
+    ownedRelationship: []
+  pre: null
