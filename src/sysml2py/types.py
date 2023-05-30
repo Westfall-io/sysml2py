@@ -38,7 +38,6 @@ def reformat(model):
     try:
         model_out = {'name':model.__class__.__name__}
         model_out.update(remove_classes(model.__dict__))
-        #print(yaml.dump(model_out))
     except Exception as e:
         print(e)
         print('Error in printing')
@@ -49,16 +48,17 @@ def reformat(model):
 def loads(in_str):
     if not type(in_str) == type(str()):
         return None
-    meta = metamodel_from_file('SysML.tx')
+    print(__file__)
+    meta = metamodel_from_file(__file__.replace('/types.py', '/SysML.tx'))
     
     model = meta.model_from_str(in_str)
     
     return reformat(model_out)
     
 
-def main(filepath='types.text'):
+def main(filepath='../../tests/multipackage.text'):
     # Load Grammar
-    meta = metamodel_from_file('SysML.tx')
+    meta = metamodel_from_file(__file__.replace('/types.py', '/SysML.tx'))
     
     # Parse file
     try:
@@ -67,9 +67,13 @@ def main(filepath='types.text'):
         print('Error in parsing: {}'.format(e))
         raise(e)
     
-    
+    model_out = reformat(model)
         
     return model, model_out
 
 if __name__ == '__main__':
-    model, model_out = main()
+    model, model_out = main('../../tests/multipackage.text')
+    print(yaml.dump(model_out))
+    
+    model, model_out = main('../../tests/subpackage.text')
+    print(yaml.dump(model_out))

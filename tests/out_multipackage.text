@@ -1,0 +1,38 @@
+name: PackageBodyElement
+ownedRelationship:
+- name: PackageMember
+  ownedRelatedElement:
+  - body:
+      name: PackageBody
+      ownedRelationship: []
+    dec:
+      id:
+      - declaredName: Salads
+        declaredShortName: null
+        name: Identification
+      name: PackageDeclaration
+    name: Package
+    ownedRelationship: []
+  - body:
+      name: PackageBody
+      ownedRelationship: []
+    dec:
+      id:
+      - declaredName: Referal
+        declaredShortName: null
+        name: Identification
+      name: PackageDeclaration
+    name: Package
+    ownedRelationship: []
+  - body:
+      name: PackageBody
+      ownedRelationship: []
+    dec:
+      id:
+      - declaredName: req
+        declaredShortName: r11
+        name: Identification
+      name: PackageDeclaration
+    name: Package
+    ownedRelationship: []
+  pre: null
