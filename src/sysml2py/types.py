@@ -14,7 +14,7 @@ def remove_classes(model):
     if type(model) == type(dict()):
         output = {}
         for element in model:
-            if not '_' in element and not 'parent' in element:
+            if not '_' in element[0] and not 'parent' in element:
                 # Remove internal parsing elements
                 output[element] = remove_classes(model[element])
     elif type(model) == type(list()):
@@ -53,6 +53,8 @@ def loads(in_str):
     
     model = meta.model_from_str(in_str)
     
+    model_out = reformat(model)
+    
     return reformat(model_out)
     
 
@@ -72,8 +74,14 @@ def main(filepath='../../tests/multipackage.text'):
     return model, model_out
 
 if __name__ == '__main__':
-    model, model_out = main('../../tests/multipackage.text')
-    print(yaml.dump(model_out))
+    def write_test_data(name):
+        model, model_out = main('../../tests/'+name+'.text')
+        with open('../../tests/out_'+name+'.text', 'w') as f:
+            f.write(yaml.dump(model_out))
+        f.close()
     
-    model, model_out = main('../../tests/subpackage.text')
-    print(yaml.dump(model_out))
+    #write_test_data('multipackage')
+    #write_test_data('subpackage')
+    #write_test_data('ownedpackage')
+    #write_test_data('aliaspackage')
+    write_test_data('importpackage')

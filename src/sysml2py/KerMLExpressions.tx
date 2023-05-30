@@ -4,7 +4,7 @@
  * Copyright (c) 2018 IncQuery Labs Ltd.
  * Copyright (c) 2019 Maplesoft (Waterloo Maple, Inc.)
  * Copyright (c) 2019 Mgnite Inc.
- *    
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -19,13 +19,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  * @license LGPL-3.0-or-later <http://spdx.org/licenses/LGPL-3.0-or-later>
- * 
+ *
  * Contributors:
  *  Ed Seidewitz, MDS
  *  Zoltan Kiss, IncQuery
  *  Balazs Grill, IncQuery
  *  Hisashi Miyashita, Maplesoft/Mgnite
- * 
+ *
  *****************************************************************************/
 
 
@@ -35,10 +35,10 @@
 
 /* EXPRESSIONS */
 
-/* Operator Expressions */ 
+/* Operator Expressions */
 
 OwnedExpressionMember :
-	ownedRelatedElement += OwnedExpression 
+	ownedRelatedElement += OwnedExpression
 ;
 
 OwnedExpression :
@@ -52,9 +52,9 @@ OwnedExpressionReference :
 ;
 
 ConditionalExpression :
-	  NullCoalescingExpression 
-	|  operator = ConditionalOperator operand += NullCoalescingExpression 
-		  '?' operand += OwnedExpressionReference 'else' operand += OwnedExpressionReference	
+	  NullCoalescingExpression
+	|  operator = ConditionalOperator operand += NullCoalescingExpression
+		  '?' operand += OwnedExpressionReference 'else' operand += OwnedExpressionReference
 ;
 
 ConditionalOperator :
@@ -64,7 +64,7 @@ ConditionalOperator :
 // Null Coalescing Expressions
 
 NullCoalescingExpression :
-	ImpliesExpression ( 
+	ImpliesExpression (
 		operator = NullCoalescingOperator operand += ImpliesExpressionReference )*
 ;
 
@@ -79,11 +79,11 @@ ImpliesExpressionReference :
 ;
 
 ImpliesExpressionMember :
-	ownedRelatedElement += ImpliesExpression 
+	ownedRelatedElement += ImpliesExpression
 ;
 
 ImpliesExpression :
-	OrExpression (   
+	OrExpression (
 		operator = ImpliesOperator operand += OrExpressionReference )*
 ;
 
@@ -96,17 +96,17 @@ OrExpressionReference :
 ;
 
 OrExpressionMember :
-	ownedRelatedElement += OrExpression 
+	ownedRelatedElement += OrExpression
 ;
 
 OrExpression :
-	XorExpression (   
+	XorExpression (
 		( operator = OrOperator operand += XorExpression
 		| operator = ConditionalOrOperator operand += XorExpressionReference ) )*
 ;
 
 OrOperator :
-	'|' 
+	'|'
 ;
 
 ConditionalOrOperator :
@@ -118,11 +118,11 @@ XorExpressionReference :
 ;
 
 XorExpressionMember :
-	ownedRelatedElement += XorExpression 
+	ownedRelatedElement += XorExpression
 ;
 
 XorExpression :
-	AndExpression (   
+	AndExpression (
 		operator = XorOperator operand += AndExpression )*
 ;
 
@@ -131,7 +131,7 @@ XorOperator :
 ;
 
 AndExpression :
-	EqualityExpression (   
+	EqualityExpression (
 		( operator = AndOperator operand += EqualityExpression
 		| operator = ConditionalAndOperator operand += EqualityExpressionReference ) )*
 ;
@@ -151,13 +151,13 @@ EqualityExpressionReference :
 ;
 
 EqualityExpressionMember :
-	ownedRelatedElement += EqualityExpression 
+	ownedRelatedElement += EqualityExpression
 ;
 
 EqualityExpression :
-	ClassificationExpression (   
+	ClassificationExpression (
 		operator = EqualityOperator operand += ClassificationExpression )*
-	
+
 ;
 
 EqualityOperator :
@@ -167,17 +167,17 @@ EqualityOperator :
 // Classification Expressions
 
 ClassificationExpression :
-	  RelationalExpression 
-	  (  
+	  RelationalExpression
+	  (
 	  	operator = ClassificationTestOperator ownedRelationship += TypeReferenceMember
-	  | 
+	  |
 	    operator = CastOperator ownedRelationship += TypeResultMember
 	  )?
-	|  operand += SelfReferenceExpression 
+	|  operand += SelfReferenceExpression
 	  operator = ClassificationTestOperator ownedRelationship += TypeReferenceMember
 	|  operand += MetadataReference
 	  operator = MetaClassificationTestOperator ownedRelationship += TypeReferenceMember
-	|  operand += SelfReferenceExpression 
+	|  operand += SelfReferenceExpression
 	  operator = CastOperator ownedRelationship += TypeResultMember
 	|  operand += MetadataReference
 	  operator = MetaCastOperator ownedRelationship += TypeResultMember
@@ -224,7 +224,7 @@ SelfReferenceExpression :
 ;
 
 SelfReferenceMember :
-	ownedRelatedElement += EmptyFeature 
+	ownedRelatedElement += EmptyFeature
 ;
 
 EmptyFeature ://This doesn't work.
@@ -234,7 +234,7 @@ EmptyFeature ://This doesn't work.
 // Relational Expressions
 
 RelationalExpression :
-	RangeExpression (   
+	RangeExpression (
 		operator = RelationalOperator operand += RangeExpression )*
 ;
 
@@ -245,24 +245,24 @@ RelationalOperator :
 // Range Expressions
 
 RangeExpression :
-	AdditiveExpression (  
-		operator = '..' operand += AdditiveExpression )?	
+	AdditiveExpression (
+		operator = '..' operand += AdditiveExpression )?
 ;
 
 // Arithmetic Expressions
 
 AdditiveExpression :
-	MultiplicativeExpression (   
-		operator = AdditiveOperator operand += MultiplicativeExpression )*	
+	MultiplicativeExpression (
+		operator = AdditiveOperator operand += MultiplicativeExpression )*
 ;
 
 AdditiveOperator :
-	'+' | '-' 
+	'+' | '-'
 ;
 
 MultiplicativeExpression :
-	ExponentiationExpression (   
-		operator = MultiplicativeOperator operand += ExponentiationExpression )*	
+	ExponentiationExpression (
+		operator = MultiplicativeOperator operand += ExponentiationExpression )*
 ;
 
 MultiplicativeOperator :
@@ -270,8 +270,8 @@ MultiplicativeOperator :
 ;
 
 ExponentiationExpression :
-	UnaryExpression (   
-		operator = ExponentiationOperator operand += UnaryExpression )*		
+	UnaryExpression (
+		operator = ExponentiationOperator operand += UnaryExpression )*
 ;
 
 ExponentiationOperator :
@@ -300,25 +300,25 @@ ExtentExpression :
 
 PrimaryExpression :
 	BaseExpression
-	(  '.' 
+	(  '.'
 	  ownedRelationship += FeatureChainMember
 	)?
-	( (  
+	( (
 	    operator = '#' '(' operand += SequenceExpression ')'
-	  |  
+	  |
 	    operator = '[' operand += SequenceExpression ']'
-	  |  '->' 
-	    ownedRelationship += ReferenceTyping 
-	    ( operand += BodyExpression 
-	    | operand += FunctionReferenceExpression 
+	  |  '->'
+	    ownedRelationship += ReferenceTyping
+	    ( operand += BodyExpression
+	    | operand += FunctionReferenceExpression
 	    | ArgumentList
 	    )
 	  |  '.'
-	    operand += BodyExpression 
+	    operand += BodyExpression
 	  |  '.?'
-	    operand += BodyExpression 
+	    operand += BodyExpression
 	  )
-	  (  '.' 
+	  (  '.'
 	  	ownedRelationship += FeatureChainMember
 	  )?
 	)*
@@ -329,7 +329,7 @@ FunctionReferenceExpression :
 ;
 
 FunctionReferenceMember :
-	ownedRelatedElement += FunctionReference 
+	ownedRelatedElement += FunctionReference
 ;
 
 FunctionReference :
@@ -338,17 +338,17 @@ FunctionReference :
 
 FeatureChainMember :
 	  memberElement = [QualifiedName]
-	|  ownedRelatedElement += OwnedFeatureChain 
+	|  ownedRelatedElement += OwnedFeatureChain
 ;
 
 /* Base Expressions */
 
 BaseExpression :
 	  NullExpression
-	| LiteralExpression 
-	| FeatureReferenceExpression 
+	| LiteralExpression
+	| FeatureReferenceExpression
 	| MetadataAccessExpression
-	| InvocationExpression 
+	| InvocationExpression
 	| BodyExpression
 	| '(' SequenceExpression ')'
 ;
@@ -360,21 +360,21 @@ BodyExpression :
 ;
 
 ExpressionBodyMember :
-	ownedRelatedElement += ExpressionBody 
+	ownedRelatedElement += ExpressionBody
 ;
 
 // This default production is overridden in the KerML and SysML grammars.
 ExpressionBody :
-	'{' ( ownedRelationship += BodyParameterMember ';' )* 
+	'{' ( ownedRelationship += BodyParameterMember ';' )*
 	    ownedRelationship += ResultExpressionMember '}'
 ;
 
 ResultExpressionMember :
-	ownedRelatedElement += OwnedExpression 
+	ownedRelatedElement += OwnedExpression
 ;
 
 BodyParameterMember :
-	'in' ownedRelatedElement += BodyParameter 
+	'in' ownedRelatedElement += BodyParameter
 ;
 
 BodyParameter :
@@ -386,9 +386,9 @@ BodyParameter :
 SequenceExpression :
 	OwnedExpression
 	( ','
-	|  operator = ',' 
+	|  operator = ','
 	  operand += SequenceExpression
-	)?	
+	)?
 ;
 
 // Feature Reference Expressions
@@ -437,12 +437,12 @@ OwnedFeatureChaining :
 ;
 
  PositionalArgumentList :
-	ownedRelationship += ArgumentMember 
+	ownedRelationship += ArgumentMember
 	( ',' ownedRelationship += ArgumentMember )*
 ;
 
 ArgumentMember :
-	ownedRelatedElement += Argument 
+	ownedRelatedElement += Argument
 ;
 
 Argument :
@@ -450,12 +450,12 @@ Argument :
 ;
 
  NamedArgumentList :
-	ownedRelationship += NamedArgumentMember 
+	ownedRelationship += NamedArgumentMember
 	( ',' ownedRelationship += NamedArgumentMember )*
 ;
 
 NamedArgumentMember :
-	ownedRelatedElement += NamedArgument 
+	ownedRelatedElement += NamedArgument
 ;
 
 NamedArgument :
@@ -479,10 +479,10 @@ NullExpression :
 /* Literal Expressions */
 
 LiteralExpression :
-	  LiteralBoolean 
-	| LiteralString 
+	  LiteralBoolean
+	| LiteralString
 	| LiteralInteger
-	| LiteralReal 
+	| LiteralReal
 	| LiteralInfinity
 ;
 
@@ -527,7 +527,7 @@ Qualification :
 QualifiedName:
 	Qualification? Name
 ;
-	
+
 /* TERMINALS */
 
 DECIMAL_VALUE :
@@ -535,7 +535,7 @@ DECIMAL_VALUE :
 
 EXP_VALUE:
 	DECIMAL_VALUE ('e' | 'E') ('+' | '-')? DECIMAL_VALUE;
-    
+
 ID :
    /[a-zA-Z_][a-zA-Z_0-9]*/;
 

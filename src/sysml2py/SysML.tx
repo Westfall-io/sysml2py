@@ -30,11 +30,6 @@ import KerMLExpressions
  *
  *****************************************************************************/
 
-
-
-
-
-
 /* ROOT NAMESPACE */
 
 RootNamespace :
@@ -235,36 +230,42 @@ AliasMember :
 	RelationshipBody
 ;
 
- ImportPrefix :
+ImportPrefix :
 	( visibility = VisibilityIndicator )?
 	'import' ( isImportAll ?= 'all' )?
 ;
 
+MembershipNamespace :
+  // Added
+  ( MembershipImport | NamespaceImport )
+;
+
 Import :
-	( MembershipImport | NamespaceImport )
-	RelationshipBody
-;
-
-MembershipImport :
-	ImportPrefix ImportedMembership
-;
-
- ImportedMembership :
-	importedMembership = [QualifiedName]
-	( '::' isRecursive ?= '**' )?
+	membership_namespace = MembershipNamespace
+	relationship_body = RelationshipBody
 ;
 
 NamespaceImport :
-	ImportPrefix
-	( ImportedNamespace
-	| ownedRelatedElement += FilterPackage
-	)
+	import_prefix = ImportPrefix
+	( importedNamespace = ImportedNamespace | ownedRelatedElement += FilterPackage )
 ;
 
- ImportedNamespace :
-	importedNamespace = [QualifiedName] '::' '*'
+MembershipImport :
+	import_prefix = ImportPrefix imported_membership=ImportedMembership
+;
+
+ImportedNamespace :
+  // !TODO: This will not work on multi-layered names, qualification breaks the parsing
+	importedNamespace = Qualification* '*'
 	( '::' isRecursive ?= '**' )?
 ;
+
+ImportedMembership :
+	importedMembership = QualifiedName
+  ( '::' isRecursive ?= '**' )?
+;
+
+
 
 FilterPackage :
 	ownedRelationship += FilterPackageImport
