@@ -1,0 +1,558 @@
+/*****************************************************************************
+ * SysML 2 Pilot Implementation
+ * Copyright (c) 2018-2023 Model Driven Solutions, Inc.
+ * Copyright (c) 2018 IncQuery Labs Ltd.
+ * Copyright (c) 2019 Maplesoft (Waterloo Maple, Inc.)
+ * Copyright (c) 2019 Mgnite Inc.
+ *    
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * @license LGPL-3.0-or-later <http://spdx.org/licenses/LGPL-3.0-or-later>
+ * 
+ * Contributors:
+ *  Ed Seidewitz, MDS
+ *  Zoltan Kiss, IncQuery
+ *  Balazs Grill, IncQuery
+ *  Hisashi Miyashita, Maplesoft/Mgnite
+ * 
+ *****************************************************************************/
+
+grammar org.omg.kerml.expressions.xtext.KerMLExpressions hidden(WS, ML_NOTE, SL_NOTE)
+
+import "http://www.eclipse.org/emf/2002/Ecore" as Ecore
+import "https://www.omg.org/spec/SysML/20230201" as SysML
+
+/* EXPRESSIONS */
+
+/* Operator Expressions */ 
+
+OwnedExpressionMember returns SysML::FeatureMembership :
+	ownedRelatedElement += OwnedExpression 
+;
+
+OwnedExpression returns SysML::Expression :
+	 ConditionalExpression
+;
+
+// Conditional Test Expressions
+
+OwnedExpressionReference returns SysML::FeatureReferenceExpression :
+	ownedRelationship += OwnedExpressionMember
+;
+
+ConditionalExpression returns SysML::Expression :
+	  NullCoalescingExpression 
+	| {SysML::OperatorExpression} operator = ConditionalOperator operand += NullCoalescingExpression 
+		  '?' operand += OwnedExpressionReference 'else' operand += OwnedExpressionReference	
+;
+
+ConditionalOperator :
+	'if'
+;
+
+// Null Coalescing Expressions
+
+NullCoalescingExpression returns SysML::Expression :
+	ImpliesExpression ( {SysML::OperatorExpression.operand += current}
+		operator = NullCoalescingOperator operand += ImpliesExpressionReference )*
+;
+
+NullCoalescingOperator :
+	'??'
+;
+
+// Logical Expressions
+
+ImpliesExpressionReference returns SysML::FeatureReferenceExpression :
+	ownedRelationship += ImpliesExpressionMember
+;
+
+ImpliesExpressionMember returns SysML::FeatureMembership :
+	ownedRelatedElement += ImpliesExpression 
+;
+
+ImpliesExpression returns SysML::Expression :
+	OrExpression ( {SysML::OperatorExpression.operand += current}  
+		operator = ImpliesOperator operand += OrExpressionReference )*
+;
+
+ImpliesOperator :
+	'implies'
+;
+
+OrExpressionReference returns SysML::FeatureReferenceExpression :
+	ownedRelationship += OrExpressionMember
+;
+
+OrExpressionMember returns SysML::FeatureMembership :
+	ownedRelatedElement += OrExpression 
+;
+
+OrExpression returns SysML::Expression :
+	XorExpression ( {SysML::OperatorExpression.operand += current}  
+		( operator = OrOperator operand += XorExpression
+		| operator = ConditionalOrOperator operand += XorExpressionReference ) )*
+;
+
+OrOperator :
+	'|' 
+;
+
+ConditionalOrOperator :
+	'or'
+;
+
+XorExpressionReference returns SysML::FeatureReferenceExpression :
+	ownedRelationship += XorExpressionMember
+;
+
+XorExpressionMember returns SysML::FeatureMembership :
+	ownedRelatedElement += XorExpression 
+;
+
+XorExpression returns SysML::Expression :
+	AndExpression ( {SysML::OperatorExpression.operand += current}  
+		operator = XorOperator operand += AndExpression )*
+;
+
+XorOperator :
+	'xor'
+;
+
+AndExpression returns SysML::Expression :
+	EqualityExpression ( {SysML::OperatorExpression.operand += current}  
+		( operator = AndOperator operand += EqualityExpression
+		| operator = ConditionalAndOperator operand += EqualityExpressionReference ) )*
+;
+
+AndOperator :
+    '&'
+;
+
+ConditionalAndOperator :
+	'and'
+;
+
+// Equality Expressions
+
+EqualityExpressionReference returns SysML::FeatureReferenceExpression :
+	ownedRelationship += EqualityExpressionMember
+;
+
+EqualityExpressionMember returns SysML::FeatureMembership :
+	ownedRelatedElement += EqualityExpression 
+;
+
+EqualityExpression returns SysML::Expression :
+	ClassificationExpression ( {SysML::OperatorExpression.operand += current}  
+		operator = EqualityOperator operand += ClassificationExpression )*
+	
+;
+
+EqualityOperator :
+	'==' | '!=' | '===' | '!=='
+;
+
+// Classification Expressions
+
+ClassificationExpression returns SysML::Expression :
+	  RelationalExpression 
+	  ( {SysML::OperatorExpression.operand += current} 
+	  	operator = ClassificationTestOperator ownedRelationship += TypeReferenceMember
+	  | {SysML::OperatorExpression.operand += current}
+	    operator = CastOperator ownedRelationship += TypeResultMember
+	  )?
+	| {SysML::OperatorExpression} operand += SelfReferenceExpression 
+	  operator = ClassificationTestOperator ownedRelationship += TypeReferenceMember
+	| {SysML::OperatorExpression} operand += MetadataReference
+	  operator = MetaClassificationTestOperator ownedRelationship += TypeReferenceMember
+	| {SysML::OperatorExpression} operand += SelfReferenceExpression 
+	  operator = CastOperator ownedRelationship += TypeResultMember
+	| {SysML::OperatorExpression} operand += MetadataReference
+	  operator = MetaCastOperator ownedRelationship += TypeResultMember
+;
+
+ClassificationTestOperator :
+	'hastype' | 'istype' | '@'
+;
+
+MetaClassificationTestOperator :
+	'@@'
+;
+
+CastOperator :
+    'as'
+;
+
+MetaCastOperator :
+	'meta'
+;
+
+MetadataReference returns SysML::MetadataAccessExpression :
+	referencedElement = [SysML::Element | QualifiedName]
+;
+
+TypeReferenceMember returns SysML::FeatureMembership :
+	ownedRelatedElement += TypeReference
+;
+
+TypeResultMember returns SysML::ReturnParameterMembership :
+	ownedRelatedElement += TypeReference
+;
+
+TypeReference returns SysML::Feature :
+	ownedRelationship += ReferenceTyping
+;
+
+ReferenceTyping returns SysML::FeatureTyping :
+	  type = [SysML::Type | QualifiedName]
+;
+
+SelfReferenceExpression returns SysML::FeatureReferenceExpression :
+	ownedRelationship += SelfReferenceMember
+;
+
+SelfReferenceMember returns SysML::ReturnParameterMembership :
+	ownedRelatedElement += EmptyFeature 
+;
+
+EmptyFeature returns SysML::Feature :
+	{SysML::Feature}
+;
+
+// Relational Expressions
+
+RelationalExpression returns SysML::Expression :
+	RangeExpression ( {SysML::OperatorExpression.operand += current}  
+		operator = RelationalOperator operand += RangeExpression )*
+;
+
+RelationalOperator :
+	'<' | '>' | '<=' | '>='
+;
+
+// Range Expressions
+
+RangeExpression returns SysML::Expression :
+	AdditiveExpression ( {SysML::OperatorExpression.operand += current} 
+		operator = '..' operand += AdditiveExpression )?	
+;
+
+// Arithmetic Expressions
+
+AdditiveExpression returns SysML::Expression :
+	MultiplicativeExpression ( {SysML::OperatorExpression.operand += current}  
+		operator = AdditiveOperator operand += MultiplicativeExpression )*	
+;
+
+AdditiveOperator :
+	'+' | '-' 
+;
+
+MultiplicativeExpression returns SysML::Expression :
+	ExponentiationExpression ( {SysML::OperatorExpression.operand += current}  
+		operator = MultiplicativeOperator operand += ExponentiationExpression )*	
+;
+
+MultiplicativeOperator :
+	'*' | '/' | '%'
+;
+
+ExponentiationExpression returns SysML::Expression :
+	UnaryExpression ( {SysML::OperatorExpression.operand += current}  
+		operator = ExponentiationOperator operand += UnaryExpression )*		
+;
+
+ExponentiationOperator :
+	'**' | '^'
+;
+
+// Unary Expressions
+
+UnaryExpression returns SysML::Expression:
+	  {SysML::OperatorExpression} operator = UnaryOperator operand += ExtentExpression
+	| ExtentExpression
+;
+
+UnaryOperator :
+	'+' | '-' | '~' | 'not'
+;
+
+// Extent Expressions
+
+ExtentExpression returns SysML::Expression :
+	  {SysML::OperatorExpression} operator = 'all' ownedRelationship += TypeResultMember
+	| PrimaryExpression
+;
+
+/* Primary Expressions */
+
+PrimaryExpression returns SysML::Expression :
+	BaseExpression
+	( {SysML::FeatureChainExpression.operand += current} '.' 
+	  ownedRelationship += FeatureChainMember
+	)?
+	( ( {SysML::OperatorExpression.operand += current} 
+	    operator = '#' '(' operand += SequenceExpression ')'
+	  | {SysML::OperatorExpression.operand += current} 
+	    operator = '[' operand += SequenceExpression ']'
+	  | {SysML::OperatorExpression.operand += current} '->' 
+	    ownedRelationship += ReferenceTyping 
+	    ( operand += BodyExpression 
+	    | operand += FunctionReferenceExpression 
+	    | ArgumentList
+	    )
+	  | {SysML::CollectExpression.operand += current} '.'
+	    operand += BodyExpression 
+	  | {SysML::SelectExpression.operand += current} '.?'
+	    operand += BodyExpression 
+	  )
+	  ( {SysML::FeatureChainExpression.operand += current} '.' 
+	  	ownedRelationship += FeatureChainMember
+	  )?
+	)*
+;
+
+FunctionReferenceExpression returns SysML::FeatureReferenceExpression :
+	ownedRelationship += FunctionReferenceMember
+;
+
+FunctionReferenceMember returns SysML::FeatureMembership :
+	ownedRelatedElement += FunctionReference 
+;
+
+FunctionReference returns SysML::Expression :
+	ownedRelationship += ReferenceTyping
+;
+
+FeatureChainMember returns SysML::Membership :
+	  memberElement = [SysML::Feature | QualifiedName]
+	| {SysML::OwningMembership} ownedRelatedElement += OwnedFeatureChain 
+;
+
+/* Base Expressions */
+
+BaseExpression returns SysML::Expression :
+	  NullExpression
+	| LiteralExpression 
+	| FeatureReferenceExpression 
+	| MetadataAccessExpression
+	| InvocationExpression 
+	| BodyExpression
+	| '(' SequenceExpression ')'
+;
+
+// Expression Bodies
+
+BodyExpression returns SysML::FeatureReferenceExpression :
+	ownedRelationship += ExpressionBodyMember
+;
+
+ExpressionBodyMember returns SysML::FeatureMembership :
+	ownedRelatedElement += ExpressionBody 
+;
+
+// This default production is overridden in the KerML and SysML grammars.
+ExpressionBody returns SysML::Expression :
+	'{' ( ownedRelationship += BodyParameterMember ';' )* 
+	    ownedRelationship += ResultExpressionMember '}'
+;
+
+ResultExpressionMember returns SysML::ResultExpressionMembership :
+	ownedRelatedElement += OwnedExpression 
+;
+
+BodyParameterMember returns SysML::ParameterMembership :
+	'in' ownedRelatedElement += BodyParameter 
+;
+
+BodyParameter returns SysML::Feature :
+	declaredName = Name
+;
+
+// Sequence Expressions
+
+SequenceExpression returns SysML::Expression :
+	OwnedExpression
+	( ','
+	| {SysML::OperatorExpression.operand += current} operator = ',' 
+	  operand += SequenceExpression
+	)?	
+;
+
+// Feature Reference Expressions
+
+FeatureReferenceExpression returns SysML::FeatureReferenceExpression :
+	ownedRelationship += FeatureReferenceMember
+;
+
+FeatureReferenceMember returns SysML::Membership :
+	memberElement = [SysML::Feature | QualifiedName]
+;
+
+// Metadata Access Expressions
+
+MetadataAccessExpression returns SysML::MetadataAccessExpression :
+	referencedElement = [SysML::Element | QualifiedName] '.' 'metadata'
+;
+
+// Invocation Expressions
+
+InvocationExpression returns SysML::InvocationExpression :
+	ownedRelationship += OwnedFeatureTyping ArgumentList
+;
+
+OwnedFeatureTyping returns SysML::FeatureTyping :
+	  type = [SysML::Type | QualifiedName]
+	| ownedRelatedElement += OwnedFeatureChain
+;
+
+OwnedFeatureChain returns SysML::Feature :
+	FeatureChain
+;
+
+// For use in KerML and SysML grammars
+fragment FeatureChain returns SysML::Feature :
+	ownedRelationship += OwnedFeatureChaining
+	( '.' ownedRelationship += OwnedFeatureChaining )+
+;
+
+OwnedFeatureChaining returns SysML::FeatureChaining :
+	chainingFeature = [SysML::Feature | QualifiedName]
+;
+
+fragment ArgumentList returns SysML::Expression :
+	'(' ( PositionalArgumentList | NamedArgumentList )? ')'
+;
+
+fragment PositionalArgumentList returns SysML::Expression :
+	ownedRelationship += ArgumentMember 
+	( ',' ownedRelationship += ArgumentMember )*
+;
+
+ArgumentMember returns SysML::ParameterMembership :
+	ownedRelatedElement += Argument 
+;
+
+Argument returns SysML::Feature :
+	ownedRelationship += ArgumentValue
+;
+
+fragment NamedArgumentList returns SysML::Expression :
+	ownedRelationship += NamedArgumentMember 
+	( ',' ownedRelationship += NamedArgumentMember )*
+;
+
+NamedArgumentMember returns SysML::ParameterMembership :
+	ownedRelatedElement += NamedArgument 
+;
+
+NamedArgument returns SysML::Feature :
+	ownedRelationship += ParameterRedefinition '=' ownedRelationship += ArgumentValue
+;
+
+ParameterRedefinition returns SysML::Redefinition:
+	redefinedFeature = [SysML::Feature | QualifiedName]
+;
+
+ArgumentValue returns SysML::FeatureValue :
+	ownedRelatedElement += OwnedExpression
+;
+
+// Null Expressions
+
+NullExpression returns SysML::NullExpression :
+	{SysML::NullExpression} ( 'null' | '(' ')' )
+;
+
+/* Literal Expressions */
+
+LiteralExpression returns SysML::LiteralExpression :
+	  LiteralBoolean 
+	| LiteralString 
+	| LiteralInteger
+	| LiteralReal 
+	| LiteralInfinity
+;
+
+LiteralBoolean returns SysML::LiteralBoolean :
+	value = BooleanValue
+;
+
+BooleanValue returns Ecore::EBoolean :
+	'true' | 'false'
+;
+
+LiteralString returns SysML::LiteralString :
+	value = STRING_VALUE
+;
+
+LiteralInteger returns SysML::LiteralInteger:
+	value = DECIMAL_VALUE
+;
+
+LiteralReal returns SysML::LiteralRational:
+	value = RealValue
+;
+
+RealValue returns Ecore::EDouble:
+	DECIMAL_VALUE? '.' ( DECIMAL_VALUE | EXP_VALUE ) | EXP_VALUE
+;
+
+LiteralInfinity returns SysML::LiteralInfinity :
+	{SysML::LiteralInfinity} '*'
+;
+
+/* NAMES */
+
+Name:
+	ID | UNRESTRICTED_NAME
+;
+
+Qualification :
+	( Name '::' )+
+;
+
+QualifiedName:
+	Qualification? Name
+;
+	
+/* TERMINALS */
+
+terminal DECIMAL_VALUE returns Ecore::EInt:
+	'0'..'9' ('0'..'9')*;
+
+terminal EXP_VALUE:
+	DECIMAL_VALUE ('e' | 'E') ('+' | '-')? DECIMAL_VALUE;
+
+terminal ID:
+	('a'..'z' | 'A'..'Z' | '_') ('a'..'z' | 'A'..'Z' | '_' | '0'..'9')*;
+
+terminal UNRESTRICTED_NAME returns Ecore::EString:
+	'\'' ('\\' ('b' | 't' | 'n' | 'f' | 'r' | '"' | "'" | '\\') | !('\\' | '\''))* '\'';
+
+terminal STRING_VALUE returns Ecore::EString:
+	'"' ('\\' ('b' | 't' | 'n' | 'f' | 'r' | '"' | "'" | '\\') | !('\\' | '"'))* '"';
+
+terminal REGULAR_COMMENT:
+	'/*' ->'*/';
+
+terminal ML_NOTE:
+	'//*'->'*/';
+
+terminal SL_NOTE:
+	'//' (!('\n' | '\r') !('\n' | '\r')*)? ('\r'? '\n')?;
+
+terminal WS:
+	(' ' | '\t' | '\r' | '\n')+;
