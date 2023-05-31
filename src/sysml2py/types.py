@@ -11,14 +11,16 @@ from textx import metamodel_from_file
 
 import os
 import sys
-sys.path.append(os.path.abspath(os.path.join(os.getcwd(),'..'))) 
+
+sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "..")))
 
 from sysml2py import load
+
 
 def main(filepath="../../tests/multipackage.text"):
     """An example docstring for a class definition."""
     # Parse file
-    fp = open(filepath, 'r')
+    fp = open(filepath, "r")
     model = load(fp)
 
     return model

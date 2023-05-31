@@ -11,8 +11,9 @@ from textx import metamodel_from_file
 
 from formatting import reformat
 
-__all__ = ['load', 'loads']
-__author__ = 'Christopher Cox'
+__all__ = ["load", "loads"]
+__author__ = "Christopher Cox"
+
 
 def load(fp):
     """SysML load from file pointer
@@ -38,16 +39,18 @@ def load(fp):
 
     """
     if not isinstance(fp, io.TextIOWrapper):
-        raise TypeError(f'the SysML object must be _io.TextIOWrapper, '
-                            f'not {fp.__class__.__name__}')
-    
+        raise TypeError(
+            f"the SysML object must be _io.TextIOWrapper, "
+            f"not {fp.__class__.__name__}"
+        )
+
     return loads(fp.read())
 
 
 def loads(s):
     """SysML load from string
 
-    Deserialize ``s`` (a ``str`` instance containing a SysML v2.0 document) 
+    Deserialize ``s`` (a ``str`` instance containing a SysML v2.0 document)
     to a Python dictionary object.
 
     Parameters
@@ -68,9 +71,8 @@ def loads(s):
 
     """
     if not isinstance(s, str):
-        raise TypeError(f'the SysML object must be str, '
-                            f'not {s.__class__.__name__}')
-    
+        raise TypeError(f"the SysML object must be str, " f"not {s.__class__.__name__}")
+
     meta = metamodel_from_file(__file__.replace("/__init__.py", "/SysML.tx"))
     model = meta.model_from_str(s)
 
