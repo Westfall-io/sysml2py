@@ -18,7 +18,7 @@ jobs:
         documentation_path: ./docs/source
     - name: Get code coverage
       run: |
-        pip install coveralls
+        pip install coveralls pytest
         coverage run --source=mypkg -m pytest tests/
         coveralls
     - name: Coveralls GitHub Action
