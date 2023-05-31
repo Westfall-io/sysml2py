@@ -36,6 +36,7 @@ def remove_classes(model):
 
 
 def reformat(model):
+    """An example docstring for a class definition."""
     # Convert to dictionary format
     try:
         model_out = {"name": model.__class__.__name__}
