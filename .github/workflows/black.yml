@@ -1,4 +1,4 @@
-name: Lint
+name: Format code 
 
 on: [push, pull_request]
 
@@ -7,5 +7,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Black Code Formatter
-        uses: lgeiger/black-action@v1.0.1
+      - name: Format code with black
+        run: |
+          pip install black
+          black .
+      - name: Commit changes
+        uses: EndBug/add-and-commit@v4
+        with:
+          author_name: ${{ github.actor }}
+          author_email: ${{ github.actor }}@users.noreply.github.com
+          message: "Format code with black"
+          add: "."
+          branch: ${{ github.ref }}
