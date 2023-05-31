@@ -1,6 +1,8 @@
-name: Format code 
+name: Format code
 
 on: [push, pull_request]
+
+permissions: read-all|write-all
 
 jobs:
   lint:
