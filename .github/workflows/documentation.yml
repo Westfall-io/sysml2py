@@ -23,5 +23,3 @@ jobs:
         pip install coveralls pytest
         coverage run --source=mypkg -m pytest tests/
         coveralls
-    - name: Coveralls GitHub Action
-      uses: coverallsapp/github-action@v1
