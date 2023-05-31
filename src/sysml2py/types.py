@@ -9,11 +9,6 @@ import yaml
 
 from textx import metamodel_from_file
 
-import os
-import sys
-
-sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "..")))
-
 from sysml2py import load
 
 

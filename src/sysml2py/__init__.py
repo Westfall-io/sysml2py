@@ -9,7 +9,7 @@ import io
 
 from textx import metamodel_from_file
 
-from .formatting import reformat
+from sysml2py.formatting import reformat
 
 __all__ = ["load", "loads"]
 __author__ = "Christopher Cox"

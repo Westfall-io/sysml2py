@@ -8,15 +8,21 @@ Created on Mon May 29 23:20:18 2023
 import pytest
 import yaml
 
-from src.sysml2py.types import main
+import os
+import sys
+print('CWD:')
+print(os.getcwd())
+sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "./src")))
+
+from sysml2py.types import main
 
 
 def name_fn(name):
-    model, model_out = main("./tests/" + name + ".text")
+    model = main("./tests/" + name + ".text")
     with open("./tests/out_" + name + ".text", "r") as f:
         test_data = f.read()
     f.close()
-    return test_data, yaml.dump(model_out)
+    return test_data, yaml.dump(model)
 
 
 def test_subpackage():
