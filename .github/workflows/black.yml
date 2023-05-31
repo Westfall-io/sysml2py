@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Format code with black
+      - name: :robot: Format code with black
         run: |
           pip install black
           black .
