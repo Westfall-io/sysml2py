@@ -16,3 +16,5 @@ jobs:
       uses: sphinx-notes/pages@v3
       with:
         documentation_path: ./docs/source
+    - name: Coveralls GitHub Action
+      uses: coverallsapp/github-action@v1
