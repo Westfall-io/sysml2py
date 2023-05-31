@@ -1,7 +1,7 @@
 Welcome to sysml2py's documentation!
 ====================================
 
-.. automodule:: sysml2py.types
+.. automodule:: sysml2py
     :members:
 
 .. toctree::
