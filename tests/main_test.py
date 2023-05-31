@@ -10,7 +10,8 @@ import yaml
 
 import os
 import sys
-print('CWD:')
+
+print("CWD:")
 print(os.getcwd())
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "./src")))
 
