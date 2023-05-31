@@ -62,6 +62,7 @@ def loads(in_str):
 
 
 def main(filepath="../../tests/multipackage.text"):
+    """An example docstring for a class definition."""
     # Load Grammar
     meta = metamodel_from_file(__file__.replace("/types.py", "/SysML.tx"))
 
