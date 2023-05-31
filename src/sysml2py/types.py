@@ -11,6 +11,7 @@ from textx import metamodel_from_file
 
 
 def remove_classes(model):
+    """An example docstring for a class definition."""
     if type(model) == type(dict()):
         output = {}
         for element in model:
