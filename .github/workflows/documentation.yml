@@ -17,6 +17,7 @@ jobs:
       with:
         documentation_path: ./docs/source
     - name: Get code coverage
+      env: GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         pip install coveralls pytest
         coverage run --source=mypkg -m pytest tests/
