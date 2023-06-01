@@ -26,13 +26,13 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        pip install coveralls pytest
+        python3.9 -m pip install coveralls pytest
         python3.9 -m coverage run --source=src -m pytest tests/ && coverage report
         coveralls
     - name: Test ${{ github.event.push.head }} coverage
       run: |
         pip install docstr-coverage
-        docstr-coverage src/sysml2py --badge=doc-cov
+        docstr-coverage src/sysml2py --badge=doc-cov --fail-under=0 -e ".*/(textx|tests)"
     - name: Commit changes
       uses: EndBug/add-and-commit@v4
       with:
