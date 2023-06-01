@@ -18,6 +18,6 @@ jobs:
         with:
           author_name: ${{ github.actor }}
           author_email: ${{ github.actor }}@users.noreply.github.com
-          message: "Format code with black"
+          message: ":robot: Format code with black"
           add: "."
           branch: ${{ github.ref }}

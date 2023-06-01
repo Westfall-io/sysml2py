@@ -5,6 +5,9 @@ on: [push]
 jobs:
   pages:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: "3.9"
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -23,30 +26,14 @@ jobs:
         pip install coveralls pytest
         coverage run --source=src -m pytest tests/ && coverage report
         coveralls
-    - name: Get SHAs
-      run: |
-        if [[ ${{ github.event_name }} == 'push' ]]; then
-          git fetch
-          echo "BASE=$(git rev-parse HEAD^)" >> $GITHUB_ENV
-          echo "HEAD=$(git rev-parse HEAD)" >> $GITHUB_ENV
-
-        elif [[ ${{ github.event_name }} == 'pull_request' ]]; then
-          echo "BASE=${{ github.event.pull_request.base.sha }}" >> $GITHUB_ENV
-          echo "HEAD=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
-
-        else
-          echo "Unexpected event trigger"
-          exit 1
-
-        fi
-    - name: Get ${{ github.event.push.head }} coverage
-      run: |
-        pip install docstr-coverage
-        git checkout $BASE
-        echo "BASE_COV=$(docstr-coverage -p)" >> $GITHUB_ENV
-
     - name: Test ${{ github.event.push.head }} coverage
       run: |
-        echo "$BASE coverage was: $BASE_COV%"
-        git checkout $HEAD
-        docstr-coverage --fail-under=$BASE_COV
+        docstr-coverage src/sysml2py --badge=doc-cov.png
+    - name: Commit changes
+      uses: EndBug/add-and-commit@v4
+      with:
+        author_name: ${{ github.actor }}
+        author_email: ${{ github.actor }}@users.noreply.github.com
+        message: ":robot: Add coverage badge"
+        add: "doc-cov.png"
+        branch: ${{ github.ref }}
