@@ -15,6 +15,9 @@ jobs:
       pages: write
       id-token: write
     steps:
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.9' 
     - id: deployment
       uses: sphinx-notes/pages@v3
       with:
@@ -27,7 +30,9 @@ jobs:
         coverage run --source=src -m pytest tests/ && coverage report
         coveralls
     - name: Test ${{ github.event.push.head }} coverage
-      run: docstr-coverage src/sysml2py --badge=doc-cov.png
+      run: |
+        pip install docstr-coverage
+        docstr-coverage src/sysml2py --badge=doc-cov.png
     - name: Commit changes
       uses: EndBug/add-and-commit@v4
       with:
