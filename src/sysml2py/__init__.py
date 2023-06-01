@@ -76,10 +76,12 @@ def loads(s):
         raise TypeError(f"the SysML object must be str, " f"not {s.__class__.__name__}")
 
     try:
-        stream = pkg_resources.resource_stream(__name__, 'grammar/KerMLExpressions.tx')
+        stream = pkg_resources.resource_stream(__name__, "grammar/KerMLExpressions.tx")
     except:
-        stream = pkg_resources.resource_stream(__name__, 'src/sysml2py/grammar/KerMLExpressions.tx')
-    grammar = stream.read().decode('utf-8')
+        stream = pkg_resources.resource_stream(
+            __name__, "src/sysml2py/grammar/KerMLExpressions.tx"
+        )
+    grammar = stream.read().decode("utf-8")
     meta = metamodel_from_str(grammar)
 
     stream = pkg_resources.resource_stream(__name__, "grammar/KerML.tx")
