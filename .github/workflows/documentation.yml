@@ -24,13 +24,13 @@ jobs:
         coverage run --source=src -m pytest tests/
         coveralls
     - name: Get ${{ github.event.pull_request.base.sha }} coverage
-        run: |
-          pip install docstr-coverage
-          git checkout $BASE
-          echo "BASE_COV=$(docstr-coverage -p)" >> $GITHUB_ENV
+      run: |
+        pip install docstr-coverage
+        git checkout $BASE
+        echo "BASE_COV=$(docstr-coverage -p)" >> $GITHUB_ENV
 
-      - name: Test ${{ github.event.pull_request.head.sha }} coverage
-        run: |
-          echo "$BASE coverage was: $BASE_COV%"
-          git checkout $HEAD
-          docstr-coverage --fail-under=$BASE_COV
+    - name: Test ${{ github.event.pull_request.head.sha }} coverage
+      run: |
+        echo "$BASE coverage was: $BASE_COV%"
+        git checkout $HEAD
+        docstr-coverage --fail-under=$BASE_COV
