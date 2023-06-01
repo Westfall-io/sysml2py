@@ -20,8 +20,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        pip install coveralls pytest pytest-cov
-        pytest --cov=src tests/
+        pip install coveralls pytest
+        coverage run --source=src -m pytest tests/
         coveralls
     - name: Get SHAs
       run: |
