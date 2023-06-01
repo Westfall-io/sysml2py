@@ -17,7 +17,7 @@ jobs:
     steps:
     - uses: actions/setup-python@v4
       with:
-        python-version: '3.9' 
+        python-version: '3.9'
     - id: deployment
       uses: sphinx-notes/pages@v3
       with:
@@ -29,6 +29,8 @@ jobs:
         pip install coveralls pytest
         coverage run --source=src -m pytest tests/ && coverage report
         coveralls
+      with:
+        python-version: '3.9' 
     - name: Test ${{ github.event.push.head }} coverage
       run: |
         pip install docstr-coverage
