@@ -78,9 +78,9 @@ def loads(s):
     try:
         stream = pkg_resources.resource_stream(__name__, "grammar/KerMLExpressions.tx")
     except:
-        stream = pkg_resources.resource_stream(
-            __name__, "src/sysml2py/grammar/KerMLExpressions.tx"
-        )
+        import os
+        print(os.getcwd())
+        stream = open("src/sysml2py/grammar/KerMLExpressions.tx", 'rb')
     grammar = stream.read().decode("utf-8")
     meta = metamodel_from_str(grammar)
 
