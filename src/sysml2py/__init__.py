@@ -16,6 +16,7 @@ from sysml2py.formatting import reformat
 __all__ = ["load", "loads"]
 __author__ = "Christopher Cox"
 
+
 def load(fp):
     """SysML load from file pointer
 
@@ -80,13 +81,13 @@ def loads(s):
         stream = pkg_resources.resource_stream(__name__, 'src/sysml2py/grammar/KerMLExpressions.tx')
     grammar = stream.read().decode('utf-8')
     meta = metamodel_from_str(grammar)
-    
-    stream = pkg_resources.resource_stream(__name__, 'grammar/KerML.tx')
-    grammar = stream.read().decode('utf-8')
+
+    stream = pkg_resources.resource_stream(__name__, "grammar/KerML.tx")
+    grammar = stream.read().decode("utf-8")
     meta = metamodel_from_str(grammar, metamodel=meta)
-    
-    stream = pkg_resources.resource_stream(__name__, 'grammar/SysML.tx')
-    grammar = stream.read().decode('utf-8')
+
+    stream = pkg_resources.resource_stream(__name__, "grammar/SysML.tx")
+    grammar = stream.read().decode("utf-8")
     meta = metamodel_from_str(grammar, metamodel=meta)
     model = meta.model_from_str(s)
 
