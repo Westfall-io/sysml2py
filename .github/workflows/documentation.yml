@@ -27,10 +27,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         pip install coveralls pytest
-        coverage run --source=src -m pytest tests/ && coverage report
+        coverage3-9 run --source=src -m pytest tests/ && coverage report
         coveralls
-      with:
-        python-version: '3.9' 
     - name: Test ${{ github.event.push.head }} coverage
       run: |
         pip install docstr-coverage
