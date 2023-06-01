@@ -2,18 +2,14 @@ name: Deploy Sphinx documentation to Pages
 
 on: [push]
 
+permissions: write-all
+
 jobs:
   pages:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.9"]
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    permissions:
-      pages: write
-      id-token: write
     steps:
     - uses: actions/setup-python@v4
       with:
@@ -26,7 +22,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        python3.9 -m pip install coveralls pytest
+        python3.9 -m pip install coveralls pytest pyyaml textx
         python3.9 -m coverage run --source=src -m pytest tests/ && coverage report
         coveralls
     - name: Test ${{ github.event.push.head }} coverage
