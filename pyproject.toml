@@ -24,7 +24,7 @@ classifiers = [
 include-package-data = true
 
 [tool.setuptools.packages.find]
-where = ["src/sysml2py"]
+where = ["src/sysml2py", "src"]
 
 [tool.setuptools.package-data]
 grammar = ["*.tx"]
