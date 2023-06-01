@@ -21,11 +21,12 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         pip install coveralls pytest
-        coverage run --source=src -m pytest tests/
+        coverage run --source=src -m pytest tests/ && coverage report
         coveralls
     - name: Get SHAs
       run: |
         if [[ ${{ github.event_name }} == 'push' ]]; then
+          git fetch
           echo "BASE=$(git rev-parse HEAD^)" >> $GITHUB_ENV
           echo "HEAD=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
