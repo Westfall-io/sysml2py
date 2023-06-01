@@ -17,6 +17,18 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 
+[tool.setuptools]
+# ...
+# By default, include-package-data is true in pyproject.toml, so you do
+# NOT have to specify this line.
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src/sysml2py"]
+
+[tool.setuptools.package-data]
+grammar = ["*.tx"]
+
 [project.urls]
 "Homepage" = "https://github.com/Westfall-io/sysml2py"
 "Bug Tracker" = "https://github.com/Westfall-io/sysml2py/issues"
