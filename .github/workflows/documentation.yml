@@ -27,17 +27,17 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         pip install coveralls pytest
-        coverage3-9 run --source=src -m pytest tests/ && coverage report
+        python3.9 -m coverage run --source=src -m pytest tests/ && coverage report
         coveralls
     - name: Test ${{ github.event.push.head }} coverage
       run: |
         pip install docstr-coverage
-        docstr-coverage src/sysml2py --badge=doc-cov.png
+        docstr-coverage src/sysml2py --badge=doc-cov
     - name: Commit changes
       uses: EndBug/add-and-commit@v4
       with:
         author_name: ${{ github.actor }}
         author_email: ${{ github.actor }}@users.noreply.github.com
         message: ":robot: Add coverage badge"
-        add: "doc-cov.png"
+        add: "doc-cov.svg"
         branch: ${{ github.ref }}
