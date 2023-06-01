@@ -27,8 +27,7 @@ jobs:
         coverage run --source=src -m pytest tests/ && coverage report
         coveralls
     - name: Test ${{ github.event.push.head }} coverage
-      run: |
-        docstr-coverage src/sysml2py --badge=doc-cov.png
+      run: docstr-coverage src/sysml2py --badge=doc-cov.png
     - name: Commit changes
       uses: EndBug/add-and-commit@v4
       with:
