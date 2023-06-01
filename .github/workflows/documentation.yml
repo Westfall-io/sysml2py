@@ -20,16 +20,31 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        pip install coveralls pytest
-        coverage run --source=src -m pytest tests/
+        pip install coveralls pytest pytest-cov
+        pytest --cov=src tests/
         coveralls
-    - name: Get ${{ github.event.pull_request.base.sha }} coverage
+    - name: Get SHAs
+      run: |
+        if [[ ${{ github.event_name }} == 'push' ]]; then
+          echo "BASE=$(git rev-parse HEAD^)" >> $GITHUB_ENV
+          echo "HEAD=$(git rev-parse HEAD)" >> $GITHUB_ENV
+
+        elif [[ ${{ github.event_name }} == 'pull_request' ]]; then
+          echo "BASE=${{ github.event.pull_request.base.sha }}" >> $GITHUB_ENV
+          echo "HEAD=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
+
+        else
+          echo "Unexpected event trigger"
+          exit 1
+
+        fi
+    - name: Get ${{ github.event.push.head }} coverage
       run: |
         pip install docstr-coverage
         git checkout $BASE
         echo "BASE_COV=$(docstr-coverage -p)" >> $GITHUB_ENV
 
-    - name: Test ${{ github.event.pull_request.head.sha }} coverage
+    - name: Test ${{ github.event.push.head }} coverage
       run: |
         echo "$BASE coverage was: $BASE_COV%"
         git checkout $HEAD
