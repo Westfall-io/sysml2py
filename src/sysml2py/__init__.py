@@ -78,17 +78,21 @@ def loads(s):
     try:
         stream = pkg_resources.resource_stream(__name__, "grammar/KerMLExpressions.tx")
     except:
-        import os
-        print(os.getcwd())
         stream = open("src/sysml2py/grammar/KerMLExpressions.tx", 'rb')
     grammar = stream.read().decode("utf-8")
     meta = metamodel_from_str(grammar)
 
-    stream = pkg_resources.resource_stream(__name__, "grammar/KerML.tx")
+    try:
+        stream = pkg_resources.resource_stream(__name__, "grammar/KerML.tx")
+    except:
+        stream = open("src/sysml2py/grammar/KerML.tx", 'rb')
     grammar = stream.read().decode("utf-8")
     meta = metamodel_from_str(grammar, metamodel=meta)
 
-    stream = pkg_resources.resource_stream(__name__, "grammar/SysML.tx")
+    try:
+        stream = pkg_resources.resource_stream(__name__, "grammar/SysML.tx")
+    except:
+        stream = open("src/sysml2py/grammar/SysML.tx", 'rb')
     grammar = stream.read().decode("utf-8")
     meta = metamodel_from_str(grammar, metamodel=meta)
     model = meta.model_from_str(s)
