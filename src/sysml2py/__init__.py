@@ -50,7 +50,7 @@ def load(fp):
     return loads(fp.read())
 
 
-def loads(s, formatting='json'):
+def loads(s, formatting="json"):
     """SysML load from string
 
     Deserialize ``s`` (a ``str`` instance containing a SysML v2.0 document)
@@ -73,21 +73,21 @@ def loads(s, formatting='json'):
         Input was not str
 
     """
-    
+
     if not isinstance(s, str):
         raise TypeError(f"the SysML object must be str, " f"not {s.__class__.__name__}")
-    
+
     try:
-        grammar = str((pkg_resources.files(sysml2py) / 'grammar/SysML.tx'))
+        grammar = str((pkg_resources.files(sysml2py) / "grammar/SysML.tx"))
     except:
         try:
-            grammar = './src/sysml2py/grammar/SysML.tx'
+            grammar = "./src/sysml2py/grammar/SysML.tx"
         except:
             grammar = "./grammar/SysML.tx"
     meta = metamodel_from_file(grammar)
-    model = meta.model_from_str(s,debug=True)
-    
-    if formatting == 'json':
+    model = meta.model_from_str(s, debug=True)
+
+    if formatting == "json":
         return reformat(model)
     else:
         return model
