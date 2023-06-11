@@ -7,10 +7,11 @@ Created on Mon May 29 23:26:16 2023
 """
 import io
 
-from textx import metamodel_from_str
+from textx import metamodel_from_file
 
-import pkg_resources
+import importlib.resources as pkg_resources
 
+import sysml2py
 from sysml2py.formatting import reformat
 
 __all__ = ["load", "loads"]
@@ -49,7 +50,7 @@ def load(fp):
     return loads(fp.read())
 
 
-def loads(s):
+def loads(s, formatting='json'):
     """SysML load from string
 
     Deserialize ``s`` (a ``str`` instance containing a SysML v2.0 document)
@@ -72,29 +73,21 @@ def loads(s):
         Input was not str
 
     """
+    
     if not isinstance(s, str):
         raise TypeError(f"the SysML object must be str, " f"not {s.__class__.__name__}")
-
+    
     try:
-        stream = pkg_resources.resource_stream(__name__, "grammar/KerMLExpressions.tx")
+        grammar = str((pkg_resources.files(sysml2py) / 'grammar/SysML.tx'))
     except:
-        stream = open("src/sysml2py/grammar/KerMLExpressions.tx", "rb")
-    grammar = stream.read().decode("utf-8")
-    meta = metamodel_from_str(grammar)
-
-    try:
-        stream = pkg_resources.resource_stream(__name__, "grammar/KerML.tx")
-    except:
-        stream = open("src/sysml2py/grammar/KerML.tx", "rb")
-    grammar = stream.read().decode("utf-8")
-    meta = metamodel_from_str(grammar, metamodel=meta)
-
-    try:
-        stream = pkg_resources.resource_stream(__name__, "grammar/SysML.tx")
-    except:
-        stream = open("src/sysml2py/grammar/SysML.tx", "rb")
-    grammar = stream.read().decode("utf-8")
-    meta = metamodel_from_str(grammar, metamodel=meta)
-    model = meta.model_from_str(s)
-
-    return reformat(model)
+        try:
+            grammar = './src/sysml2py/grammar/SysML.tx'
+        except:
+            grammar = "./grammar/SysML.tx"
+    meta = metamodel_from_file(grammar)
+    model = meta.model_from_str(s,debug=True)
+    
+    if formatting == 'json':
+        return reformat(model)
+    else:
+        return model
