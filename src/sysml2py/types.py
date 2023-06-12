@@ -8,8 +8,8 @@ Created on Tue May 16 00:26:47 2023
 
 import yaml
 
-#import sys
-#sys.stdout = open('./log.txt', 'w')
+# import sys
+# sys.stdout = open('./log.txt', 'w')
 
 if __name__ == "__main__":
     import os
@@ -19,7 +19,8 @@ if __name__ == "__main__":
     from sysml2py import load, loads
     from sysml2py.formatting import classtree
 
-    a = loads('''package 'Part Definition Example' {
+    a = loads(
+        """package 'Part Definition Example' {
 	import ScalarValues::*;
 	
 	part def Vehicle {
@@ -38,16 +39,16 @@ if __name__ == "__main__":
 	
 	part def Engine;	
 	part def Person;
-}''')#, formatting=False)
+}"""
+    )  # , formatting=False)
     print(yaml.dump(a))
 
     b = classtree(a)
-    
-    print('\n\n'+b.dump())
+
+    print("\n\n" + b.dump())
     import string
 
-    print('\n\n'+b.dump().translate(str.maketrans('', '', string.whitespace)))
-    
-    #sys.stdout = sys.__stdout__
-    #sys.stdout.close()
+    print("\n\n" + b.dump().translate(str.maketrans("", "", string.whitespace)))
 
+    # sys.stdout = sys.__stdout__
+    # sys.stdout.close()
