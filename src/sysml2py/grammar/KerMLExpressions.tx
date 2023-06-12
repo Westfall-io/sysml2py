@@ -511,8 +511,12 @@ LiteralInfinity :
 
 /* NAMES */
 
+AboutKeyword:
+  'about'
+;
+
 Name:
-	ID | UNRESTRICTED_NAME
+	!AboutKeyword ID | UNRESTRICTED_NAME
 ;
 
 Qualification :
@@ -544,7 +548,13 @@ STRING_VALUE :
 	/'"' ('\' ('b' | 't' | 'n' | 'f' | 'r' | '"' | "'" | '\') | !('\' | '"'))* '"'/;
 
 REGULAR_COMMENT:
-	'/*''*/';
+  /\/\*(.|\n)*?\*\//
+;
+
+Comment:
+// Reserved for textx, but in the model
+  /\/\/.*$/
+;
 
 ML_NOTE:
 	/'\/*'->'*\/'/;

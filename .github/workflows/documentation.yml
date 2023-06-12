@@ -1,6 +1,9 @@
 name: Deploy Sphinx documentation to Pages
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
 
 permissions: write-all
 

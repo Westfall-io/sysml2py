@@ -80,7 +80,7 @@ OwnedAnnotation :
 ;
 
 AnnotatingElement :
-	  Comment
+	  CommentKerML
 	| Documentation
 	| TextualRepresentation
 	| MetadataFeature
@@ -88,7 +88,8 @@ AnnotatingElement :
 
 /* Comments */
 
-Comment :
+CommentKerML :
+// Comment is reserved in TextX
 	( 'comment' Identification?
 	  ('about' ownedRelationship += Annotation
 	     ( ',' ownedRelationship += Annotation )* )?
@@ -97,7 +98,7 @@ Comment :
 ;
 
 Documentation :
-	'doc' Identification? body = REGULAR_COMMENT
+	'doc' Identification? body=REGULAR_COMMENT
 ;
 
 /* Textual Representation */

@@ -72,16 +72,17 @@ AnnotatingMember :
 ;
 
 AnnotatingElement :
-	  Comment
-	| Documentation
-	| TextualRepresentation
-	| MetadataUsage
+	  ownedRelatedElement = CommentSysML
+	| ownedRelatedElement = Documentation
+	| ownedRelatedElement = TextualRepresentation
+	| ownedRelatedElement = MetadataUsage
 ;
 
 /* Comments */
 
-Comment :
-	( 'comment' Identification?
+CommentSysML :
+// Comment is reserved in TextX
+	( 'comment' identification=Identification?
 	  ('about' ownedRelationship += Annotation
 	     ( ',' ownedRelationship += Annotation )* )?
 	)?
@@ -89,7 +90,7 @@ Comment :
 ;
 
 Documentation :
-	'doc' Identification? body = REGULAR_COMMENT
+	'doc' identification=Identification? body=REGULAR_COMMENT
 ;
 
 /* Textual Representation */
@@ -509,7 +510,7 @@ VariantUsageMember :
 ;
 
 NonOccurrenceUsageMember :
-	MemberPrefix ownedRelatedElement += NonOccurrenceUsageElement
+	prefix=MemberPrefix ownedRelatedElement += NonOccurrenceUsageElement
 ;
 
 OccurrenceUsageMember :
@@ -539,7 +540,7 @@ BehaviorUsageMember :
 ;
 
  BasicUsagePrefix :
-	RefPrefix
+	prefix=RefPrefix
 	( isReference ?= 'ref' )?
 ;
 
@@ -611,7 +612,7 @@ ReferenceUsageKeyword :
 ;
 
 DefaultReferenceUsage :
-	RefPrefix UsageDeclaration ValuePart? UsageBody
+	prefix=RefPrefix declaration=UsageDeclaration valuepart=ValuePart? body=UsageBody
 ;
 
 ReferenceUsage :
@@ -725,11 +726,11 @@ AttributeUsageKeyword :
 ;
 
 AttributeDefinition :
-	DefinitionPrefix AttributeDefKeyword Definition
+	prefix=DefinitionPrefix AttributeDefKeyword definition=Definition
 ;
 
 AttributeUsage :
-	UsagePrefix AttributeUsageKeyword Usage
+	prefix=UsagePrefix AttributeUsageKeyword usage=Usage
 ;
 
 /* ENUMERATIONS */
@@ -812,19 +813,19 @@ OccurrenceUsageKeyword :
 ;
 
  OccurrenceUsagePrefix :
-	  BasicUsagePrefix
+	  prefix=BasicUsagePrefix
 	  ( isIndividual ?= 'individual' )?
 	  ( portionKind = PortionKind )?
-	  UsageExtensionKeyword*
+	  usageExtension=UsageExtensionKeyword*
 ;
 
 OccurrenceUsage :
-	OccurrenceUsagePrefix OccurrenceUsageKeyword Usage
+	prefix=OccurrenceUsagePrefix OccurrenceUsageKeyword usage=Usage
 ;
 
 IndividualUsage :
-	BasicUsagePrefix isIndividual ?= 'individual'
-	UsageExtensionKeyword* Usage
+	prefix=BasicUsagePrefix isIndividual ?= 'individual'
+	UsageExtensionKeyword* usage=Usage
 ;
 
 PortionUsage :
