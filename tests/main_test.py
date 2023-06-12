@@ -35,51 +35,56 @@ def remove_comments(string):
             return match.group(1) # captured quoted-string
     return regex.sub(_replacer, string)
 
+
 def strip_ws(text):
     text = remove_comments(text)
     return text.translate(str.maketrans('', '', string.whitespace))
 
 def test_package():
-    text = 'package Package1;'
+    text = "package Package1;"
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
 
+
 def test_subpackage():
-    text = '''
+    text = """
     package Package1 {
         package Package2;
-    }'''
+    }"""
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
-    
+
+
 def test_package_owned_members():
-    text = '''
+    text = """
     package Package1 {
         package Package2;
         part def Part2;
         part part2 : Part2;
-    }'''
+    }"""
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
-    
+
+
 def test_package_with_alias_member():
-    text = '''package Package1 {
+    text = """package Package1 {
         package Package2;
         alias Package2Alias
             for Package2;
-    }'''
+    }"""
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
-    
+
+
 def test_package_with_imported_package():
-    text = '''package Package1 {
+    text = """package Package1 {
         import Package2::*;
         private import Package3::*;
-    }'''
+    }"""
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
@@ -196,4 +201,4 @@ def test_Training_PartDefinition_PartDefinition_Example():
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
-    
+

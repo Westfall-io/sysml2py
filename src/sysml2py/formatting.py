@@ -8,6 +8,7 @@ Created on Wed May 31 13:26:53 2023
 
 from sysml2py.grammar.classes import RootNamespace
 
+
 def remove_classes(model):
     """An example docstring for a class definition."""
     if type(model) == type(dict()):
@@ -44,6 +45,7 @@ def reformat(model):
         print("Error in printing")
 
     return model_out
+
 
 def classtree(model):
     return RootNamespace(model)
