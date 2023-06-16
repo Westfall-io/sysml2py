@@ -41,9 +41,9 @@ def remove_comments(string):
 
 def strip_ws(text):
     text = remove_comments(text)
-    text = text.replace('specializes', ':>')
-    text = text.replace('subsets', ':>')
-    text = text.replace('redefines', ':>>')
+    text = text.replace("specializes", ":>")
+    text = text.replace("subsets", ":>")
+    text = text.replace("redefines", ":>>")
     return text.translate(str.maketrans("", "", string.whitespace))
 
 
@@ -216,6 +216,7 @@ def test_Training_PartDefinition_PartDefinition_Example():
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
 
+
 def test_Training_Generalization_Generalization_Example():
     text = """package 'Generalization Example' {
 
@@ -240,20 +241,21 @@ def test_Training_Generalization_Generalization_Example():
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
 
+
 # The following test was removed, as the grammar from sysml doesn't make sense
 # to parse this correctly.
 
 # def test_Training_Subsetting_Subsetting_Example():
 #     text = """package 'Subsetting Example' {
-# 	
+#
 #     	part def Vehicle {
 #     		part parts : VehiclePart[*];
-    		
+
 #     		part eng : Engine subsets parts;
 #     		part trans : Transmission subsets parts;
 #     		part wheels : Wheel[4] :> parts;
 #     	}
-    	
+
 #     	abstract part def VehiclePart;
 #     	part def Engine :> VehiclePart;
 #     	part def Transmission :> VehiclePart;
@@ -262,6 +264,7 @@ def test_Training_Generalization_Generalization_Example():
 #     a = loads(text)
 #     b = classtree(a)
 #     assert strip_ws(text) == strip_ws(b.dump())
+
 
 def test_Training_Redefinition_Redefinition_Example():
     text = """package 'Redefinition Example' {
@@ -288,11 +291,11 @@ def test_Training_Redefinition_Redefinition_Example():
     
     	part def Cylinder;
     }"""
-    
+
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
-    
+
 
 def test_Training_Parts_Parts_Example_1():
     text = """package 'Parts Example-1' {
@@ -327,7 +330,8 @@ def test_Training_Parts_Parts_Example_1():
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
-    
+
+
 def test_Training_Parts_Parts_Example_2():
     text = """package 'Parts Example-2' {
     	
@@ -361,7 +365,8 @@ def test_Training_Parts_Parts_Example_2():
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
-    
+
+
 def test_Training_EnumerationDefinitions_Enumeration_Example():
     text = """package 'Enumeration Definitions-1' {
     	import ScalarValues::Real;
