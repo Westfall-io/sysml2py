@@ -20,25 +20,22 @@ if __name__ == "__main__":
     from sysml2py.formatting import classtree
 
     a = loads(
-        """package 'Part Definition Example' {
-	import ScalarValues::*;
+        """package 'Enumeration Definitions-1' {
+	import ScalarValues::Real;
 	
-	part def Vehicle {
-		attribute mass : Real;
-		attribute status : VehicleStatus;
-		
-		part eng : Engine;
-		
-		ref part driver : Person;
+	enum def TrafficLightColor {
+		enum green;
+		enum yellow;
+		enum red;
 	}
 	
-	attribute def VehicleStatus {
-		gearSetting : Integer;
-		acceleratorPosition : Real;
+	part def TrafficLight {
+		attribute currentColor : TrafficLightColor;
 	}
 	
-	part def Engine;	
-	part def Person;
+	part def TrafficLightGo specializes TrafficLight {
+		attribute redefines currentColor = TrafficLightColor::green;
+	}
 }"""
     )  # , formatting=False)
     print(yaml.dump(a))

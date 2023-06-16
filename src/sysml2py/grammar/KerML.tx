@@ -645,8 +645,7 @@ OwnedFeatureTyping :
 ;
 
  FeatureType :
-	  type = QualifiedName
-	| ownedRelatedElement += OwnedFeatureChain
+	  type = QualifiedName | ownedRelatedElement += OwnedFeatureChain
 ;
 
 /* Subsetting */

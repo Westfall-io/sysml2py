@@ -355,8 +355,8 @@ OwnedSubclassification :
 ;
 
  FeatureSpecializationPart :
-	  ( specialization+=FeatureSpecialization )+ multiplicity=MultiplicityPart? specialization+=FeatureSpecialization*
-	| multiplicity=MultiplicityPart specialization+=FeatureSpecialization*
+	  ( specialization+=FeatureSpecialization )+ multiplicity=MultiplicityPart? specialization2+=FeatureSpecialization*
+	| multiplicity2=MultiplicityPart specialization+=FeatureSpecialization*
 ;
 
  MultiplicityPart :
@@ -386,12 +386,12 @@ DefinedByKeyword :
 ;
 
  Subsettings :
-	Subsets ( ',' ownedRelationship += OwnedSubsetting )*
+	SubsetsKeyword ownedRelationship += OwnedSubsetting ( ',' ownedRelationship += OwnedSubsetting )*
 ;
 
- Subsets :
+/* Subsets :
 	SubsetsKeyword ownedRelationship += OwnedSubsetting
-;
+;*/
 
 SubsetsKeyword :
 	':>' | 'subsets'
@@ -406,7 +406,7 @@ ReferencesKeyword :
 ;
 
  Redefinitions :
-	Redefines ( ',' ownedRelationship += OwnedRedefinition )*
+	redefines=Redefines ( ',' ownedRelationship += OwnedRedefinition )*
 ;
 
  Redefines :
@@ -454,7 +454,7 @@ MultiplicityRange :
 
 
 MultiplicityRelatedElement :
-    (LiteralExpression | FeatureReferenceExpression)
+    (ownedRelatedElement = LiteralExpression | ownedRelatedElement = FeatureReferenceExpression)
 ;
 
 MultiplicityExpressionMember :
@@ -474,7 +474,7 @@ MultiplicityExpressionMember :
 ;
 
  DefinitionPrefix :
-	BasicDefinitionPrefix? DefinitionExtensionKeyword*
+	prefix=BasicDefinitionPrefix? keyword=DefinitionExtensionKeyword*
 ;
 
  Definition :
@@ -575,7 +575,7 @@ BehaviorUsageMember :
 ;
 
 FeatureValue :
-	( '=' | isDefault ?= 'default' ( '=' | isInitial ?= ':=' )? )
+	( '=' | isDefault ?= 'default' ( isEqual ?= '=' | isInitial ?= ':=' )? )
 	ownedRelatedElement += OwnedExpression
 ;
 
@@ -736,7 +736,7 @@ AttributeUsage :
 /* ENUMERATIONS */
 
 EnumerationKeyword :
-	''
+	'enum'
 ;
 EnumerationDefKeyword :
 	EnumerationKeyword 'def'
@@ -747,7 +747,9 @@ EnumerationUsageKeyword :
 ;
 
 EnumerationDefinition :
-	EnumerationDefKeyword DefinitionDeclaration EnumerationBody
+	EnumerationDefKeyword
+  declaration=DefinitionDeclaration
+  body=EnumerationBody
 ;
 
  EnumerationBody :
@@ -759,15 +761,15 @@ EnumerationDefinition :
 ;
 
 EnumerationUsageMember :
-	MemberPrefix ownedRelatedElement += EnumeratedValue
+	prefix=MemberPrefix ownedRelatedElement += EnumeratedValue
 ;
 
 EnumeratedValue :
-	EnumerationUsageKeyword? Usage
+	keyword=EnumerationUsageKeyword? usage=Usage
 ;
 
 EnumerationUsage :
-	UsagePrefix EnumerationUsageKeyword Usage
+	prefix=UsagePrefix EnumerationUsageKeyword usage=Usage
 ;
 
 /* OCCURRENCES */
@@ -783,9 +785,9 @@ OccurrenceDefKeyword :
 ;
 
  OccurrenceDefinitionPrefix :
-	BasicDefinitionPrefix?
+	prefix=BasicDefinitionPrefix?
 	( isIndividual ?= 'individual' ownedRelationship += LifeClassMembership )?
-	DefinitionExtensionKeyword*
+	keyword=DefinitionExtensionKeyword*
 ;
 
 OccurrenceDefinition :

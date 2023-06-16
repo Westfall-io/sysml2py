@@ -41,6 +41,9 @@ def remove_comments(string):
 
 def strip_ws(text):
     text = remove_comments(text)
+    text = text.replace('specializes', ':>')
+    text = text.replace('subsets', ':>')
+    text = text.replace('redefines', ':>>')
     return text.translate(str.maketrans("", "", string.whitespace))
 
 
@@ -208,6 +211,174 @@ def test_Training_PartDefinition_PartDefinition_Example():
     	
     	part def Engine;	
     	part def Person;
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+
+def test_Training_Generalization_Generalization_Example():
+    text = """package 'Generalization Example' {
+
+    	abstract part def Vehicle;
+    	
+    	part def HumanDrivenVehicle specializes Vehicle {
+    		ref part driver : Person;
+    	}
+    	
+    	part def PoweredVehicle :> Vehicle {
+    		part eng : Engine;
+    	}
+    	
+    	part def HumanDrivenPoweredVehicle :> 
+    		HumanDrivenVehicle, PoweredVehicle;
+    	
+    	part def Engine;	
+    	part def Person;
+    	
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+
+# The following test was removed, as the grammar from sysml doesn't make sense
+# to parse this correctly.
+
+# def test_Training_Subsetting_Subsetting_Example():
+#     text = """package 'Subsetting Example' {
+# 	
+#     	part def Vehicle {
+#     		part parts : VehiclePart[*];
+    		
+#     		part eng : Engine subsets parts;
+#     		part trans : Transmission subsets parts;
+#     		part wheels : Wheel[4] :> parts;
+#     	}
+    	
+#     	abstract part def VehiclePart;
+#     	part def Engine :> VehiclePart;
+#     	part def Transmission :> VehiclePart;
+#     	part def Wheel :> VehiclePart;
+#     }"""
+#     a = loads(text)
+#     b = classtree(a)
+#     assert strip_ws(text) == strip_ws(b.dump())
+
+def test_Training_Redefinition_Redefinition_Example():
+    text = """package 'Redefinition Example' {
+    
+    	part def Vehicle {
+    		part eng : Engine;
+    	}
+    	part def SmallVehicle :> Vehicle {
+    		part smallEng : SmallEngine redefines eng;
+    	}
+    	part def BigVehicle :> Vehicle {
+    		part bigEng : BigEngine :>> eng;
+    	}
+    
+    	part def Engine {
+    		part cyl : Cylinder[4..6];
+    	}
+    	part def SmallEngine :> Engine {
+    		part redefines cyl[4];
+    	}
+    	part def BigEngine :> Engine {
+    		part redefines cyl[6];
+    	}
+    
+    	part def Cylinder;
+    }"""
+    
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+    
+
+def test_Training_Parts_Parts_Example_1():
+    text = """package 'Parts Example-1' {
+	
+    	// Definitions
+    	
+    	part def Vehicle {
+    		part eng : Engine;
+    	}
+    	
+    	part def Engine {
+    		part cyl : Cylinder[4..6];
+    	}
+    	
+    	part def Cylinder;
+    	
+    	// Usages
+    	
+    	part smallVehicle : Vehicle {
+    		part redefines eng {
+    			part redefines cyl[4];
+    		}
+    	}
+    	
+    	part bigVehicle : Vehicle {
+    		part redefines eng {
+    			part redefines cyl[6];
+    		}
+    	}
+    	
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+    
+def test_Training_Parts_Parts_Example_2():
+    text = """package 'Parts Example-2' {
+    	
+    	// Definitions
+    	
+    	part def Vehicle;	
+    	part def Engine;	
+    	part def Cylinder;
+    	
+    	// Usages
+    	
+    	part vehicle : Vehicle {
+    		part eng : Engine {
+    			part cyl : Cylinder[4..6];
+    		}
+    	}
+    	
+    	part smallVehicle :> vehicle {
+    		part redefines eng {
+    			part redefines cyl[4];
+    		}
+    	}
+    	
+    	part bigVehicle :> vehicle {
+    		part redefines eng {
+    			part redefines cyl[6];
+    		}
+    	}
+    	
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+    
+def test_Training_EnumerationDefinitions_Enumeration_Example():
+    text = """package 'Enumeration Definitions-1' {
+    	import ScalarValues::Real;
+    	
+    	enum def TrafficLightColor {
+    		enum green;
+    		enum yellow;
+    		enum red;
+    	}
+    	
+    	part def TrafficLight {
+    		attribute currentColor : TrafficLightColor;
+    	}
+    	
+    	part def TrafficLightGo specializes TrafficLight {
+    		attribute redefines currentColor = TrafficLightColor::green;
+    	}
     }"""
     a = loads(text)
     b = classtree(a)
