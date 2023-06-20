@@ -1,5 +1,7 @@
 on: [push]
 
+permissions: write-all
+
 jobs:
   release:
     name: Semantic Release
