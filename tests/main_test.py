@@ -241,6 +241,7 @@ def test_Training_Generalization_Generalization_Example():
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
 
+
 def test_Training_Subsetting_Subsetting_Example():
     text = """package 'Subsetting Example' {
 
@@ -260,6 +261,7 @@ def test_Training_Subsetting_Subsetting_Example():
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
+
 
 def test_Training_Redefinition_Redefinition_Example():
     text = """package 'Redefinition Example' {
@@ -291,6 +293,7 @@ def test_Training_Redefinition_Redefinition_Example():
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
 
+
 def test_Training_EnumerationDefinitions_Enumeration_Example_1():
     text = """package 'Enumeration Definitions-1' {
     	import ScalarValues::Real;
@@ -312,7 +315,8 @@ def test_Training_EnumerationDefinitions_Enumeration_Example_1():
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
-    
+
+
 def test_Training_EnumerationDefinitions_Enumeration_Example_2():
     text = """package 'Enumeration Definitions-2' {
     	import ScalarValues::*;
@@ -348,8 +352,9 @@ def test_Training_EnumerationDefinitions_Enumeration_Example_2():
     }"""
     a = loads(text)
     b = classtree(a)
-    assert strip_ws(text) == strip_ws(b.dump())    
-    
+    assert strip_ws(text) == strip_ws(b.dump())
+
+
 def test_Training_Parts_Parts_Example_1():
     text = """package 'Parts Example-1' {
 	
@@ -419,6 +424,7 @@ def test_Training_Parts_Parts_Example_2():
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
 
+
 def test_Training_Items_Items_Example():
     text = """package 'Items Example' {
     	import ScalarValues::*;
@@ -440,6 +446,7 @@ def test_Training_Items_Items_Example():
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
+
 
 def test_Training_Connections_Connections_Example():
     text = """package 'Connections Example' {
@@ -486,8 +493,9 @@ def test_Training_Connections_Connections_Example():
     }"""
     a = loads(text)
     b = classtree(a)
-    assert strip_ws(text) == strip_ws(b.dump())    
-    
+    assert strip_ws(text) == strip_ws(b.dump())
+
+
 def test_Training_Ports_Port_Conjugation_Example():
     text = """package 'Port Conjugation Example' {
 	
@@ -512,7 +520,8 @@ def test_Training_Ports_Port_Conjugation_Example():
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
-    
+
+
 def test_Training_Ports_Port_Example():
     text = """package 'Port Example' {
 	
@@ -542,7 +551,8 @@ def test_Training_Ports_Port_Example():
     }"""
     a = loads(text)
     b = classtree(a)
-    assert strip_ws(text) == strip_ws(b.dump())  
+    assert strip_ws(text) == strip_ws(b.dump())
+
 
 def test_Training_Interfaces_InterfaceDecomposition_Example():
     text = """package 'Interface Decomposition Example' {
@@ -570,8 +580,9 @@ def test_Training_Interfaces_InterfaceDecomposition_Example():
     }"""
     a = loads(text)
     b = classtree(a)
-    assert strip_ws(text) == strip_ws(b.dump())  
-    
+    assert strip_ws(text) == strip_ws(b.dump())
+
+
 def test_Training_Interfaces_Interface_Example():
     text = """package 'Interface Example' {
     	import 'Port Example'::*;
@@ -594,4 +605,4 @@ def test_Training_Interfaces_Interface_Example():
     }"""
     a = loads(text)
     b = classtree(a)
-    assert strip_ws(text) == strip_ws(b.dump())  
+    assert strip_ws(text) == strip_ws(b.dump())
