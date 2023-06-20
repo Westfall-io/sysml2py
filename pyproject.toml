@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sysml2py"
-version = "0.1.2"
+version = "0.2.0"
 authors = [
   { name="Christopher Cox", email="chris.cox@westfall.io" },
 ]
@@ -28,6 +28,11 @@ where = ["src/sysml2py", "src"]
 
 [tool.setuptools.package-data]
 grammar = ["*.tx"]
+
+[tool.semantic_release]
+version_variable = "pyproject.toml:version"
+version_source = "tag"
+commit_parser = "semantic_release.history.emoji_parser"
 
 [project.urls]
 "Homepage" = "https://github.com/Westfall-io/sysml2py"

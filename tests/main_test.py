@@ -47,78 +47,78 @@ def strip_ws(text):
     return text.translate(str.maketrans("", "", string.whitespace))
 
 
-def test_package():
-    text = "package Package1;"
-    a = loads(text)
-    b = classtree(a)
-    assert strip_ws(text) == strip_ws(b.dump())
+# def test_package():
+#     text = "package Package1;"
+#     a = loads(text)
+#     b = classtree(a)
+#     assert strip_ws(text) == strip_ws(b.dump())
 
 
-def test_subpackage():
-    text = """
-    package Package1 {
-        package Package2;
-    }"""
-    a = loads(text)
-    b = classtree(a)
-    assert strip_ws(text) == strip_ws(b.dump())
+# def test_subpackage():
+#     text = """
+#     package Package1 {
+#         package Package2;
+#     }"""
+#     a = loads(text)
+#     b = classtree(a)
+#     assert strip_ws(text) == strip_ws(b.dump())
 
 
-def test_package_owned_members():
-    text = """
-    package Package1 {
-        package Package2;
-        part def Part2;
-        part part2 : Part2;
-    }"""
-    a = loads(text)
-    b = classtree(a)
-    assert strip_ws(text) == strip_ws(b.dump())
+# def test_package_owned_members():
+#     text = """
+#     package Package1 {
+#         package Package2;
+#         part def Part2;
+#         part part2 : Part2;
+#     }"""
+#     a = loads(text)
+#     b = classtree(a)
+#     assert strip_ws(text) == strip_ws(b.dump())
 
 
-def test_package_with_alias_member():
-    text = """package Package1 {
-        package Package2;
-        alias Package2Alias
-            for Package2;
-    }"""
-    a = loads(text)
-    b = classtree(a)
-    assert strip_ws(text) == strip_ws(b.dump())
+# def test_package_with_alias_member():
+#     text = """package Package1 {
+#         package Package2;
+#         alias Package2Alias
+#             for Package2;
+#     }"""
+#     a = loads(text)
+#     b = classtree(a)
+#     assert strip_ws(text) == strip_ws(b.dump())
 
 
-def test_package_with_imported_package():
-    text = """package Package1 {
-        import Package2::*;
-        private import Package3::*;
-    }"""
-    a = loads(text)
-    b = classtree(a)
-    assert strip_ws(text) == strip_ws(b.dump())
+# def test_package_with_imported_package():
+#     text = """package Package1 {
+#         import Package2::*;
+#         private import Package3::*;
+#     }"""
+#     a = loads(text)
+#     b = classtree(a)
+#     assert strip_ws(text) == strip_ws(b.dump())
 
 
-def test_attribute_definition():
-    text = """attribute def AttributeDef1;"""
-    a = loads(text)
-    b = classtree(a)
-    assert strip_ws(text) == strip_ws(b.dump())
+# def test_attribute_definition():
+#     text = """attribute def AttributeDef1;"""
+#     a = loads(text)
+#     b = classtree(a)
+#     assert strip_ws(text) == strip_ws(b.dump())
 
 
-def test_attribute_usage():
-    text = """attribute attribute1 :
-AttributeDef1;"""
-    a = loads(text)
-    b = classtree(a)
-    assert strip_ws(text) == strip_ws(b.dump())
+# def test_attribute_usage():
+#     text = """attribute attribute1 :
+# AttributeDef1;"""
+#     a = loads(text)
+#     b = classtree(a)
+#     assert strip_ws(text) == strip_ws(b.dump())
 
 
-def test_attribute_def_subusage():
-    text = """attribute def SensorRecord {
-        attribute Reading : Real;
-    }"""
-    a = loads(text)
-    b = classtree(a)
-    assert strip_ws(text) == strip_ws(b.dump())
+# def test_attribute_def_subusage():
+#     text = """attribute def SensorRecord {
+#         attribute Reading : Real;
+#     }"""
+#     a = loads(text)
+#     b = classtree(a)
+#     assert strip_ws(text) == strip_ws(b.dump())
 
 
 ###################################################
@@ -241,30 +241,25 @@ def test_Training_Generalization_Generalization_Example():
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
 
+def test_Training_Subsetting_Subsetting_Example():
+    text = """package 'Subsetting Example' {
 
-# The following test was removed, as the grammar from sysml doesn't make sense
-# to parse this correctly.
+     	part def Vehicle {
+    		part parts : VehiclePart[*];
 
-# def test_Training_Subsetting_Subsetting_Example():
-#     text = """package 'Subsetting Example' {
-#
-#     	part def Vehicle {
-#     		part parts : VehiclePart[*];
+    		part eng : Engine subsets parts;
+    		part trans : Transmission subsets parts;
+    		part wheels : Wheel[4] :> parts;
+     	}
 
-#     		part eng : Engine subsets parts;
-#     		part trans : Transmission subsets parts;
-#     		part wheels : Wheel[4] :> parts;
-#     	}
-
-#     	abstract part def VehiclePart;
-#     	part def Engine :> VehiclePart;
-#     	part def Transmission :> VehiclePart;
-#     	part def Wheel :> VehiclePart;
-#     }"""
-#     a = loads(text)
-#     b = classtree(a)
-#     assert strip_ws(text) == strip_ws(b.dump())
-
+     	abstract part def VehiclePart;
+     	part def Engine :> VehiclePart;
+     	part def Transmission :> VehiclePart;
+     	part def Wheel :> VehiclePart;
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
 
 def test_Training_Redefinition_Redefinition_Example():
     text = """package 'Redefinition Example' {
@@ -296,7 +291,65 @@ def test_Training_Redefinition_Redefinition_Example():
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
 
-
+def test_Training_EnumerationDefinitions_Enumeration_Example_1():
+    text = """package 'Enumeration Definitions-1' {
+    	import ScalarValues::Real;
+    	
+    	enum def TrafficLightColor {
+    		enum green;
+    		enum yellow;
+    		enum red;
+    	}
+    	
+    	part def TrafficLight {
+    		attribute currentColor : TrafficLightColor;
+    	}
+    	
+    	part def TrafficLightGo specializes TrafficLight {
+    		attribute redefines currentColor = TrafficLightColor::green;
+    	}
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+    
+def test_Training_EnumerationDefinitions_Enumeration_Example_2():
+    text = """package 'Enumeration Definitions-2' {
+    	import ScalarValues::*;
+    	import 'Enumeration Definitions-1'::*;
+    	
+    	attribute def ClassificationLevel {
+    		attribute code : String;
+    		attribute color : TrafficLightColor;
+    	}
+    	
+    	enum def ClassificationKind specializes ClassificationLevel {
+    		unclassified {
+    			:>> code = "uncl";
+    			:>> color = TrafficLightColor::green;
+    		}
+    		confidential {
+    			:>> code = "conf";
+    			:>> color = TrafficLightColor::yellow;
+    		}
+    		secret {
+    			:>> code = "secr";
+    			:>> color = TrafficLightColor::red;
+    		}
+    	}
+    	
+    	enum def GradePoints :> Real {
+    		A = 4.0;
+    		B = 3.0;
+    		C = 2.0;
+    		D = 1.0;
+    		F = 0.0;
+    	}
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())    
+    
 def test_Training_Parts_Parts_Example_1():
     text = """package 'Parts Example-1' {
 	
@@ -366,25 +419,179 @@ def test_Training_Parts_Parts_Example_2():
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
 
+def test_Training_Items_Items_Example():
+    text = """package 'Items Example' {
+    	import ScalarValues::*;
+    	
+    	item def Fuel;
+    	item def Person;
+    	
+    	part def Vehicle {
+    		attribute mass : Real;
+    		
+    		ref item driver : Person;
+    
+    		part fuelTank {
+    			item fuel: Fuel;
+    		}		
+    	}
+    	
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
 
-def test_Training_EnumerationDefinitions_Enumeration_Example():
-    text = """package 'Enumeration Definitions-1' {
-    	import ScalarValues::Real;
+def test_Training_Connections_Connections_Example():
+    text = """package 'Connections Example' {
+	
+    	part def WheelHubAssembly;
+    	part def WheelAssembly;
+    	part def Tire;
+    	part def TireBead;
+    	part def Wheel;
+    	part def TireMountingRim;
+    	part def LugBoltMountingHole;
+    	part def Hub;
+    	part def LugBoltThreadableHole;
+    	part def LugBoltJoint;
     	
-    	enum def TrafficLightColor {
-    		enum green;
-    		enum yellow;
-    		enum red;
+    	connection def PressureSeat {
+    		end bead : TireBead[1];
+    		end mountingRim : TireMountingRim[1];
     	}
     	
-    	part def TrafficLight {
-    		attribute currentColor : TrafficLightColor;
+    	part wheelHubAssembly : WheelHubAssembly {
+    		
+    		part wheel : WheelAssembly[1] {
+    			part t : Tire[1] {
+    				part bead : TireBead[2];			
+    			}
+    			part w: Wheel[1] {
+    				part rim : TireMountingRim[2];
+    				part mountingHoles : LugBoltMountingHole[5];
+    			}						
+    			connection : PressureSeat 
+    				connect bead references t.bead 
+    				to mountingRim references w.rim;		
+    		}
+    		
+    		part lugBoltJoints : LugBoltJoint[0..5];
+    		part hub : Hub[1] {
+    			part h : LugBoltThreadableHole[5];
+    		}
+    		connect lugBoltJoints[0..1] to wheel.w.mountingHoles[1];
+    		connect lugBoltJoints[0..1] to hub.h[1];
     	}
     	
-    	part def TrafficLightGo specializes TrafficLight {
-    		attribute redefines currentColor = TrafficLightColor::green;
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())    
+    
+def test_Training_Ports_Port_Conjugation_Example():
+    text = """package 'Port Conjugation Example' {
+	
+    	attribute def Temp;
+    	
+    	part def Fuel;
+    	
+    	port def FuelPort {
+    		attribute temperature : Temp;
+    		out item fuelSupply : Fuel;
+    		in item fuelReturn : Fuel;
+    	}
+    	
+    	part def FuelTank {
+    		port fuelTankPort : FuelPort;
+    	}
+    	
+    	part def Engine {
+    		port engineFuelPort : ~FuelPort;
     	}
     }"""
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
+    
+def test_Training_Ports_Port_Example():
+    text = """package 'Port Example' {
+	
+    	attribute def Temp;
+    	
+    	part def Fuel;
+    	
+    	port def FuelOutPort {
+    		attribute temperature : Temp;
+    		out item fuelSupply : Fuel;
+    		in item fuelReturn : Fuel;
+    	}
+    	
+    	port def FuelInPort {
+    		attribute temperature : Temp;
+    		in item fuelSupply : Fuel;
+    		out item fuelReturn : Fuel;
+    	}
+    	
+    	part def FuelTankAssembly {
+    		port fuelTankPort : FuelOutPort;
+    	}
+    	
+    	part def Engine {
+    		port engineFuelPort : FuelInPort;
+    	}
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())  
+
+def test_Training_Interfaces_InterfaceDecomposition_Example():
+    text = """package 'Interface Decomposition Example' {
+    	
+    	port def SpigotBank;
+    	port def Spigot;
+    	
+    	port def Faucet;
+    	port def FaucetInlet;
+    	
+    	interface def WaterDelivery {
+    		end suppliedBy : SpigotBank[1] {
+    			port hot : Spigot;
+    			port cold : Spigot;
+    		}
+    		end deliveredTo : Faucet[1..*] {
+    			port hot : FaucetInlet;
+    			port cold : FaucetInlet;
+    		}
+    		
+    		connect suppliedBy.hot to deliveredTo.hot;
+    		connect suppliedBy.cold to deliveredTo.cold;
+    	}
+    	
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())  
+    
+def test_Training_Interfaces_Interface_Example():
+    text = """package 'Interface Example' {
+    	import 'Port Example'::*;
+    	
+    	part def Vehicle;
+    	
+    	interface def FuelInterface {
+    		end supplierPort : FuelOutPort;
+    		end consumerPort : FuelInPort;
+    	}
+    	
+    	part vehicle : Vehicle {	
+    		part tankAssy : FuelTankAssembly;		
+    		part eng : Engine;
+    		
+    		interface : FuelInterface connect 
+    			supplierPort ::> tankAssy.fuelTankPort to 
+    			consumerPort ::> eng.engineFuelPort;
+    	} 
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())  

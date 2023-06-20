@@ -67,6 +67,8 @@ class DefinitionElement:
         self.children = []
         if valid_definition(definition, "DefinitionElement"):
             # This is a SysML Element
+            if isinstance(definition['ownedRelatedElement'], str):
+                raise NotImplementedError
             if definition["ownedRelatedElement"]["name"] == "Package":
                 self.children.append(Package(definition["ownedRelatedElement"]))
             elif definition["ownedRelatedElement"]["name"] == "PartDefinition":
@@ -84,6 +86,22 @@ class DefinitionElement:
                 self.children.append(
                     EnumerationDefinition(definition["ownedRelatedElement"])
                 )
+            elif definition["ownedRelatedElement"]["name"] == "ItemDefinition":
+                self.children.append(
+                    ItemDefinition(definition["ownedRelatedElement"])
+                )
+            elif definition["ownedRelatedElement"]["name"] == "ConnectionDefinition":
+                self.children.append(
+                    ConnectionDefinition(definition["ownedRelatedElement"])
+                )
+            elif definition["ownedRelatedElement"]["name"] == "PortDefinition":
+                self.children.append(
+                    PortDefinition(definition["ownedRelatedElement"])
+                )
+            elif definition["ownedRelatedElement"]["name"] == "InterfaceDefinition":
+                self.children.append(
+                    InterfaceDefinition(definition["ownedRelatedElement"])
+                )
             else:
                 raise NotImplementedError
 
@@ -94,6 +112,235 @@ class DefinitionElement:
 
         return " ".join(filter(None, (output)))
 
+class InterfaceDefinition:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.prefix = None
+            self.keyword = 'interface def'
+            self.declaration = None
+            self.body = None
+            
+            if definition['prefix'] is not None:
+                self.prefix = OccurrenceDefinitionPrefix(definition['prefix'])
+            
+            if definition['declaration'] is not None:
+                self.declaration = DefinitionDeclaration(definition['declaration'])
+            
+            if definition['body'] is not None:
+                self.body = InterfaceBody(definition['body'])
+    
+    def dump(self):
+        output = []
+        if self.prefix is not None:
+            output.append(self.prefix.dump())
+        output.append(self.keyword)
+        if self.declaration is not None:
+            output.append(self.declaration.dump())
+        if self.body is not None:
+            output.append(self.body.dump())
+        return " ".join(output)
+
+class InterfaceBody:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.items = []
+            for item in definition['item']:
+                self.items.append(InterfaceBodyItem(item))
+    
+    def dump(self):
+        if len(self.items) == 0:
+            return ';'
+        else:
+            return '{\n'+"\n".join([child.dump() for child in self.items]) + "\n}"
+        
+class InterfaceBodyItem:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.children = []
+            for relationship in definition['ownedRelationship']:
+                if relationship['name'] == 'DefinitionMember':
+                    self.children.append(DefinitionMember(relationship))
+                elif relationship['name'] == 'VariantUsageMember':
+                    raise NotImplementedError
+                elif relationship['name'] == 'InterfaceNonOccurrenceUsageMember':
+                    raise NotImplementedError
+                elif relationship['name'] == 'EmptySuccessionMember':
+                    raise NotImplementedError
+                elif relationship['name'] == 'InterfaceOccurrenceUsageMember':
+                    self.children.append(InterfaceOccurrenceUsageMember(relationship))
+                elif relationship['name'] == 'AliasMember':
+                    self.children.append(AliasMember(relationship))
+                elif relationship['name'] == 'Import':
+                    self.children.append(Import(relationship))
+                    
+    def dump(self):
+        return "\n".join([child.dump() for child in self.children])
+    
+class InterfaceOccurrenceUsageMember:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.prefix = None
+            self.elements = []
+            if definition['prefix'] is not None:
+                self.prefix = MemberPrefix(definition['prefix'])
+                
+            for element in definition['ownedRelatedElement']:
+                self.elements.append(InterfaceOccurrenceUsageElement(element))
+                
+    def dump(self):
+        output = []
+        if self.prefix is not None:
+            output.append(self.prefix.dump())
+            
+        for element in self.elements:
+            output.append(element.dump())
+            
+        return "\n".join(output)
+    
+class InterfaceOccurrenceUsageElement:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            if definition['element']['name'] == 'DefaultInterfaceEnd':
+                self.element = DefaultInterfaceEnd(definition['element'])
+            elif definition['element']['name'] == 'StructureUsageElement':
+                self.element = StructureUsageElement(definition['element'])
+            else:
+                raise NotImplementedError
+    def dump(self):
+        return self.element.dump()
+
+class DefaultInterfaceEnd:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.direction = None
+            self.isAbstract = definition['isAbstract']
+            self.isVariation = definition['isVariation']
+            self.isEnd = definition['isEnd']
+            self.usage = None
+            
+            if definition['direction'] is not None:
+                self.direction = FeatureDirection(definition['direction'])
+            
+            if definition['usage'] is not None:
+                self.usage = Usage(definition['usage'])
+    def dump(self):
+        output = []
+        if self.direction is not None:
+            output.append(self.direction.dump())
+        if self.isAbstract:
+            output.append('abstract')
+        elif self.isVariation:
+            output.append('variation')
+        if self.isEnd:
+            output.append('end')
+        if self.usage is not None:
+            output.append(self.usage.dump())
+        return " ".join(output)
+    
+class PortDefinition:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.keyword = 'port def'
+            self.prefix = None
+            self.definition = None
+            
+            if definition['prefix'] is not None:
+                self.prefix = DefinitionPrefix(definition['prefix'])
+            
+            if definition['definition'] is not None:
+                self.definition = Definition(definition['definition'])
+    
+    def dump(self):
+        output = []
+        if self.prefix is not None:
+            output.append(self.prefix.dump())
+        
+        output.append(self.keyword)
+        
+        if self.definition is not None:
+            output.append(self.definition.dump())
+        
+        return " ".join(output)
+    
+class DefinitionPrefix:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.prefix = None
+            self.keywords = []
+            
+            if definition['prefix'] is not None:
+                self.prefix = BasicDefinitionPrefix(definition['prefix'])
+                
+            for keyword in definition['keyword']:
+                self.keywords.append(DefinitionExtensionKeyword(keyword))
+                
+    def dump(self):
+        output = []
+        if self.prefix is not None:
+            output.append(self.prefix.dump())
+        
+        for keyword in self.keywords:
+            output.append(keyword.dump())
+        return "".join(output)
+    
+class DefinitionExtensionKeyword:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.relationships = []
+            for relationship in definition['ownedRelationship']:
+                self.relationships.append(PrefixMetadataMember(relationship))
+    
+    def dump(self):
+        return "".join([child.dump() for child in self.relationships])
+    
+class PrefixMetadataMember:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            raise NotImplementedError
+    
+class ConnectionDefinition:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.keyword = 'connection def'
+            self.prefix = None
+            self.definition = None
+            
+            if definition['prefix'] is not None:
+                self.prefix = OccurrenceDefinitionPrefix(definition['prefix'])
+            
+            if definition['definition'] is not None:
+                self.definition = Definition(definition['definition'])
+    
+    def dump(self):
+        output = []
+        if self.prefix is not None:
+            output.append(self.prefix.dump())
+        
+        output.append(self.keyword)
+        if self.definition is not None:
+            output.append(self.definition.dump())
+            
+        return " ".join(output)
+
+class ItemDefinition:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.keyword = "item def"
+            if definition['prefix'] is not None:
+                self.prefix = OccurrenceDefinitionPrefix(definition['prefix'])
+            else:
+                self.prefix = None
+            self.definition = Definition(definition['definition'])
+            
+    def dump(self):
+        output = []
+        if self.prefix is not None:
+            output.append(self.prefix.dump())
+            
+        output.append(self.keyword)
+        output.append(self.definition.dump())
+        return " ".join(output)
+            
 
 class EnumerationDefinition:
     def __init__(self, definition):
@@ -361,7 +608,7 @@ class Definition:
 
 class DefinitionDeclaration:
     def __init__(self, definition):
-        if valid_definition(definition, "DefinitionDeclaration"):
+        if valid_definition(definition, self.__class__.__name__):
             if "identification" in definition:
                 if definition["identification"] is not None:
                     self.identification = Identification(definition["identification"])
@@ -447,7 +694,7 @@ class DefinitionBodyItem:
         output = []
         for child in self.children:
             output.append(child.dump())
-        return "".join(output)
+        return "\n".join(output)
 
 
 class DefinitionMember:
@@ -867,6 +1114,18 @@ class BaseExpression:
                 self.relationship = FeatureReferenceExpression(
                     definition["ownedRelationship"]
                 )
+            elif definition["ownedRelationship"]["name"] == "LiteralInteger":
+                self.relationship = LiteralInteger(
+                    definition["ownedRelationship"]
+                )
+            elif definition["ownedRelationship"]["name"] == "LiteralString":
+                self.relationship = LiteralString(
+                    definition["ownedRelationship"]
+                )
+            elif definition["ownedRelationship"]["name"] == "LiteralReal":
+                self.relationship = LiteralReal(
+                    definition["ownedRelationship"]
+                )
             else:
                 raise NotImplementedError
 
@@ -913,16 +1172,281 @@ class StructureUsageElement:
                 self.children = ItemUsage(definition["ownedRelatedElement"])
             elif definition["ownedRelatedElement"]["name"] == "PartUsage":
                 self.children = PartUsage(definition["ownedRelatedElement"])
+            elif definition["ownedRelatedElement"]["name"] == "ConnectionUsage":
+                self.children = ConnectionUsage(definition["ownedRelatedElement"])
+            elif definition["ownedRelatedElement"]["name"] == "PortUsage":
+                self.children = PortUsage(definition["ownedRelatedElement"])
+            elif definition["ownedRelatedElement"]["name"] == "InterfaceUsage":
+                self.children = InterfaceUsage(definition["ownedRelatedElement"])    
             else:
                 raise NotImplementedError
 
     def dump(self):
         return self.children.dump()
+    
+class InterfaceUsage:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.prefix = None
+            self.keyword = 'interface'
+            self.declaration = None
+            self.body = None
+            
+            if definition['prefix'] is not None:
+                self.prefix = OccurrenceUsagePrefix(definition['prefix'])
+            
+            if definition['declaration'] is not None:
+                self.declaration = InterfaceUsageDeclaration(definition['declaration'])
+                
+            if definition['body'] is not None:
+                self.body = InterfaceBody(definition['body'])
+                
+    def dump(self):
+        output = []
+        if self.prefix is not None:
+            output.append(self.prefix.dump())
+        output.append(self.keyword)
+        if self.declaration is not None:
+            output.append(self.declaration.dump())
+        if self.body is not None:
+            output.append(self.body.dump())
+            
+        return " ".join(output)
 
+class InterfaceUsageDeclaration:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.declaration = None
+            self.keyword = None
+            self.part = None
+            
+            if definition['declaration'] is not None:
+                self.declaration = UsageDeclaration(definition['declaration'])
+            
+            if definition['part1'] is not None:
+                self.part = InterfacePart(definition['part1'])
+                # The connect usage was optional and it was used here.
+                self.keyword = 'connect\n'
+            elif definition['part2'] is not None:
+                self.part = InterfacePart(definition['part2'])
+    
+    def dump(self):
+        output = []
+        if self.declaration is not None:
+            output.append(self.declaration.dump())
+        
+        if self.keyword is not None:
+            output.append(self.keyword)
+        
+        if self.part is not None:
+            output.append(self.part.dump())
+    
+        return " ".join(output)
+
+class InterfacePart:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            if definition['binarypart'] is not None:
+                self.children = BinaryInterfacePart(definition['binarypart'])
+            elif definition['narypart'] is not None:
+                raise NotImplementedError
+            else:
+                raise NotImplementedError
+                
+    def dump(self):
+        return self.children.dump()
+    
+class BinaryInterfacePart:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):        
+            self.children = []
+            for relationship in definition['ownedRelationship']:
+                self.children.append(InterfaceEndMember(relationship))
+    
+    def dump(self):
+        # Assume this is only ever 2 long
+        if len(self.children) > 2:
+            raise NotImplementedError
+            
+        return self.children[0].dump() + " to " + self.children[1].dump()
+
+class InterfaceEndMember:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.child = InterfaceEnd(definition['ownedRelatedElement'])
+        
+    def dump(self):
+        return self.child.dump()
+
+class InterfaceEnd:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            if definition['declaredName'] is not None:
+                self.name = definition['declaredName']
+                self.keyword = '::>'
+            else:
+                self.name = None
+                
+            self.relationships = []
+            for relationship in definition['ownedRelationship']:
+                if relationship['name'] == 'OwnedReferenceSubsetting':
+                    self.relationships.append(OwnedReferenceSubsetting(relationship))
+                elif relationship['name'] == 'OwnedMultiplicity':
+                    self.relationships.append(OwnedMultiplicity(relationship))
+                else:
+                    return NotImplementedError
+    def dump(self):
+        output = []
+        if self.name is not None:
+            output.append(self.name)
+            output.append(self.keyword)
+        
+        for relationship in self.relationships:
+            output.append(relationship.dump())
+            
+        return " ".join(output)
+            
+class PortUsage:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.prefix = None
+            self.keyword = 'port'
+            self.usage = None
+            
+            if definition['prefix'] is not None:
+                self.prefix = OccurrenceUsagePrefix(definition['prefix'])
+                
+            if definition['usage'] is not None:
+                self.usage = Usage(definition['usage'])
+    
+    def dump(self):
+        output = []
+        if self.prefix is not None:
+            output.append(self.prefix.dump())
+        
+        output.append(self.keyword)
+        
+        if self.usage is not None:
+            output.append(self.usage.dump())
+        
+        return " ".join(output)
+    
+
+class ConnectionUsage:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.prefix = None
+            if definition['prefix'] is not None:
+                self.prefix = OccurrenceUsagePrefix(definition['prefix'])
+            
+            self.declaration = None
+            if definition['declaration'] is not None:
+                self.declaration = UsageDeclaration(definition['declaration'])
+                
+            self.keyword = 'connection'    
+            self.keyword2 = 'connect\n'
+            
+            self.part = None
+            if definition['part'] is not None:
+                self.part = ConnectorPart(definition['part'])
+            
+            self.body = UsageBody(definition['body'])
+    
+    def dump(self):
+        output = []
+        if self.prefix is not None:
+            output.append(self.prefix.dump())
+            
+        if self.declaration is not None:
+            output.append(self.keyword)
+            output.append(self.declaration.dump())
+        
+        if self.part is not None:
+            output.append(self.keyword2)
+            output.append(self.part.dump())
+        
+        output.append(self.body.dump())
+        
+        return " ".join(output)
+    
+class ConnectorPart:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            if definition['part']['name'] == 'BinaryConnectorPart':
+                self.part = BinaryConnectorPart(definition['part'])
+            else:
+                raise NotImplementedError
+        
+    def dump(self):
+        return self.part.dump()
+    
+class BinaryConnectorPart:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.children = []
+            for relationship in definition['ownedRelationship']:
+                self.children.append(ConnectorEndMember(relationship))
+    
+    def dump(self):
+        return " to ".join([child.dump() for child in self.children])
+    
+class ConnectorEndMember:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.children = []
+            for element in definition['ownedRelatedElement']:
+                self.children.append(ConnectorEnd(element))
+                
+    def dump(self):
+        return "".join([child.dump() for child in self.children])
+    
+class ConnectorEnd:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.declaredName = None
+            if definition['declaredName'] is not None:
+                self.declaredName = definition['declaredName']
+                
+            self.children = []
+            for relationship in definition['ownedRelationship']:
+                if relationship['name'] == 'OwnedReferenceSubsetting':
+                    self.children.append(OwnedReferenceSubsetting(relationship))
+                else:
+                    self.children.append(OwnedMultiplicity(relationship))
+                
+    def dump(self):
+        output = []
+        if self.declaredName is not None:
+            output.append(self.declaredName)
+            output.append('references')
+            
+        for child in self.children:
+            output.append(child.dump())
+            
+        return " ".join(output)
+            
+class OwnedReferenceSubsetting:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.referencedFeature = None
+            if definition['referencedFeature'] is not None:
+                self.referencedFeature = QualifiedName(definition['referencedFeature'])
+    
+            self.elements = []
+            for element in definition['ownedRelatedElement']:
+                self.elements.append(OwnedFeatureChain(element))
+                
+    def dump(self):
+        if self.referencedFeature is not None:
+            return self.referencedFeature.dump()
+        else:
+            return "".join([child.dump() for child in self.elements])
+            
+            
 
 class AttributeUsage:
     def __init__(self, definition):
-        if valid_definition(definition, "AttributeUsage"):
+        if valid_definition(definition, self.__class__.__name__):
             if definition["prefix"] is not None:
                 raise NotImplementedError
             self.prefix = definition["prefix"]
@@ -1011,8 +1535,8 @@ class BasicUsagePrefix:
 
 class RefPrefix:
     def __init__(self, definition):
-        if valid_definition(definition, "RefPrefix"):
-            if self.direction is not None:
+        if valid_definition(definition, self.__class__.__name__):
+            if definition['direction'] is not None:
                 self.direction = FeatureDirection(definition["direction"])
             else:
                 self.direction = None
@@ -1047,20 +1571,37 @@ class RefPrefix:
 
 class FeatureDirection:
     def __init__(self, definition):
-        raise NotImplementedError
-
+        if valid_definition(definition, self.__class__.__name__):
+            self.isIn = definition['in'] == 'in '
+            self.isOut = definition['out'] == 'out'
+            self.isInOut = definition['inout'] == 'inout'
+            
+    def dump(self):
+        if self.isInOut:
+            return 'inout'
+        elif self.isIn:
+            return 'in'
+        elif self.isOut:
+            return 'out'
+        else:
+            raise NotImplementedError
 
 class ItemUsage:
     def __init__(self, definition):
         if valid_definition(definition, "ItemUsage"):
+            self.prefix = None
             if definition["prefix"] is not None:
-                raise NotImplementedError
-            self.prefix = definition["prefix"]
+                self.prefix = OccurrenceUsagePrefix(definition['prefix'])
             self.keyword = "item"
             self.usage = Usage(definition["usage"])
 
     def dump(self):
-        return self.keyword + " " + self.usage.dump()
+        output = []
+        if self.prefix is not None:
+            output.append(self.prefix.dump())
+        output.append(self.keyword)
+        output.append(self.usage.dump())
+        return " ".join(output)
 
 
 class Usage:
@@ -1229,17 +1770,41 @@ class MultiplicityRelatedElement:
             if "name" in definition["ownedRelatedElement"]:
                 if definition["ownedRelatedElement"]["name"] == "LiteralInteger":
                     self.element = LiteralInteger(definition["ownedRelatedElement"])
+                elif definition["ownedRelatedElement"]["name"] == "LiteralInfinity":
+                    self.element = LiteralInfinity(definition["ownedRelatedElement"])
                 else:
                     raise NotImplementedError
 
     def dump(self):
         return str(self.element.dump())
 
+class LiteralString:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.element = definition["value"]
+    def dump(self):
+        return self.element
 
 class LiteralInteger:
     def __init__(self, definition):
         if valid_definition(definition, "LiteralInteger"):
             self.element = definition["value"]
+
+    def dump(self):
+        return self.element
+
+class LiteralReal:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.element = definition["value"]
+
+    def dump(self):
+        return self.element
+    
+class LiteralInfinity:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.element = '*'
 
     def dump(self):
         return self.element
@@ -1334,13 +1899,29 @@ class OwnedSubsetting:
 
 class OwnedFeatureChain:
     def __init__(self, definition):
-        if valid_definition(definition, "OwnedFeatureChain"):
-            raise NotImplementedError
+        if valid_definition(definition, self.__class__.__name__):
+            self.feature = FeatureChain(definition['feature'])
 
     def dump(self):
-        raise NotImplementedError
+        return self.feature.dump()
 
+class FeatureChain:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.children = []
+            for relationship in definition['ownedRelationship']:
+                self.children.append(OwnedFeatureChaining(relationship))
+                
+    def dump(self):
+        return ".".join([child.dump() for child in self.children])
 
+class OwnedFeatureChaining:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.chainingFeature = QualifiedName(definition['chainingFeature'])
+    
+    def dump(self):
+        return self.chainingFeature.dump()
 class Typings:
     def __init__(self, definition):
         if valid_definition(definition, "Typings"):
@@ -1376,17 +1957,31 @@ class TypedBy:
 
 class FeatureTyping:
     def __init__(self, definition):
-        if valid_definition(definition, "FeatureTyping"):
+        if valid_definition(definition, self.__class__.__name__):
             if definition["ownedRelationship"]["name"] == "OwnedFeatureTyping":
                 self.relationship = OwnedFeatureTyping(definition["ownedRelationship"])
+            elif definition["ownedRelationship"]["name"] == "ConjugatedPortTyping":
+                self.relationship = ConjugatedPortTyping(definition["ownedRelationship"])
+            else:
+                raise NotImplementedError
 
     def dump(self):
         return self.relationship.dump()
 
+class ConjugatedPortTyping:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.keyword = '~'
+            # We skip a step in the grammar here.
+            self.name = QualifiedName(definition['conjugatedPortDefinition'])
+            
+    def dump(self):
+        return self.keyword + self.name.dump()
+        
 
 class OwnedFeatureTyping:
     def __init__(self, definition):
-        if valid_definition(definition, "OwnedFeatureTyping"):
+        if valid_definition(definition, self.__class__.__name__):
             if definition["type"]["name"] == "FeatureType":
                 self.type = FeatureType(definition["type"])
             else:
@@ -1411,11 +2006,19 @@ class FeatureType:
 class UsageCompletion:
     def __init__(self, definition):
         if valid_definition(definition, "UsageCompletion"):
-            self.valuepart = definition["valuepart"]
+            if definition["valuepart"] is None:
+                self.valuepart = None
+            else:
+                self.valuepart = ValuePart(definition["valuepart"])
             self.body = UsageBody(definition["body"])
 
     def dump(self):
-        return "".join(filter(None, (self.valuepart, self.body.dump())))
+        output = []
+        if self.valuepart is not None:
+            output.append(self.valuepart.dump())
+            
+        output.append(self.body.dump())
+        return "".join(output)
 
 
 class UsageBody:
@@ -1694,7 +2297,7 @@ class ImportedNamespace:
 
 class QualifiedName:
     def __init__(self, definition):
-        if valid_definition(definition, "QualifiedName"):
+        if valid_definition(definition, self.__class__.__name__):
             self.names = [definition["name1"]]
             for name in definition["names"]:
                 self.names.append(name)

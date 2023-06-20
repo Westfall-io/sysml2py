@@ -419,8 +419,8 @@ OwnedFeatureChain :
 
 // For use in KerML and SysML grammars
  FeatureChain :
-	ownedRelationship += OwnedFeatureChaining
-	( '.' ownedRelationship += OwnedFeatureChaining )+
+	ownedRelationship += OwnedFeatureChaining '.' ownedRelationship += OwnedFeatureChaining
+	( '.' ownedRelationship += OwnedFeatureChaining )*
 ;
 
 OwnedFeatureChaining :
@@ -506,17 +506,17 @@ RealValue :
 ;
 
 LiteralInfinity :
-	 '*'
+	 value='*'
 ;
 
 /* NAMES */
 
-AboutKeyword:
-  'about'
+ReservedKeyword:
+  'about' | 'to' | 'connect' | 'connection'
 ;
 
 Name:
-	!AboutKeyword ID | UNRESTRICTED_NAME
+	!ReservedKeyword ID | UNRESTRICTED_NAME
 ;
 
 Qualification :
@@ -545,7 +545,8 @@ UNRESTRICTED_NAME :
   /[\'].*[\']/;
 
 STRING_VALUE :
-	/'"' ('\' ('b' | 't' | 'n' | 'f' | 'r' | '"' | "'" | '\') | !('\' | '"'))* '"'/;
+	/*/'"' ('\' ('b' | 't' | 'n' | 'f' | 'r' | '"' | "'" | '\') | !('\' | '"'))* '"'/;*/
+  /[\"].*[\"]/;
 
 REGULAR_COMMENT:
   /\/\*(.|\n)*?\*\//
