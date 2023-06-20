@@ -35,6 +35,7 @@ version_variable = "pyproject.toml:version"
 version_source = "tag"
 commit_parser = "semantic_release.history.emoji_parser"
 build_command = false
+upload_to_repository = false
 
 [project.urls]
 "Homepage" = "https://github.com/Westfall-io/sysml2py"
