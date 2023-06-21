@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.2.1 (2023-06-21)
+
+### Other
+
+* Merge pull request #10 from Westfall-io/dev0.2.1 ([`420a16d`](https://github.com/Westfall-io/sysml2py/commit/420a16d7c62dbc56426e539adfcd7828ea408855))
+* :robot: Add coverage badge ([`199fa49`](https://github.com/Westfall-io/sysml2py/commit/199fa497bb06bc68ac897f2031d951ae55ce1f9e))
+
 ## v0.2.0 (2023-06-21)
 
 ### :sparkles:
