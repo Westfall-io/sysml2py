@@ -31,7 +31,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.x'
+        python-version: '3.9'
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -40,8 +40,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        python3.9 -m pip install coveralls pytest pyyaml textx
-        python3.9 -m coverage run --source=src -m pytest tests/ && coverage report
+        python -m pip install coveralls pytest pyyaml textx
+        python -m coverage run --source=src -m pytest tests/ && coverage report
         coveralls
     - name: Test ${{ github.event.push.head }} docstring coverage
       run: |
@@ -60,7 +60,7 @@ jobs:
     name: Semantic Versioning
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         fetch-depth: 0
     - name: Python Semantic Release
@@ -80,7 +80,6 @@ jobs:
         pip install build
         python3 -m build --sdist --wheel --outdir dist/ .
     - name: Publish distribution 📦 to PyPI
-      if: startsWith(github.ref, 'refs/tags')
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         password: ${{ secrets.PYPI_API_TOKEN }}
