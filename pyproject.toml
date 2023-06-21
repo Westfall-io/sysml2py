@@ -27,7 +27,7 @@ where = ["src/sysml2py", "src"]
 grammar = ["*.tx"]
 
 [tool.semantic_release]
-branch = "dev0.1.3"
+branch = "main"
 version_variable = "pyproject.toml:version"
 version_source = "tag"
 commit_version_number = true # required for version_source = "tag"
