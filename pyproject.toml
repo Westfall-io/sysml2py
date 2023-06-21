@@ -30,7 +30,7 @@ where = ["src/sysml2py", "src"]
 grammar = ["*.tx"]
 
 [tool.semantic_release]
-branch = "main"
+branch = "dev0.1.3"
 version_variable = "pyproject.toml:version"
 version_source = "tag"
 commit_parser = "semantic_release.history.emoji_parser"
