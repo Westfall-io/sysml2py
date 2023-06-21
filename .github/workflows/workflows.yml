@@ -3,6 +3,7 @@ name: Test Commit
 on:
   push:
     branches:
+      - '*'
       - '!main'
 
 jobs:
