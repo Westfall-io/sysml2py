@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v0.2.4 (2023-06-21)
+
+### Other
+
+* 0.2.4 ([`252e8e0`](https://github.com/Westfall-io/sysml2py/commit/252e8e05a69bcfed1954dc163cb40c89e0f3f494))
+* 0.3.0 ([`3a71fc8`](https://github.com/Westfall-io/sysml2py/commit/3a71fc883d08d3946dd62e36bc0cdf00e69a74a1))
+* 0.2.4 ([`f296def`](https://github.com/Westfall-io/sysml2py/commit/f296def60d36f4836f99726bd2fdeef53bf316d1))
+
 ## v0.2.3 (2023-06-21)
 
 ### Other
