@@ -1,5 +1,5 @@
-//import grammar.KerML
-//import grammar.KerMLExpressions
+import KerML
+import KerMLExpressions
 /*****************************************************************************
  * SysML 2 Pilot Implementation
  * Copyright (c) 2018-2023 Model Driven Solutions, Inc.
@@ -52,15 +52,15 @@ RootNamespace :
 Dependency :
 	( ownedRelationship += PrefixMetadataAnnotation )*
 	'dependency' ( Identification? 'from' )?
-    client += [QualifiedName] ( ',' client += [QualifiedName] )* 'to'
-    supplier += [QualifiedName] ( ',' supplier += [QualifiedName] )*
+    client += QualifiedName ( ',' client += QualifiedName )* 'to'
+    supplier += QualifiedName ( ',' supplier += QualifiedName )*
     RelationshipBody
 ;
 
 /* ANNOTATIONS */
 
 Annotation :
-	annotatedElement = [QualifiedName]
+	annotatedElement = QualifiedName
 ;
 
 OwnedAnnotation :
@@ -72,16 +72,17 @@ AnnotatingMember :
 ;
 
 AnnotatingElement :
-	  Comment
-	| Documentation
-	| TextualRepresentation
-	| MetadataUsage
+	  ownedRelatedElement = CommentSysML
+	| ownedRelatedElement = Documentation
+	| ownedRelatedElement = TextualRepresentation
+	| ownedRelatedElement = MetadataUsage
 ;
 
 /* Comments */
 
-Comment :
-	( 'comment' Identification?
+CommentSysML :
+// Comment is reserved in TextX
+	( 'comment' identification=Identification?
 	  ('about' ownedRelationship += Annotation
 	     ( ',' ownedRelationship += Annotation )* )?
 	)?
@@ -89,7 +90,7 @@ Comment :
 ;
 
 Documentation :
-	'doc' Identification? body = REGULAR_COMMENT
+	'doc' identification=Identification? body=REGULAR_COMMENT
 ;
 
 /* Textual Representation */
@@ -145,7 +146,7 @@ MetadataUsage :
 ;
 
 MetadataTyping :
-	type = [QualifiedName]
+	type = QualifiedName
 ;
 
  MetadataBody :
@@ -165,7 +166,7 @@ MetadataBodyUsageMember :
 MetadataBodyUsage :
 	'ref'? ( ':>>' | 'redefines' )? ownedRelationship += OwnedRedefinition
 	FeatureSpecializationPart? ValuePart?
-	MetadataBody
+	body=MetadataBody
 ;
 
 /* PACKAGES */
@@ -174,7 +175,7 @@ MetadataBodyUsage :
 
 Package :
 	( ownedRelationship += PrefixMetadataMember )*
-	dec=PackageDeclaration body=PackageBody
+	declaration=PackageDeclaration body=PackageBody
 ;
 
 LibraryPackage :
@@ -183,8 +184,8 @@ LibraryPackage :
 	PackageDeclaration PackageBody
 ;
 
- PackageDeclaration :
-	'package' id += Identification?
+PackageDeclaration :
+	'package' identification = Identification?
 ;
 
  PackageBody :
@@ -212,22 +213,20 @@ LibraryPackage :
 ;
 
 PackageMember :
-	pre = MemberPrefix
-	( ownedRelatedElement += DefinitionElement
-	| ownedRelatedElement += UsageElement
-	)
+	prefix = MemberPrefix
+	( ownedRelatedElement = DefinitionElement | ownedRelatedElement = UsageElement)
 ;
 
 ElementFilterMember :
-	MemberPrefix
+	prefix = MemberPrefix
 	'filter' ownedRelatedElement += OwnedExpression ';'
 ;
 
 AliasMember :
-	MemberPrefix
+	prefix = MemberPrefix
 	'alias' ( '<' memberShortName = Name '>' )? ( memberName = Name )?
-	'for' memberElement = [QualifiedName]
-	RelationshipBody
+	'for' memberElement = QualifiedName
+	body = RelationshipBody
 ;
 
 ImportPrefix :
@@ -235,34 +234,27 @@ ImportPrefix :
 	'import' ( isImportAll ?= 'all' )?
 ;
 
-MembershipNamespace :
-  // Added
-  ( MembershipImport | NamespaceImport )
-;
-
 Import :
-	membership_namespace = MembershipNamespace
-	relationship_body = RelationshipBody
+	(ownedRelationship = NamespaceImport | ownedRelationship = MembershipImport)
+	body = RelationshipBody
 ;
 
 NamespaceImport :
-	import_prefix = ImportPrefix
-	( importedNamespace = ImportedNamespace | ownedRelatedElement += FilterPackage )
+	prefix = ImportPrefix
+	( namespace = ImportedNamespace | ownedRelatedElement += FilterPackage )
 ;
 
 MembershipImport :
-	import_prefix = ImportPrefix imported_membership=ImportedMembership
+	prefix = ImportPrefix membership=ImportedMembership
 ;
 
 ImportedNamespace :
-  // !TODO: This will not work on multi-layered names, qualification breaks the parsing
-	importedNamespace = Qualification* '*'
-	( '::' isRecursive ?= '**' )?
+  // !TODO: Figure out why this breaks
+  namespace = QualifiedName  !'::**' '::*'
 ;
 
 ImportedMembership :
-	importedMembership = QualifiedName
-  ( '::' isRecursive ?= '**' )?
+	importedMembership = QualifiedName ( '::' isRecursive ?= '**' )?
 ;
 
 
@@ -299,41 +291,41 @@ FilterPackageMember :
 /* Package Elements */
 
 DefinitionElement :
-	  Package
-	| LibraryPackage
-	| AnnotatingElement
-	| Dependency
-	| AttributeDefinition
-	| EnumerationDefinition
-	| OccurrenceDefinition
-	| IndividualDefinition
-	| ItemDefinition
-	| MetadataDefinition
-	| PartDefinition
-	| ConnectionDefinition
-	| FlowConnectionDefinition
-	| InterfaceDefinition
-	| AllocationDefinition
-	| PortDefinition
-	| ActionDefinition
-	| CalculationDefinition
-	| StateDefinition
-	| ConstraintDefinition
-	| RequirementDefinition
-	| ConcernDefinition
-	| CaseDefinition
-	| AnalysisCaseDefinition
-	| VerificationCaseDefinition
-	| UseCaseDefinition
-	| ViewDefinition
-	| ViewpointDefinition
-	| RenderingDefinition
-	| ExtendedDefinition
+	  ownedRelatedElement = Package
+	| ownedRelatedElement = LibraryPackage
+	| ownedRelatedElement = AnnotatingElement
+	| ownedRelatedElement = Dependency
+	| ownedRelatedElement = AttributeDefinition
+	| ownedRelatedElement = EnumerationDefinition
+	| ownedRelatedElement = OccurrenceDefinition
+	| ownedRelatedElement = IndividualDefinition
+	| ownedRelatedElement = ItemDefinition
+	| ownedRelatedElement = MetadataDefinition
+	| ownedRelatedElement = PartDefinition
+	| ownedRelatedElement = ConnectionDefinition
+	| ownedRelatedElement = FlowConnectionDefinition
+	| ownedRelatedElement = InterfaceDefinition
+	| ownedRelatedElement = AllocationDefinition
+	| ownedRelatedElement = PortDefinition
+	| ownedRelatedElement = ActionDefinition
+	| ownedRelatedElement = CalculationDefinition
+	| ownedRelatedElement = StateDefinition
+	| ownedRelatedElement = ConstraintDefinition
+	| ownedRelatedElement = RequirementDefinition
+	| ownedRelatedElement = ConcernDefinition
+	| ownedRelatedElement = CaseDefinition
+	| ownedRelatedElement = AnalysisCaseDefinition
+	| ownedRelatedElement = VerificationCaseDefinition
+	| ownedRelatedElement = UseCaseDefinition
+	| ownedRelatedElement = ViewDefinition
+	| ownedRelatedElement = ViewpointDefinition
+	| ownedRelatedElement = RenderingDefinition
+	| ownedRelatedElement = ExtendedDefinition
 ;
 
 UsageElement :
-	  NonOccurrenceUsageElement
-	| OccurrenceUsageElement
+	  ownedRelatedElement = NonOccurrenceUsageElement
+	| ownedRelatedElement = OccurrenceUsageElement
 ;
 
 /* CLASSIFIERS */
@@ -350,7 +342,7 @@ SpecializesKeyword :
 ;
 
 OwnedSubclassification :
-	superclassifier = [QualifiedName]
+	superclassifier = QualifiedName
 ;
 
 /* FEATURES */
@@ -358,13 +350,13 @@ OwnedSubclassification :
 /* Features */
 
  FeatureDeclaration :
-	  Identification FeatureSpecializationPart?
-	| FeatureSpecializationPart
+	  identification=Identification specialization=FeatureSpecializationPart?
+	| specialization=FeatureSpecializationPart
 ;
 
  FeatureSpecializationPart :
-	  ( FeatureSpecialization )+ MultiplicityPart? FeatureSpecialization*
-	| MultiplicityPart FeatureSpecialization*
+	  ( specialization+=FeatureSpecialization )+ multiplicity=MultiplicityPart? specialization2+=FeatureSpecialization*
+	| multiplicity2=MultiplicityPart specialization+=FeatureSpecialization*
 ;
 
  MultiplicityPart :
@@ -378,11 +370,11 @@ OwnedSubclassification :
 ;
 
  FeatureSpecialization :
-	Typings | Subsettings | References | Redefinitions
+	ownedRelationship=Typings | ownedRelationship=Subsettings | ownedRelationship=References | ownedRelationship=Redefinitions
 ;
 
  Typings :
-	TypedBy ( ',' ownedRelationship += FeatureTyping )*
+	typedby=TypedBy ( ',' ownedRelationship += FeatureTyping )*
 ;
 
  TypedBy :
@@ -394,12 +386,12 @@ DefinedByKeyword :
 ;
 
  Subsettings :
-	Subsets ( ',' ownedRelationship += OwnedSubsetting )*
+	SubsetsKeyword ownedRelationship += OwnedSubsetting ( ',' ownedRelationship += OwnedSubsetting )*
 ;
 
- Subsets :
+/* Subsets :
 	SubsetsKeyword ownedRelationship += OwnedSubsetting
-;
+;*/
 
 SubsetsKeyword :
 	':>' | 'subsets'
@@ -414,7 +406,7 @@ ReferencesKeyword :
 ;
 
  Redefinitions :
-	Redefines ( ',' ownedRelationship += OwnedRedefinition )*
+	redefines=Redefines ( ',' ownedRelationship += OwnedRedefinition )*
 ;
 
  Redefines :
@@ -428,24 +420,26 @@ RedefinesKeyword :
 /* Feature Typing, Subsetting and Redefinition */
 
 FeatureTyping :
-	OwnedFeatureTyping | ConjugatedPortTyping
+	ownedRelationship = OwnedFeatureTyping | ownedRelationship = ConjugatedPortTyping
 ;
 
 // OwnedFeatureTyping inherited from Expression syntax.
 
 OwnedSubsetting :
-	  subsettedFeature = [QualifiedName]
-	| ownedRelatedElement += OwnedFeatureChain
+	  ownedRelatedElement += OwnedFeatureChain
+	| subsettedFeature = QualifiedName
 ;
 
 OwnedReferenceSubsetting :
-	  referencedFeature = [QualifiedName]
-	| ownedRelatedElement += OwnedFeatureChain
+	  ownedRelatedElement += OwnedFeatureChain
+	| referencedFeature = QualifiedName
+  // Always check for feature chain first.
+
 ;
 
 OwnedRedefinition :
-	  redefinedFeature = [QualifiedName]
-	| ownedRelatedElement += OwnedFeatureChain
+	  ownedRelatedElement += OwnedFeatureChain
+	| redefinedFeature = QualifiedName
 ;
 
 /* Multiplicity */
@@ -462,7 +456,7 @@ MultiplicityRange :
 
 
 MultiplicityRelatedElement :
-    (LiteralExpression | FeatureReferenceExpression)
+    (ownedRelatedElement = LiteralExpression | ownedRelatedElement = FeatureReferenceExpression)
 ;
 
 MultiplicityExpressionMember :
@@ -482,19 +476,19 @@ MultiplicityExpressionMember :
 ;
 
  DefinitionPrefix :
-	BasicDefinitionPrefix? DefinitionExtensionKeyword*
+	prefix=BasicDefinitionPrefix? keyword+=DefinitionExtensionKeyword*
 ;
 
  Definition :
-	DefinitionDeclaration DefinitionBody
+	declaration=DefinitionDeclaration body=DefinitionBody
 ;
 
  DefinitionDeclaration :
-	Identification? SubclassificationPart?
+	identification=Identification? subclassificationpart=SubclassificationPart?
 ;
 
  DefinitionBody :
-	';' | '{' DefinitionBodyItem* '}'
+	';' | '{' ownedRelatedElement+=DefinitionBodyItem* '}'
 ;
 
  DefinitionBodyItem :
@@ -508,7 +502,7 @@ MultiplicityExpressionMember :
 ;
 
 DefinitionMember :
-	MemberPrefix
+	prefix = MemberPrefix
 	ownedRelatedElement += DefinitionElement
 ;
 
@@ -518,11 +512,11 @@ VariantUsageMember :
 ;
 
 NonOccurrenceUsageMember :
-	MemberPrefix ownedRelatedElement += NonOccurrenceUsageElement
+	prefix=MemberPrefix ownedRelatedElement += NonOccurrenceUsageElement
 ;
 
 OccurrenceUsageMember :
-	MemberPrefix ownedRelatedElement += OccurrenceUsageElement
+	prefix=MemberPrefix ownedRelatedElement += OccurrenceUsageElement
 ;
 
 StructureUsageMember :
@@ -536,7 +530,7 @@ BehaviorUsageMember :
 /* Usages */
 
  FeatureDirection :
-	in = 'in' | out = 'out' | inout = 'inout'
+	in = 'in ' | out = 'out' | inout = 'inout'
 ;
 
  RefPrefix :
@@ -548,7 +542,7 @@ BehaviorUsageMember :
 ;
 
  BasicUsagePrefix :
-	RefPrefix
+	prefix=RefPrefix
 	( isReference ?= 'ref' )?
 ;
 
@@ -561,19 +555,19 @@ BehaviorUsageMember :
 ;
 
  Usage :
-	UsageDeclaration? UsageCompletion
+	declaration=UsageDeclaration? completion=UsageCompletion
 ;
 
  UsageDeclaration :
-	  FeatureDeclaration
+	  declaration=FeatureDeclaration
 ;
 
  UsageCompletion :
-	ValuePart? UsageBody
+	valuepart=ValuePart? body=UsageBody
 ;
 
  UsageBody :
-	DefinitionBody
+	body=DefinitionBody
 ;
 
  ValuePart :
@@ -583,7 +577,7 @@ BehaviorUsageMember :
 ;
 
 FeatureValue :
-	( '=' | isDefault ?= 'default' ( '=' | isInitial ?= ':=' )? )
+	( '=' | isDefault ?= 'default' ( isEqual ?= '=' | isInitial ?= ':=' )? )
 	ownedRelatedElement += OwnedExpression
 ;
 
@@ -620,7 +614,7 @@ ReferenceUsageKeyword :
 ;
 
 DefaultReferenceUsage :
-	RefPrefix UsageDeclaration ValuePart? UsageBody
+	prefix=RefPrefix declaration=UsageDeclaration valuepart=ValuePart? body=UsageBody
 ;
 
 ReferenceUsage :
@@ -635,35 +629,35 @@ VariantReference :
 /* Body Elements */
 
 NonOccurrenceUsageElement :
-	  DefaultReferenceUsage
-	| ReferenceUsage
-	| AttributeUsage
-	| EnumerationUsage
-	| BindingConnector
-	| Succession
-	| ExtendedUsage
+	  ownedRelatedElement = DefaultReferenceUsage
+	| ownedRelatedElement = ReferenceUsage
+	| ownedRelatedElement = AttributeUsage
+	| ownedRelatedElement = EnumerationUsage
+	| ownedRelatedElement = BindingConnector
+	| ownedRelatedElement = Succession
+	| ownedRelatedElement = ExtendedUsage
 ;
 
 OccurrenceUsageElement :
-	StructureUsageElement | BehaviorUsageElement
+	ownedRelatedElement = StructureUsageElement | ownedRelatedElement = BehaviorUsageElement
 ;
 
 StructureUsageElement :
-	  OccurrenceUsage
-	| IndividualUsage
-	| PortionUsage
-	| EventOccurrenceUsage
-	| ItemUsage
-	| PartUsage
-	| ViewUsage
-	| RenderingUsage
-	| PortUsage
-	| ConnectionUsage
-	| InterfaceUsage
-	| AllocationUsage
-	| Message
-	| FlowConnectionUsage
-	| SuccessionFlowConnectionUsage
+	  ownedRelatedElement = OccurrenceUsage
+	| ownedRelatedElement = IndividualUsage
+	| ownedRelatedElement = PortionUsage
+	| ownedRelatedElement = EventOccurrenceUsage
+	| ownedRelatedElement = ItemUsage
+	| ownedRelatedElement = PartUsage
+	| ownedRelatedElement = ViewUsage
+	| ownedRelatedElement = RenderingUsage
+	| ownedRelatedElement = PortUsage
+	| ownedRelatedElement = ConnectionUsage
+	| ownedRelatedElement = InterfaceUsage
+	| ownedRelatedElement = AllocationUsage
+	| ownedRelatedElement = Message
+	| ownedRelatedElement = FlowConnectionUsage
+	| ownedRelatedElement = SuccessionFlowConnectionUsage
 ;
 
 BehaviorUsageElement :
@@ -734,17 +728,17 @@ AttributeUsageKeyword :
 ;
 
 AttributeDefinition :
-	DefinitionPrefix AttributeDefKeyword Definition
+	prefix=DefinitionPrefix AttributeDefKeyword definition=Definition
 ;
 
 AttributeUsage :
-	UsagePrefix AttributeUsageKeyword Usage
+	prefix=UsagePrefix AttributeUsageKeyword usage=Usage
 ;
 
 /* ENUMERATIONS */
 
 EnumerationKeyword :
-	''
+	'enum'
 ;
 EnumerationDefKeyword :
 	EnumerationKeyword 'def'
@@ -755,7 +749,9 @@ EnumerationUsageKeyword :
 ;
 
 EnumerationDefinition :
-	EnumerationDefKeyword DefinitionDeclaration EnumerationBody
+	EnumerationDefKeyword
+  declaration=DefinitionDeclaration
+  body=EnumerationBody
 ;
 
  EnumerationBody :
@@ -767,15 +763,15 @@ EnumerationDefinition :
 ;
 
 EnumerationUsageMember :
-	MemberPrefix ownedRelatedElement += EnumeratedValue
+	prefix=MemberPrefix ownedRelatedElement += EnumeratedValue
 ;
 
 EnumeratedValue :
-	EnumerationUsageKeyword? Usage
+	keyword=EnumerationUsageKeyword? usage=Usage
 ;
 
 EnumerationUsage :
-	UsagePrefix EnumerationUsageKeyword Usage
+	prefix=UsagePrefix EnumerationUsageKeyword usage=Usage
 ;
 
 /* OCCURRENCES */
@@ -791,9 +787,9 @@ OccurrenceDefKeyword :
 ;
 
  OccurrenceDefinitionPrefix :
-	BasicDefinitionPrefix?
+	prefix=BasicDefinitionPrefix?
 	( isIndividual ?= 'individual' ownedRelationship += LifeClassMembership )?
-	DefinitionExtensionKeyword*
+	keyword=DefinitionExtensionKeyword*
 ;
 
 OccurrenceDefinition :
@@ -821,19 +817,19 @@ OccurrenceUsageKeyword :
 ;
 
  OccurrenceUsagePrefix :
-	  BasicUsagePrefix
+	  prefix=BasicUsagePrefix
 	  ( isIndividual ?= 'individual' )?
 	  ( portionKind = PortionKind )?
-	  UsageExtensionKeyword*
+	  usageExtension=UsageExtensionKeyword*
 ;
 
 OccurrenceUsage :
-	OccurrenceUsagePrefix OccurrenceUsageKeyword Usage
+	prefix=OccurrenceUsagePrefix OccurrenceUsageKeyword usage=Usage
 ;
 
 IndividualUsage :
-	BasicUsagePrefix isIndividual ?= 'individual'
-	UsageExtensionKeyword* Usage
+	prefix=BasicUsagePrefix isIndividual ?= 'individual'
+	UsageExtensionKeyword* usage=Usage
 ;
 
 PortionUsage :
@@ -896,11 +892,11 @@ ItemUsageKeyword :
 ;
 
 ItemDefinition :
-	OccurrenceDefinitionPrefix ItemDefKeyword Definition
+	prefix=OccurrenceDefinitionPrefix ItemDefKeyword definition=Definition
 ;
 
 ItemUsage :
-	OccurrenceUsagePrefix ItemUsageKeyword Usage
+	prefix=OccurrenceUsagePrefix ItemUsageKeyword usage=Usage
 ;
 
 /* PARTS */
@@ -918,11 +914,11 @@ PartUsageKeyword :
 ;
 
 PartDefinition :
-	OccurrenceDefinitionPrefix PartDefKeyword Definition
+	prefix = OccurrenceDefinitionPrefix PartDefKeyword definition = Definition
 ;
 
 PartUsage :
-	OccurrenceUsagePrefix PartUsageKeyword Usage
+	prefix=OccurrenceUsagePrefix PartUsageKeyword usage=Usage
 ;
 
 /* PORTS */
@@ -938,8 +934,8 @@ PortDefKeyword :
 ;
 
 PortDefinition :
-	DefinitionPrefix PortDefKeyword Definition
-	ownedRelationship += ConjugatedPortDefinitionMember
+	prefix=DefinitionPrefix PortDefKeyword definition=Definition
+	//(ownedRelationship += ConjugatedPortDefinitionMember)
 ;
 
 ConjugatedPortDefinitionMember :
@@ -955,7 +951,7 @@ PortConjugation ://This doesn't work.
 ;
 
 ConjugatedPortTyping :
-	conjugatedPortDefinition = [ConjugatedQualifiedName|ConjugatedQualifiedName]
+	conjugatedPortDefinition = ConjugatedQualifiedName
 ;
 
 ConjugatedQualifiedName :
@@ -969,7 +965,7 @@ PortUsageKeyword :
 ;
 
 PortUsage :
-	OccurrenceUsagePrefix PortUsageKeyword Usage
+	prefix=OccurrenceUsagePrefix PortUsageKeyword usage=Usage
 ;
 
 /* CONNECTIONS */
@@ -1023,7 +1019,7 @@ ConnectionDefKeyword :
 ;
 
 ConnectionDefinition :
-	OccurrenceDefinitionPrefix ConnectionDefKeyword Definition
+	prefix=OccurrenceDefinitionPrefix ConnectionDefKeyword definition=Definition
 ;
 
 /* Connection Usages */
@@ -1037,15 +1033,17 @@ ConnectionUsageKeyword :
 ;
 
 ConnectionUsage :
-	OccurrenceUsagePrefix
-	( ConnectionUsageKeyword UsageDeclaration?
-	  ( ConnectorKeyword ConnectorPart )?
-	| ConnectorKeyword ConnectorPart
-	) UsageBody
+	prefix=OccurrenceUsagePrefix
+	(
+    ConnectionUsageKeyword declaration=UsageDeclaration? ( ConnectorKeyword part=ConnectorPart )?
+  |
+    ConnectorKeyword part=ConnectorPart
+  )
+  body=UsageBody
 ;
 
  ConnectorPart :
-	BinaryConnectorPart | NaryConnectorPart
+	part=BinaryConnectorPart | part=NaryConnectorPart
 ;
 
  BinaryConnectorPart :
@@ -1169,7 +1167,7 @@ FlowEnd :
 ;
 
 FlowEndSubsetting :
-	  referencedFeature = [QualifiedName] '.'
+	  referencedFeature = QualifiedName '.'
 	| ownedRelatedElement += FeatureChainPrefix
 ;
 
@@ -1187,7 +1185,7 @@ FlowFeature :
 ;
 
 FlowRedefinition :
-	redefinedFeature = [QualifiedName]
+	redefinedFeature = QualifiedName
 ;
 
 /* INTERFACES */
@@ -1203,11 +1201,11 @@ InterfaceDefKeyword :
 ;
 
 InterfaceDefinition :
-	OccurrenceDefinitionPrefix InterfaceDefKeyword DefinitionDeclaration InterfaceBody
+	prefix=OccurrenceDefinitionPrefix InterfaceDefKeyword declaration=DefinitionDeclaration body=InterfaceBody
 ;
 
  InterfaceBody :
-	';' | '{' InterfaceBodyItem* '}'
+	';' | '{' item+=InterfaceBodyItem* '}'
 ;
 
  InterfaceBodyItem :
@@ -1233,17 +1231,17 @@ InterfaceNonOccurrenceUsageElement :
 ;
 
 InterfaceOccurrenceUsageMember :
-	MemberPrefix ownedRelatedElement += InterfaceOccurrenceUsageElement
+	prefix=MemberPrefix ownedRelatedElement += InterfaceOccurrenceUsageElement
 ;
 
 InterfaceOccurrenceUsageElement :
-	DefaultInterfaceEnd | StructureUsageElement | BehaviorUsageElement
+	element=DefaultInterfaceEnd | element=StructureUsageElement | element=BehaviorUsageElement
 ;
 
 DefaultInterfaceEnd :
 	( direction = FeatureDirection )?
 	( isAbstract ?= 'abstract' | isVariation ?= 'variation')?
-	isEnd ?= 'end' Usage
+	isEnd ?= 'end' usage=Usage
 ;
 
 /* Interface Usages */
@@ -1253,15 +1251,15 @@ InterfaceUsageKeyword :
 ;
 
 InterfaceUsage :
-	OccurrenceUsagePrefix InterfaceUsageKeyword InterfaceUsageDeclaration InterfaceBody
+	prefix=OccurrenceUsagePrefix InterfaceUsageKeyword declaration=InterfaceUsageDeclaration body=InterfaceBody
 ;
 
  InterfaceUsageDeclaration :
-	UsageDeclaration? ( ConnectorKeyword InterfacePart )? | InterfacePart
+	declaration=UsageDeclaration? ( ConnectorKeyword part1=InterfacePart )? | part2=InterfacePart
 ;
 
  InterfacePart :
-	BinaryInterfacePart | NaryInterfacePart
+	binarypart=BinaryInterfacePart | narypart=NaryInterfacePart
 ;
 
  BinaryInterfacePart :
@@ -1276,7 +1274,7 @@ InterfaceUsage :
 ;
 
 InterfaceEndMember :
-	ownedRelatedElement += InterfaceEnd
+	ownedRelatedElement = InterfaceEnd
 ;
 
 InterfaceEnd :
@@ -1366,7 +1364,7 @@ ActionBodyItem :
 
 
 InitialNodeMember :
-	MemberPrefix 'first' memberElement = [QualifiedName]
+	MemberPrefix 'first' memberElement = QualifiedName
 	RelationshipBody
 ;
 
@@ -1854,8 +1852,8 @@ TargetTransitionUsage :
 ;
 
 TransitionSourceMember :
-	  memberElement = [QualifiedName]
-	|  ownedRelatedElement += OwnedFeatureChain
+	  ownedRelatedElement += OwnedFeatureChain
+	| memberElement = QualifiedName
 ;
 
 TriggerActionMember :

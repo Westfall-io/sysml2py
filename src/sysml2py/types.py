@@ -5,32 +5,56 @@ Created on Tue May 16 00:26:47 2023
 
 @author: christophercox
 """
+
 import yaml
 
-from textx import metamodel_from_file
-
-from sysml2py import load
-
-
-def main(filepath="../../tests/multipackage.text"):
-    """An example docstring for a class definition."""
-    # Parse file
-    fp = open(filepath, "r")
-    model = load(fp)
-
-    return model
-
+# import sys
+# sys.stdout = open('./log.txt', 'w')
 
 if __name__ == "__main__":
+    import os
+    import yaml
 
-    def write_test_data(name):
-        model = main("../../tests/" + name + ".text")
-        with open("../../tests/out_" + name + ".text", "w") as f:
-            f.write(yaml.dump(model))
-        f.close()
+    os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+    from sysml2py import load, loads
+    from sysml2py.formatting import classtree
 
-    # write_test_data('multipackage')
-    # write_test_data('subpackage')
-    # write_test_data('ownedpackage')
-    # write_test_data('aliaspackage')
-    write_test_data("importpackage")
+    a = loads(
+        """package 'Port Example' {
+    	
+        	attribute def Temp;
+        	
+        	part def Fuel;
+        	
+        	port def FuelOutPort {
+        		attribute temperature : Temp;
+        		out item fuelSupply : Fuel;
+        		in item fuelReturn : Fuel;
+        	}
+        	
+        	port def FuelInPort {
+        		attribute temperature : Temp;
+        		in item fuelSupply : Fuel;
+        		out item fuelReturn : Fuel;
+        	}
+        	
+        	part def FuelTankAssembly {
+        		port fuelTankPort : FuelOutPort;
+        	}
+        	
+        	part def Engine {
+        		port engineFuelPort : FuelInPort;
+        	}
+        }"""
+    )  # , formatting=False)
+    print(yaml.dump(a))
+
+    b = classtree(a)
+
+    print("\n\n" + b.dump())
+    import string
+
+    print("\n\n" + b.dump().translate(str.maketrans("", "", string.whitespace)))
+
+    # sys.stdout = sys.__stdout__
+    # sys.stdout.close()
