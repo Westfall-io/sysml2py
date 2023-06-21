@@ -37,7 +37,7 @@ OwnedExpressionMember :
 ;
 
 OwnedExpression :
-	 ConditionalExpression
+	 expression=ConditionalExpression
 ;
 
 // Conditional Test Expressions
@@ -47,7 +47,7 @@ OwnedExpressionReference :
 ;
 
 ConditionalExpression :
-	  NullCoalescingExpression
+	  operand += NullCoalescingExpression
 	|  operator = ConditionalOperator operand += NullCoalescingExpression
 		  '?' operand += OwnedExpressionReference 'else' operand += OwnedExpressionReference
 ;
@@ -59,7 +59,7 @@ ConditionalOperator :
 // Null Coalescing Expressions
 
 NullCoalescingExpression :
-	ImpliesExpression (
+	implies = ImpliesExpression (
 		operator = NullCoalescingOperator operand += ImpliesExpressionReference )*
 ;
 
@@ -78,7 +78,7 @@ ImpliesExpressionMember :
 ;
 
 ImpliesExpression :
-	OrExpression (
+	or = OrExpression (
 		operator = ImpliesOperator operand += OrExpressionReference )*
 ;
 
@@ -95,7 +95,7 @@ OrExpressionMember :
 ;
 
 OrExpression :
-	XorExpression (
+	xor=XorExpression (
 		( operator = OrOperator operand += XorExpression
 		| operator = ConditionalOrOperator operand += XorExpressionReference ) )*
 ;
@@ -117,7 +117,7 @@ XorExpressionMember :
 ;
 
 XorExpression :
-	AndExpression (
+	and=AndExpression (
 		operator = XorOperator operand += AndExpression )*
 ;
 
@@ -126,7 +126,7 @@ XorOperator :
 ;
 
 AndExpression :
-	EqualityExpression (
+	equality=EqualityExpression (
 		( operator = AndOperator operand += EqualityExpression
 		| operator = ConditionalAndOperator operand += EqualityExpressionReference ) )*
 ;
@@ -150,7 +150,7 @@ EqualityExpressionMember :
 ;
 
 EqualityExpression :
-	ClassificationExpression (
+	classification=ClassificationExpression (
 		operator = EqualityOperator operand += ClassificationExpression )*
 
 ;
@@ -162,7 +162,7 @@ EqualityOperator :
 // Classification Expressions
 
 ClassificationExpression :
-	  RelationalExpression
+	  relational=RelationalExpression
 	  (
 	  	operator = ClassificationTestOperator ownedRelationship += TypeReferenceMember
 	  |
@@ -195,7 +195,7 @@ MetaCastOperator :
 ;
 
 MetadataReference :
-	referencedElement = [QualifiedName]
+	referencedElement = QualifiedName
 ;
 
 TypeReferenceMember :
@@ -211,7 +211,7 @@ TypeReference :
 ;
 
 ReferenceTyping :
-	  type = [QualifiedName]
+	  type = QualifiedName
 ;
 
 SelfReferenceExpression :
@@ -229,7 +229,7 @@ EmptyFeature ://This doesn't work.
 // Relational Expressions
 
 RelationalExpression :
-	RangeExpression (
+	range=RangeExpression (
 		operator = RelationalOperator operand += RangeExpression )*
 ;
 
@@ -240,14 +240,14 @@ RelationalOperator :
 // Range Expressions
 
 RangeExpression :
-	AdditiveExpression (
+	additive=AdditiveExpression (
 		operator = '..' operand += AdditiveExpression )?
 ;
 
 // Arithmetic Expressions
 
 AdditiveExpression :
-	MultiplicativeExpression (
+	multiplicitive=MultiplicativeExpression (
 		operator = AdditiveOperator operand += MultiplicativeExpression )*
 ;
 
@@ -256,7 +256,7 @@ AdditiveOperator :
 ;
 
 MultiplicativeExpression :
-	ExponentiationExpression (
+	exponential=ExponentiationExpression (
 		operator = MultiplicativeOperator operand += ExponentiationExpression )*
 ;
 
@@ -265,7 +265,7 @@ MultiplicativeOperator :
 ;
 
 ExponentiationExpression :
-	UnaryExpression (
+	unary=UnaryExpression (
 		operator = ExponentiationOperator operand += UnaryExpression )*
 ;
 
@@ -277,7 +277,7 @@ ExponentiationOperator :
 
 UnaryExpression :
 	   operator = UnaryOperator operand += ExtentExpression
-	| ExtentExpression
+	| extent=ExtentExpression
 ;
 
 UnaryOperator :
@@ -288,13 +288,13 @@ UnaryOperator :
 
 ExtentExpression :
 	   operator = 'all' ownedRelationship += TypeResultMember
-	| PrimaryExpression
+	| primary=PrimaryExpression
 ;
 
 /* Primary Expressions */
 
 PrimaryExpression :
-	BaseExpression
+	base=BaseExpression
 	(  '.'
 	  ownedRelationship += FeatureChainMember
 	)?
@@ -332,20 +332,20 @@ FunctionReference :
 ;
 
 FeatureChainMember :
-	  memberElement = [QualifiedName]
+	  memberElement = QualifiedName
 	|  ownedRelatedElement += OwnedFeatureChain
 ;
 
 /* Base Expressions */
 
 BaseExpression :
-	  NullExpression
-	| LiteralExpression
-	| FeatureReferenceExpression
-	| MetadataAccessExpression
-	| InvocationExpression
-	| BodyExpression
-	| '(' SequenceExpression ')'
+	  ownedRelationship=NullExpression
+	| ownedRelationship=LiteralExpression
+	| ownedRelationship=FeatureReferenceExpression
+	| ownedRelationship=MetadataAccessExpression
+	| ownedRelationship=InvocationExpression
+	| ownedRelationship=BodyExpression
+	| '(' ownedRelationship=SequenceExpression ')'
 ;
 
 // Expression Bodies
@@ -393,13 +393,13 @@ FeatureReferenceExpression :
 ;
 
 FeatureReferenceMember :
-	memberElement = [QualifiedName]
+	memberElement = QualifiedName
 ;
 
 // Metadata Access Expressions
 
 MetadataAccessExpression :
-	referencedElement = [QualifiedName] '.' 'metadata'
+	referencedElement = QualifiedName '.' 'metadata'
 ;
 
 // Invocation Expressions
@@ -409,22 +409,22 @@ InvocationExpression :
 ;
 
 OwnedFeatureTyping :
-	  type = [QualifiedName]
+	  type = QualifiedName
 	| ownedRelatedElement += OwnedFeatureChain
 ;
 
 OwnedFeatureChain :
-	FeatureChain
+	feature=FeatureChain
 ;
 
 // For use in KerML and SysML grammars
  FeatureChain :
-	ownedRelationship += OwnedFeatureChaining
-	( '.' ownedRelationship += OwnedFeatureChaining )+
+	ownedRelationship += OwnedFeatureChaining '.' ownedRelationship += OwnedFeatureChaining
+	( '.' ownedRelationship += OwnedFeatureChaining )*
 ;
 
 OwnedFeatureChaining :
-	chainingFeature = [QualifiedName]
+	chainingFeature = QualifiedName
 ;
 
  ArgumentList :
@@ -458,7 +458,7 @@ NamedArgument :
 ;
 
 ParameterRedefinition :
-	redefinedFeature = [QualifiedName]
+	redefinedFeature = QualifiedName
 ;
 
 ArgumentValue :
@@ -506,21 +506,25 @@ RealValue :
 ;
 
 LiteralInfinity :
-	 '*'
+	 value='*'
 ;
 
 /* NAMES */
 
+ReservedKeyword:
+  'about' | 'to' | 'connect' | 'connection'
+;
+
 Name:
-	ID | UNRESTRICTED_NAME
+	!ReservedKeyword ID | UNRESTRICTED_NAME
 ;
 
 Qualification :
-	( Name '::' )+
+	( '::' Name )+
 ;
 
 QualifiedName:
-	Qualification? Name
+	name1=Name ( '::' names+=Name )*
 ;
 
 /* TERMINALS */
@@ -535,13 +539,23 @@ ID :
    /[a-zA-Z_][a-zA-Z_0-9]*/;
 
 UNRESTRICTED_NAME :
-	/''' ('\' ('b' | 't' | 'n' | 'f' | 'r' | '"' | "'" | '\') | !('\' | '''))* '''/;
+  /* Old format?
+  /''' ('\' ('b' | 't' | 'n' | 'f' | 'r' | '"' | "'" | '\') | !('\' | '''))* '''/;
+  */
+  /[\'].*[\']/;
 
 STRING_VALUE :
-	/'"' ('\' ('b' | 't' | 'n' | 'f' | 'r' | '"' | "'" | '\') | !('\' | '"'))* '"'/;
+	/*/'"' ('\' ('b' | 't' | 'n' | 'f' | 'r' | '"' | "'" | '\') | !('\' | '"'))* '"'/;*/
+  /[\"].*[\"]/;
 
 REGULAR_COMMENT:
-	'/*''*/';
+  /\/\*(.|\n)*?\*\//
+;
+
+Comment:
+// Reserved for textx, but in the model
+  /\/\/.*$/
+;
 
 ML_NOTE:
 	/'\/*'->'*\/'/;

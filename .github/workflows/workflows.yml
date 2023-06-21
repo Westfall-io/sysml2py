@@ -1,6 +1,10 @@
-name: Python package
+name: Test Commit
 
-on: [push]
+on:
+  push:
+    branches:
+      - '*'
+      - '!main'
 
 jobs:
   build:
@@ -8,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.11"]
 
     steps:
       - uses: actions/checkout@v3
@@ -22,8 +26,8 @@ jobs:
           pip install -r requirements.txt
       - name: Test with pytest
         run: |
-          pip install pytest pytest-cov
-          pytest tests/main_test.py --doctest-modules --junitxml=junit/test-results-${{ matrix.python-version }}.xml --cov=com --cov-report=xml --cov-report=html
+          pip install pytest pytest-cov pytest-timeout
+          pytest --timeout=300 tests/main_test.py --doctest-modules --junitxml=junit/test-results-${{ matrix.python-version }}.xml --cov=com --cov-report=xml --cov-report=html
       - name: Upload pytest test results
         uses: actions/upload-artifact@v3
         with:
@@ -31,12 +35,3 @@ jobs:
           path: junit/test-results-${{ matrix.python-version }}.xml
         # Use always() to always run this step to publish test results when there are test failures
         if: ${{ always() }}
-      - name: Build a binary wheel and a source tarball
-        run: |
-          pip install build
-          python3 -m build --sdist --wheel --outdir dist/ .
-      - name: Publish distribution 📦 to PyPI
-        if: startsWith(github.ref, 'refs/tags')
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}

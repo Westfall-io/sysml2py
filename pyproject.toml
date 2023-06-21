@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sysml2py"
-version = "0.2.4"
+version = "0.2.3"
 authors = [
   { name="Christopher Cox", email="chris.cox@westfall.io" },
 ]
@@ -18,16 +18,24 @@ classifiers = [
 ]
 
 [tool.setuptools]
-# ...
-# By default, include-package-data is true in pyproject.toml, so you do
-# NOT have to specify this line.
 include-package-data = true
 
 [tool.setuptools.packages.find]
-where = ["src/sysml2py"]
+where = ["src/sysml2py", "src"]
 
 [tool.setuptools.package-data]
 grammar = ["*.tx"]
+
+[tool.semantic_release]
+branch = "main"
+version_variable = "pyproject.toml:version"
+version_source = "tag"
+commit_version_number = true # required for version_source = "tag"
+tag_commit = true
+commit_parser = "semantic_release.history.emoji_parser"
+build_command = false
+upload_to_repository = false
+upload_to_release = false
 
 [project.urls]
 "Homepage" = "https://github.com/Westfall-io/sysml2py"

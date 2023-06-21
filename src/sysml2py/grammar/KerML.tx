@@ -1,4 +1,4 @@
-//import grammar.KerMLExpressions
+import KerMLExpressions
 /*****************************************************************************
  * SysML 2 Pilot Implementation
  * Copyright (c) 2018-2023 Model Driven Solutions, Inc.
@@ -64,15 +64,15 @@ OwnedRelatedElement :
 Dependency :
 	( ownedRelationship += PrefixMetadataAnnotation )*
 	'dependency' ( Identification? 'from' )?
-    client += [QualifiedName] ( ',' client += [QualifiedName] )* 'to'
-    supplier += [QualifiedName] ( ',' supplier += [QualifiedName] )*
+    client += QualifiedName ( ',' client += QualifiedName )* 'to'
+    supplier += QualifiedName ( ',' supplier += QualifiedName )*
     RelationshipBody
 ;
 
 /* ANNOTATIONS */
 
 Annotation :
-	annotatedElement = [QualifiedName]
+	annotatedElement = QualifiedName
 ;
 
 OwnedAnnotation :
@@ -80,7 +80,7 @@ OwnedAnnotation :
 ;
 
 AnnotatingElement :
-	  Comment
+	  CommentKerML
 	| Documentation
 	| TextualRepresentation
 	| MetadataFeature
@@ -88,7 +88,8 @@ AnnotatingElement :
 
 /* Comments */
 
-Comment :
+CommentKerML :
+// Comment is reserved in TextX
 	( 'comment' Identification?
 	  ('about' ownedRelationship += Annotation
 	     ( ',' ownedRelationship += Annotation )* )?
@@ -97,7 +98,7 @@ Comment :
 ;
 
 Documentation :
-	'doc' Identification? body = REGULAR_COMMENT
+	'doc' Identification? body=REGULAR_COMMENT
 ;
 
 /* Textual Representation */
@@ -156,7 +157,7 @@ NamespaceFeatureMember :
 AliasMember :
 	MemberPrefix
 	'alias' ( '<' memberShortName = Name '>' )? ( memberName = Name )?
-	'for' memberElement = [QualifiedName]
+	'for' memberElement = QualifiedName
 	RelationshipBody
 ;
 
@@ -175,7 +176,7 @@ MembershipImport :
 ;
 
  ImportedMembership :
-	importedMembership = [QualifiedName]
+	importedMembership = QualifiedName
 	( '::' isRecursive ?= '**' )?
 ;
 
@@ -187,7 +188,7 @@ NamespaceImport :
 ;
 
  ImportedNamespace :
-	importedNamespace = [QualifiedName] '::' '*'
+	importedNamespace = QualifiedName '::' '*'
 	( '::' isRecursive ?= '**' )?
 ;
 
@@ -384,16 +385,16 @@ OwnedFeatureMember :
 Specialization :
     ( 'specialization' Identification? )?
     'subtype'
-	( specific = [QualifiedName]
+	( specific = QualifiedName
 	| ownedRelatedElement += OwnedFeatureChain )
     ( ':>' | 'specializes')
-	( general = [QualifiedName]
+	( general = QualifiedName
 	| ownedRelatedElement += OwnedFeatureChain )
 	RelationshipBody
 ;
 
 OwnedSpecialization :
-	  general = [QualifiedName]
+	  general = QualifiedName
 	| ownedRelatedElement += OwnedFeatureChain
 ;
 
@@ -402,16 +403,16 @@ OwnedSpecialization :
 Conjugation :
 	( 'conjugation' Identification? )?
     'conjugate'
-    ( conjugatedType = [QualifiedName]
+    ( conjugatedType = QualifiedName
 	| ownedRelatedElement += OwnedFeatureChain )
     ( '~' | 'conjugates')
-    ( originalType = [QualifiedName]
+    ( originalType = QualifiedName
 	| ownedRelatedElement += OwnedFeatureChain )
 	RelationshipBody
 ;
 
 OwnedConjugation :
-	  originalType = [QualifiedName]
+	  originalType = QualifiedName
 	| ownedRelatedElement += OwnedFeatureChain
 ;
 
@@ -420,33 +421,33 @@ OwnedConjugation :
 Disjoining :
 	( 'disjoining' Identification? )?
 	'disjoint'
-	( typeDisjoined = [QualifiedName]
+	( typeDisjoined = QualifiedName
 	| ownedRelatedElement += OwnedFeatureChain )
 	'from'
-	( disjoiningType = [QualifiedName]
+	( disjoiningType = QualifiedName
 	| ownedRelatedElement += OwnedFeatureChain )
 	RelationshipBody
 ;
 
 OwnedDisjoining :
-	  disjoiningType = [QualifiedName]
+	  disjoiningType = QualifiedName
 	| ownedRelatedElement += OwnedFeatureChain
 ;
 
 /* Unioning, Intersecting and Differencing */
 
 Unioning :
-	  unioningType = [QualifiedName]
+	  unioningType = QualifiedName
 	| ownedRelatedElement += OwnedFeatureChain
 ;
 
 Intersecting :
-	  intersectingType = [QualifiedName]
+	  intersectingType = QualifiedName
 	| ownedRelatedElement += OwnedFeatureChain
 ;
 
 Differencing :
-	  differencingType = [QualifiedName]
+	  differencingType = QualifiedName
 	| ownedRelatedElement += OwnedFeatureChain
 ;
 
@@ -479,19 +480,19 @@ Classifier :
 
 Subclassification :
 	( 'specialization' Identification? )?
-    'subclassifier' subclassifier = [QualifiedName]
-    ( ':>' | 'specializes') superclassifier = [QualifiedName]
+    'subclassifier' subclassifier = QualifiedName
+    ( ':>' | 'specializes') superclassifier = QualifiedName
     RelationshipBody
 ;
 
 Ownedsubclassification :
-	superclassifier = [QualifiedName]
+	superclassifier = QualifiedName
 ;
 
 /* Classifier Conjugation */
 
 ClassifierConjugation :
-	originalType = [QualifiedName]
+	originalType = QualifiedName
 ;
 
 /* FEATURES */
@@ -563,11 +564,11 @@ Feature :
 ;
 
  FeatureSpecialization :
-	Typings | Subsettings | References | Redefinitions
+	typings=Typings | Subsettings | References | Redefinitions
 ;
 
  Typings :
-	TypedBy ( ',' ownedRelationship += OwnedFeatureTyping )*
+	typedby=TypedBy ( ',' ownedRelationship += OwnedFeatureTyping )*
 ;
 
  TypedBy :
@@ -603,16 +604,16 @@ ReferencesKeyword :
 FeatureInverting :
 	( 'inverting' Identification? )?
 	'inverse'
-	( featureInverted = [QualifiedName]
+	( featureInverted = QualifiedName
 	| ownedRelatedElement += OwnedFeatureChain )
 	'of'
-	( invertingFeature = [QualifiedName]
+	( invertingFeature = QualifiedName
 	| ownedRelatedElement += OwnedFeatureChain )
 	RelationshipBody
 ;
 
 OwnedFeatureInverting :
-	  invertingFeature = [QualifiedName]
+	  invertingFeature = QualifiedName
 	| ownedRelatedElement += OwnedFeatureChain
 ;
 
@@ -620,32 +621,31 @@ OwnedFeatureInverting :
 
 TypeFeaturing :
 	'featuring' ( Identification? 'of')?
-	featureOfType = [QualifiedName]
-	'by' featuringType = [QualifiedName]
+	featureOfType = QualifiedName
+	'by' featuringType = QualifiedName
 	RelationshipBody
 ;
 
 OwnedTypeFeaturing :
-	featuringType = [QualifiedName]
+	featuringType = QualifiedName
 ;
 
 /* Feature Typing */
 
 FeatureTyping :
 	( 'specialization' Identification? )?
-    'typing' typedFeature = [QualifiedName]
-    (':' | 'typed' 'by') FeatureType
+    'typing' typedFeature = QualifiedName
+    (':' | 'typed' 'by') type=FeatureType
     RelationshipBody
 ;
 
 
 OwnedFeatureTyping :
-	FeatureType
+	type=FeatureType
 ;
 
  FeatureType :
-	  type = [QualifiedName]
-	| ownedRelatedElement += OwnedFeatureChain
+	  type = QualifiedName | ownedRelatedElement += OwnedFeatureChain
 ;
 
 /* Subsetting */
@@ -653,21 +653,21 @@ OwnedFeatureTyping :
 Subsetting :
 	( 'specialization' Identification? )?
     'subset'
-    ( subsettingFeature = [QualifiedName]
+    ( subsettingFeature = QualifiedName
 	| ownedRelatedElement += OwnedFeatureChain )
     ( ':>' | 'subsets' )
-    ( subsettedFeature = [QualifiedName]
+    ( subsettedFeature = QualifiedName
 	| ownedRelatedElement += OwnedFeatureChain )
 	RelationshipBody
 ;
 
 OwnedSubsetting :
-	  subsettedFeature = [QualifiedName]
+	  subsettedFeature = QualifiedName
 	| ownedRelatedElement += OwnedFeatureChain
 ;
 
 OwnedReferenceSubsetting :
-	  referencedFeature = [QualifiedName]
+	  referencedFeature = QualifiedName
 	| ownedRelatedElement += OwnedFeatureChain
 ;
 
@@ -676,16 +676,16 @@ OwnedReferenceSubsetting :
 Redefinition :
 	( 'specialization' Identification? )?
     'redefinition'
-    ( redefiningFeature = [QualifiedName]
+    ( redefiningFeature = QualifiedName
 	| ownedRelatedElement += OwnedFeatureChain )
     ( ':>>' | 'redefines' )
-    ( redefinedFeature = [QualifiedName]
+    ( redefinedFeature = QualifiedName
 	| ownedRelatedElement += OwnedFeatureChain )
 	RelationshipBody
 ;
 
 OwnedRedefinition :
-	  redefinedFeature = [QualifiedName]
+	  redefinedFeature = QualifiedName
 	| ownedRelatedElement += OwnedFeatureChain
 ;
 
@@ -696,7 +696,7 @@ OwnedRedefinition :
 ;
 
 FeatureConjugation :
-	originalType = [QualifiedName]
+	originalType = QualifiedName
 ;
 
 /* FEATURE VALUES */
@@ -1033,7 +1033,7 @@ ItemFlowEnd :
 ;
 
 ItemFlowEndSubsetting :
-	  referencedFeature = [QualifiedName] '.'
+	  referencedFeature = QualifiedName '.'
 	| ownedRelatedElement += FeatureChainPrefix
 ;
 
@@ -1051,7 +1051,7 @@ ItemFlowFeature :
 ;
 
 ItemFlowRedefinition :
-	redefinedFeature = [QualifiedName]
+	redefinedFeature = QualifiedName
 ;
 
 /* METADATA */
@@ -1086,7 +1086,7 @@ MetadataFeature :
 ;
 
 MetadataTyping :
-	type = [QualifiedName]
+	type = QualifiedName
 ;
 
  MetadataBody :
