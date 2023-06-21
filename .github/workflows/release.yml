@@ -75,6 +75,7 @@ jobs:
     needs: [documentation, codecoverage, versioning]
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v3
     - name: Build a binary wheel and a source tarball
       run: |
         pip install build
