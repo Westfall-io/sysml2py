@@ -59,6 +59,7 @@ jobs:
   versioning:
     name: Semantic Versioning
     runs-on: ubuntu-latest
+    needs: [documentation, codecoverage]
     steps:
     - uses: actions/checkout@v3
       with:
@@ -72,7 +73,7 @@ jobs:
 
   release:
     name: PyPI Release
-    needs: [documentation, codecoverage, versioning]
+    needs: [versioning]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
