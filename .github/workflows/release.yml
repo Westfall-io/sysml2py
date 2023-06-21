@@ -64,24 +64,9 @@ jobs:
     - uses: actions/checkout@v3
       with:
         fetch-depth: 0
-    - name: Python Semantic Release
+    - name: Python Semantic Release 📦 to PyPI
       uses: relekang/python-semantic-release@master
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         repository_username: __token__
         repository_password: ${{ secrets.PYPI_API_TOKEN }}
-
-  release:
-    name: PyPI Release
-    needs: [versioning]
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Build a binary wheel and a source tarball
-      run: |
-        pip install build
-        python3 -m build --sdist --wheel --outdir dist/ .
-    - name: Publish distribution 📦 to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        password: ${{ secrets.PYPI_API_TOKEN }}
