@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.2.2 (2023-06-21)
+
+### Other
+
+* Merge pull request #11 from Westfall-io/dev0.2.2 ([`f67e116`](https://github.com/Westfall-io/sysml2py/commit/f67e11669d3421b1754ca7b9a99db0aa25d8b0a7))
+
 ## v0.2.1 (2023-06-21)
 
 ### Other
