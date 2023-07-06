@@ -17,6 +17,9 @@ from sysml2py.formatting import reformat
 __all__ = ["load", "loads"]
 __author__ = "Christopher Cox"
 
+from sysml2py.item import Item
+from sysml2py.attribute import Attribute
+from sysml2py.part import Part
 
 def load(fp):
     """SysML load from file pointer
