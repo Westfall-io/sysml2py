@@ -19,9 +19,7 @@ if __name__ == "__main__":
     from sysml2py import load, loads
     from sysml2py.formatting import classtree
 
-    a = loads(
-        """item fat;"""
-    )  # , formatting=False)
+    a = loads("""item fat;""")  # , formatting=False)
     print(yaml.dump(a))
 
     b = classtree(a)
