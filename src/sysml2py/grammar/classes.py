@@ -1464,10 +1464,10 @@ class PrimaryExpression:
             "ownedRelationship": [],
         }
         for child in self.operand:
-            output["operand"] = child.get_definition()
+            output["operand"].append(child.get_definition())
 
         for child in self.operator:
-            output["operator"] = child
+            output["operator"].append(child)
         return output
 
 
@@ -1484,6 +1484,15 @@ class SequenceExpression:
 
     def dump(self):
         return self.child.dump()
+    
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "operator": "",
+            "operand": [],
+            "ownedRelationship": self.child.get_definition(),
+        }
+        return output
 
 
 class BaseExpression:
@@ -1522,7 +1531,15 @@ class FeatureReferenceExpression:
 
     def dump(self):
         return "".join([child.dump() for child in self.children])
-
+    
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "ownedRelationship": [],
+        }
+        for child in self.children:
+            output['ownedRelationship'].append(child.get_definition())
+        return output
 
 class FeatureReferenceMember:
     def __init__(self, definition):
@@ -1531,6 +1548,13 @@ class FeatureReferenceMember:
 
     def dump(self):
         return self.memberElement.dump()
+    
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "memberElement": self.memberElement.get_definition(),
+        }
+        return output
 
 
 class OccurrenceUsageElement:

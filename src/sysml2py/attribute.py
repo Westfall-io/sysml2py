@@ -73,15 +73,119 @@ class Attribute(Usage):
 
     def set_value(self, value):
         if isinstance(value, u.quantity.Quantity):
+            package_units = {'name': 'QualifiedName', 'name1':str(value.unit), 'names':[]}
+            package_units = {'name': 'FeatureReferenceMember', 'memberElement': package_units}
+            package_units = {'name': 'FeatureReferenceExpression', 'ownedRelationship': [package_units]}
+            package_units = {'name': 'BaseExpression', 'ownedRelationship': package_units}
+            package_units = {
+                "name": "PrimaryExpression",
+                "operand": [],
+                "base": package_units,
+                "operator": [],
+                "ownedRelationship": [],
+            }
+            package_units = {
+                "name": "ExtentExpression",
+                "operator": "",
+                "ownedRelationship": [],
+                "primary": package_units,
+            }
+            package_units = {
+                "name": "UnaryExpression",
+                "operand": [],
+                "operator": None,
+                "extent": package_units,
+            }
+            package_units = {
+                "name": "ExponentiationExpression",
+                "operand": [],
+                "operator": [],
+                "unary": package_units,
+            }
+            package_units = {
+                "name": "MultiplicativeExpression",
+                "operand": [],
+                "operator": [],
+                "exponential": package_units,
+            }
+            package_units = {
+                "name": "AdditiveExpression",
+                "operand": [],
+                "operator": [],
+                "multiplicitive": package_units,
+            }
+            package_units = {
+                "name": "RangeExpression",
+                "operand": [],
+                "operator": "",
+                "additive": package_units,
+            }
+            package_units = {
+                "name": "RelationalExpression",
+                "operand": [],
+                "operator": [],
+                "range": package_units,
+            }
+            package_units = {
+                "name": "ClassificationExpression",
+                "operand": [],
+                "operator": None,
+                "ownedRelationship": [],
+                "relational": package_units,
+            }
+            package_units = {
+                "name": "EqualityExpression",
+                "operand": [],
+                "operator": [],
+                "classification": package_units,
+            }
+            package_units = {
+                "name": "AndExpression",
+                "operand": [],
+                "operator": [],
+                "equality": package_units,
+            }
+            package_units = {
+                "name": "XorExpression",
+                "operand": [],
+                "operator": [],
+                "and": package_units,
+            }
+            package_units = {
+                "name": "OrExpression",
+                "xor": package_units,
+                "operand": [],
+                "operator": [],
+            }
+            package_units = {
+                "name": "ImpliesExpression",
+                "operand": [],
+                "operator": [],
+                "or": package_units,
+            }
+            package_units = {
+                "name": "NullCoalescingExpression",
+                "implies": package_units,
+                "operator": [],
+                "operand": [],
+            }
+            package_units = {
+                "name": "ConditionalExpression",
+                "operator": None,
+                "operand": [package_units],
+            }
+            package_units = {"name": "OwnedExpression", "expression": package_units}
+            package_units = {'name': 'SequenceExpression', 'operand': [], 'operator': '', 'ownedRelationship':package_units}
+            
             package = {
                 "name": "BaseExpression",
-                "ownedRelationship": {"name": "LiteralInteger", "value": value.value},
+                "ownedRelationship": {"name": "LiteralInteger", "value": str(value.value)},
             }
             package = {
                 "name": "PrimaryExpression",
-                "operand": [],
+                "operand": [package_units],
                 "base": package,
-                "operator": [],
+                "operator": ['['],
                 "ownedRelationship": [],
             }
             package = {
@@ -187,3 +291,9 @@ class Attribute(Usage):
             # value.unit
 
         return self
+    
+    def get_value(self):
+        realpart = self.grammar.usage.completion.valuepart.relationships[0].elements[0].expression.operands[0].implies.orexpression.xor.andexpression.equality.classification.relational.range.additive.multiplicitive.exponential.unary.extent.primary
+        real = float(realpart.base.relationship.dump())
+        unit = realpart.operand[0].child.expression.operands[0].implies.orexpression.xor.andexpression.equality.classification.relational.range.additive.multiplicitive.exponential.unary.extent.primary.base.relationship.children[0].memberElement.dump()
+        return real*u.Unit(unit)
