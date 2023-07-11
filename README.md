@@ -1,7 +1,7 @@
 # sysml2py
 [![PyPI version](https://badge.fury.io/py/sysml2py.svg)](https://badge.fury.io/py/sysml2py)[![Coverage Status](https://coveralls.io/repos/github/Westfall-io/sysml2py/badge.svg)](https://coveralls.io/github/Westfall-io/sysml2py)![Docstring Coverage](https://raw.githubusercontent.com/Westfall-io/sysml2py/main/doc-cov.svg)
 
-:construction:This project is just starting and is pre-alpha.:construction:
+:construction:This project is just starting and is alpha.:construction:
 
 ## Description
 sysml2py is an open source pure Python library for constructing python-based
@@ -60,6 +60,30 @@ the SI units to be valid SysML.
     attribute thrust= 1199.0 [N];
   }
 ```
+
+The package is able to handle Items, Parts, and Attributes.
+
+```
+a = Part()._set_name('camera')
+b = Item()._set_name('lens')
+d = Attribute()._set_name('mass')
+c = Part()._set_name("sensor")
+c._set_child(a)
+c._set_child(b)
+a._set_child(d)
+print(classtree(c.dump()).dump())
+```
+
+will return:
+```
+part sensor {
+   part camera {
+      attribute mass;
+   }
+   item lens;
+}
+```
+
 
 ## License
 sysml2py is released under the MIT license, hence allowing commercial use of the library.
