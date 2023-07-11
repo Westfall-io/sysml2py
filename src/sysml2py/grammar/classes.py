@@ -2682,18 +2682,19 @@ class PackageMember:
             return " ".join(filter(None, (self.prefix.dump(), "".join(output))))
         else:
             return "".join(output)
-        
+
     def get_definition(self):
         output = {
-            'name': self.__class__.__name__,
-            'prefix': None,
-            'ownedRelationship': []}
+            "name": self.__class__.__name__,
+            "prefix": None,
+            "ownedRelationship": [],
+        }
         if self.prefix is not None:
-            output['prefix'] = self.prefix.get_definition()
-            
+            output["prefix"] = self.prefix.get_definition()
+
         for child in self.children:
-            output['ownedRelatedElement'] = child.get_definition()
-            
+            output["ownedRelatedElement"] = child.get_definition()
+
         return output
 
 
@@ -2704,10 +2705,10 @@ class MemberPrefix:
 
     def dump(self):
         return self.visibility.dump()
-    
+
     def get_definition(self):
-        output = {'name': self.__class__.__name__}
-        output['visibility'] = self.visibility.get_definition()
+        output = {"name": self.__class__.__name__}
+        output["visibility"] = self.visibility.get_definition()
         return output
 
 
@@ -2731,14 +2732,14 @@ class Package:
 
     def dump(self):
         return "".join([self.declaration.dump(), self.body.dump()])
-    
+
     def get_definition(self):
-        output = {'name': self.__class__.__name__, 'ownedRelationship': []}
+        output = {"name": self.__class__.__name__, "ownedRelationship": []}
         for rel in self.relationships:
-            output['ownedRelationship'] = rel.get_definition()
-        output['declaration'] = self.declaration.get_definition()
-        output['body'] = self.body.get_definition()
-        
+            output["ownedRelationship"] = rel.get_definition()
+        output["declaration"] = self.declaration.get_definition()
+        output["body"] = self.body.get_definition()
+
         return output
 
 
@@ -2783,13 +2784,13 @@ class PackageDeclaration:
 
     def dump(self):
         return "package " + self.identification.dump()
-    
+
     def get_definition(self):
         return {
-            "name": self.__class__.__name__, 
-            'identification':self.identification.get_definition()
-            }
-        
+            "name": self.__class__.__name__,
+            "identification": self.identification.get_definition(),
+        }
+
 
 class PackageBody:
     def __init__(self, definition=None):
@@ -2808,13 +2809,15 @@ class PackageBody:
                             elif relationship["name"] == "Import":
                                 self.children.append(Import(relationship))
                             else:
-                                raise AttributeError("Failed to match this relationship")
+                                raise AttributeError(
+                                    "Failed to match this relationship"
+                                )
                         else:
                             raise NotImplementedError
                 else:
                     raise NotImplementedError
-            #else: handled inside function
-        #else: no new definitions needed
+            # else: handled inside function
+        # else: no new definitions needed
 
     def dump(self):
         #!TODO This won't work
@@ -2825,11 +2828,9 @@ class PackageBody:
             for child in self.children:
                 output.append(child.dump())
             return " { \n" + "\n".join(output) + "\n}"
-        
+
     def get_definition(self):
-        output = {
-            "name": self.__class__.__name__,
-            "ownedRelationship": []}
+        output = {"name": self.__class__.__name__, "ownedRelationship": []}
         for child in self.children:
             output["ownedRelationship"].append(child.get_definition())
         return output
