@@ -2,6 +2,28 @@
 
 <!--next-version-placeholder-->
 
+## v0.3.0 (2023-07-11)
+
+### :sparkles:
+
+* :sparkles: Added some rollup classes the abstract underlying grammar. They have functions to manipulate the grammar. ([`b1e01a4`](https://github.com/Westfall-io/sysml2py/commit/b1e01a465200e79f96a30da4f2ce5b861850ddd5))
+
+### :arrow_up:
+
+* :arrow_up: Merge from main and add astropy to main dependencies to handle units. ([`98f260b`](https://github.com/Westfall-io/sysml2py/commit/98f260b888f54f9f6911b043387cd0fbc4d81c88))
+
+### Other
+
+* Merge pull request #21 from Westfall-io/dev0.3.x ([`f83804e`](https://github.com/Westfall-io/sysml2py/commit/f83804e94d207807df160152ce1b55a0c91d7c9b))
+* Merge pull request #20 from Westfall-io/19-provide-user-interactable-item-class ([`4d3dd0a`](https://github.com/Westfall-io/sysml2py/commit/4d3dd0a34b73c1db5a3c57bd2cc85f8d8055acb6))
+* :robot: Format code with black ([`3cc027b`](https://github.com/Westfall-io/sysml2py/commit/3cc027bbb04e7ddcbc3422f3b11b4809913f985b))
+* :poop: Fixing git conflict. ([`f44c394`](https://github.com/Westfall-io/sysml2py/commit/f44c394e15f78034fe83f3086d6b0cca58658052))
+* :memo: Updates to readme, also added a loadfromgrammar function to Usage. ([`e999436`](https://github.com/Westfall-io/sysml2py/commit/e999436193ccee31dfadaf5a193705cf61e99496))
+* :robot: Format code with black ([`f85c2a5`](https://github.com/Westfall-io/sysml2py/commit/f85c2a51f49954e032322d4603bb431e53392c65))
+* 🚧 Merge from code black mods. ([`cde58c1`](https://github.com/Westfall-io/sysml2py/commit/cde58c1cef4149e79cd4e40ea39016f954da6354))
+* Merge branch 'main' of github.com:Westfall-io/sysml2py into 19-provide-user-interactable-item-class ([`157d5f7`](https://github.com/Westfall-io/sysml2py/commit/157d5f73e00c58a0f7ddee8676585b741772e585))
+* :robot: Format code with black ([`90398e1`](https://github.com/Westfall-io/sysml2py/commit/90398e15bfcbc54d20011c35a9f9384da91fd134))
+
 ## v0.2.10 (2023-06-21)
 
 ### Other
