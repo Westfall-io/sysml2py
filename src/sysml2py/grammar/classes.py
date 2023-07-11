@@ -31,6 +31,7 @@ def beautify(string):
     ns = []
     # print(lines)
     for line in lines:
+        line = line.rstrip()
         if line == "}":
             level += -1
 
@@ -2681,6 +2682,19 @@ class PackageMember:
             return " ".join(filter(None, (self.prefix.dump(), "".join(output))))
         else:
             return "".join(output)
+        
+    def get_definition(self):
+        output = {
+            'name': self.__class__.__name__,
+            'prefix': None,
+            'ownedRelationship': []}
+        if self.prefix is not None:
+            output['prefix'] = self.prefix.get_definition()
+            
+        for child in self.children:
+            output['ownedRelatedElement'] = child.get_definition()
+            
+        return output
 
 
 class MemberPrefix:
@@ -2690,23 +2704,42 @@ class MemberPrefix:
 
     def dump(self):
         return self.visibility.dump()
+    
+    def get_definition(self):
+        output = {'name': self.__class__.__name__}
+        output['visibility'] = self.visibility.get_definition()
+        return output
 
 
 class Package:
-    def __init__(self, definition):
-        if valid_definition(definition, "Package"):
-            # Elements inside of a package
-            # ownedRelationship += PrefixMetadataMember
-            # declaration = PackageDeclaration
-            # body = PackageBody
+    def __init__(self, definition=None):
+        if definition is not None:
+            if valid_definition(definition, self.__class__.__name__):
+                # Elements inside of a package
+                # ownedRelationship += PrefixMetadataMember
+                # declaration = PackageDeclaration
+                # body = PackageBody
+                self.relationships = []
+                for rel in definition["ownedRelationship"]:
+                    self.relationships.append(json.dumps(rel))
+                self.declaration = PackageDeclaration(definition["declaration"])
+                self.body = PackageBody(definition["body"])
+        else:
             self.relationships = []
-            for rel in definition["ownedRelationship"]:
-                self.relationships.append(json.dumps(rel))
-            self.declaration = PackageDeclaration(definition["declaration"])
-            self.body = PackageBody(definition["body"])
+            self.declaration = PackageDeclaration()
+            self.body = PackageBody()
 
     def dump(self):
         return "".join([self.declaration.dump(), self.body.dump()])
+    
+    def get_definition(self):
+        output = {'name': self.__class__.__name__, 'ownedRelationship': []}
+        for rel in self.relationships:
+            output['ownedRelationship'] = rel.get_definition()
+        output['declaration'] = self.declaration.get_definition()
+        output['body'] = self.body.get_definition()
+        
+        return output
 
 
 class Identification:
@@ -2741,37 +2774,47 @@ class Identification:
 
 
 class PackageDeclaration:
-    def __init__(self, definition):
-        if valid_definition(definition, "PackageDeclaration"):
-            self.identification = Identification(definition["identification"])
+    def __init__(self, definition=None):
+        if definition is not None:
+            if valid_definition(definition, "PackageDeclaration"):
+                self.identification = Identification(definition["identification"])
+        else:
+            self.identification = Identification()
 
     def dump(self):
         return "package " + self.identification.dump()
-
+    
+    def get_definition(self):
+        return {
+            "name": self.__class__.__name__, 
+            'identification':self.identification.get_definition()
+            }
+        
 
 class PackageBody:
-    def __init__(self, definition):
+    def __init__(self, definition=None):
         self.children = []
-        if valid_definition(definition, "PackageBody"):
-            if "ownedRelationship" in definition:
-                for relationship in definition["ownedRelationship"]:
-                    if "name" in relationship:
-                        if relationship["name"] == "PackageMember":
-                            self.children.append(PackageMember(relationship))
-                        elif relationship["name"] == "ElementFilterMember":
-                            raise NotImplementedError
-                        elif relationship["name"] == "AliasMember":
-                            self.children.append(AliasMember(relationship))
-                        elif relationship["name"] == "Import":
-                            self.children.append(Import(relationship))
+        if definition is not None:
+            if valid_definition(definition, "PackageBody"):
+                if "ownedRelationship" in definition:
+                    for relationship in definition["ownedRelationship"]:
+                        if "name" in relationship:
+                            if relationship["name"] == "PackageMember":
+                                self.children.append(PackageMember(relationship))
+                            elif relationship["name"] == "ElementFilterMember":
+                                raise NotImplementedError
+                            elif relationship["name"] == "AliasMember":
+                                self.children.append(AliasMember(relationship))
+                            elif relationship["name"] == "Import":
+                                self.children.append(Import(relationship))
+                            else:
+                                raise AttributeError("Failed to match this relationship")
                         else:
-                            raise AttributeError("Failed to match this relationship")
-                    else:
-                        raise NotImplementedError
-            else:
-                raise NotImplementedError
-        else:
-            raise AttributeError("This does not seem to be valid.")
+                            raise NotImplementedError
+                else:
+                    raise NotImplementedError
+            #else: handled inside function
+        #else: no new definitions needed
 
     def dump(self):
         #!TODO This won't work
@@ -2782,6 +2825,14 @@ class PackageBody:
             for child in self.children:
                 output.append(child.dump())
             return " { \n" + "\n".join(output) + "\n}"
+        
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "ownedRelationship": []}
+        for child in self.children:
+            output["ownedRelationship"].append(child.get_definition())
+        return output
 
 
 class AliasMember:

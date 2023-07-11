@@ -10,7 +10,7 @@ __all__ = ["load", "loads"]
 __author__ = "Christopher Cox"
 
 from sysml2py.usage import Item, Attribute, Part
-
+from sysml2py.definition import Package
 
 def load(fp):
     """SysML load from file pointer
