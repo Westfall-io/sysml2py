@@ -1,5 +1,5 @@
 # sysml2py
-[![PyPI version](https://badge.fury.io/py/sysml2py.svg)](https://badge.fury.io/py/sysml2py)[![Coverage Status](https://coveralls.io/repos/github/Westfall-io/sysml2py/badge.svg)](https://coveralls.io/github/Westfall-io/sysml2py)![Docstring Coverage](https://raw.githubusercontent.com/Westfall-io/sysml2py/main/doc-cov.svg)
+[![PyPI version](https://badge.fury.io/py/sysml2py.svg)](https://badge.fury.io/py/sysml2py)[![Coverage Status](https://coveralls.io/repos/github/Westfall-io/sysml2py/badge.svg)](https://coveralls.io/github/Westfall-io/sysml2py)![Docstring Coverage](https://raw.githubusercontent.com/Westfall-io/sysml2py/main/doc-cov.svg)[![Trello](https://img.shields.io/badge/Trello-%23026AA7.svg?style=for-the-badge&logo=Trello&logoColor=white)](https://trello.com/b/xHfFUzlk/sysml2py)
 
 :construction:This project is just starting and is alpha.:construction:
 
@@ -84,6 +84,8 @@ part sensor {
 }
 ```
 
+## Release Planning
+Development can be tracked via [Trello.](https://trello.com/b/xHfFUzlk/sysml2py)
 
 ## License
 sysml2py is released under the MIT license, hence allowing commercial use of the library.
