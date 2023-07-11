@@ -5,10 +5,8 @@ Created on Mon May 29 23:20:18 2023
 
 @author: christophercox
 """
-import pytest
-import yaml
 import re
-
+import string
 import os
 import sys
 
@@ -16,11 +14,8 @@ print("CWD:")
 print(os.getcwd())
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "./src")))
 
-from sysml2py import load, loads
+from sysml2py import loads
 from sysml2py.formatting import classtree
-
-import string
-
 
 def remove_comments(string):
     pattern = r"(\".*?\"|\'.*?\')|(//[^\r\n]*$)"
