@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.3.1 (2023-07-11)
+
+### Other
+
+* Merge pull request #22 from Westfall-io/dev0.3.1 ([`8dc6722`](https://github.com/Westfall-io/sysml2py/commit/8dc6722aa809565a86d5e9bf7c506b60864fb2fd))
+* Merge branch 'dev0.3.1' of github.com:Westfall-io/sysml2py into dev0.3.1 ([`151be3f`](https://github.com/Westfall-io/sysml2py/commit/151be3fd591918aa2bfee475395218e33b712e47))
+* Merge branch 'main' of github.com:Westfall-io/sysml2py into dev0.3.1 ([`76dc161`](https://github.com/Westfall-io/sysml2py/commit/76dc1616092fd20c5f1d5f27cf6d991f590b162b))
+* :robot: Format code with black ([`0b70bbc`](https://github.com/Westfall-io/sysml2py/commit/0b70bbc00d82781d894fbf088d5e52831088c7ae))
+* :memo: Documentation changes. ([`edfd629`](https://github.com/Westfall-io/sysml2py/commit/edfd629ec5ef6611d2b9643706cee6b1bf40ea47))
+
 ## v0.3.0 (2023-07-11)
 
 ### :sparkles:
