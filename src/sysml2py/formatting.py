@@ -51,25 +51,26 @@ def reformat(model):
 def classtree(model):
     return RootNamespace(model)
 
+
 def collapse(model):
-    """ Take a classtree and collapse it into our special classes that
+    """Take a classtree and collapse it into our special classes that
     package all of the sub-grammar classes."""
     output = []
-    if model.__class__.__name__ == 'RootNamespace':
+    if model.__class__.__name__ == "RootNamespace":
         for child in model.children[0].children:
-            if child.__class__.__name__ == 'UsageElement':
+            if child.__class__.__name__ == "UsageElement":
                 ue = child.children
-                if ue.__class__.__name__ == 'OccurrenceUsageElement':
+                if ue.__class__.__name__ == "OccurrenceUsageElement":
                     se = ue.children
-                    if se.children.__class__.__name__ == 'PartUsage':
+                    if se.children.__class__.__name__ == "PartUsage":
                         output.append(Part().load_from_grammar(se.children))
                     else:
                         pass
                 else:
-                    #OccurrenceUsageElement
+                    # OccurrenceUsageElement
                     pass
             else:
                 pass
     else:
-        print('no')
+        print("no")
     return output
