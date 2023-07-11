@@ -72,6 +72,7 @@ class RootNamespace:
             elif member["name"] == "Import":
                 raise NotImplementedError
             else:
+                print(member["name"])
                 raise AttributeError("Error")
 
             self.children.append(memberclass)
@@ -935,6 +936,13 @@ class UsageElement:
 
     def dump(self):
         return self.children.dump()
+
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "ownedRelatedElement": self.children.get_definition(),
+        }
+        return output
 
 
 class NonOccurrenceUsageElement:

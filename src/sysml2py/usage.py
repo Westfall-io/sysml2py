@@ -40,18 +40,23 @@ class Usage:
         self.typedby = None
         return self
 
-    def usage_dump(self, child):
-        # This is a usage.
-
+    def _ensure_body(self, subgrammar="usage"):
         # Add children
         body = []
         for abc in self.children:
-            body.append(DefinitionBodyItem(abc.dump(child=True)).get_definition())
-
+            body.append(
+                DefinitionBodyItem(abc.dump(child="DefinitionBody")).get_definition()
+            )
         if len(body) > 0:
-            self.grammar.usage.completion.body.body = DefinitionBody(
+            self.grammar.getattr(subgrammar).completion.body.body = DefinitionBody(
                 {"name": "DefinitionBody", "ownedRelatedElement": body}
             )
+        return self
+
+    def usage_dump(self, child):
+        # This is a usage.
+
+        self._ensure_body("usage")
 
         # Add packaging
         package = {
@@ -60,83 +65,79 @@ class Usage:
         }
         package = {"name": "OccurrenceUsageElement", "ownedRelatedElement": package}
 
-        if child:
+        if child == "DefinitionBody":
             package = {
                 "name": "OccurrenceUsageMember",
                 "prefix": None,
                 "ownedRelatedElement": [package],
             }
+
             package = {"name": "DefinitionBodyItem", "ownedRelationship": [package]}
-        else:
-            # Add these packets to make this dump without parents
+        elif "PackageBody":
             package = {"name": "UsageElement", "ownedRelatedElement": package}
             package = {
                 "name": "PackageMember",
                 "ownedRelatedElement": package,
                 "prefix": None,
             }
-            package = {
-                "name": "PackageBodyElement",
-                "ownedRelationship": [package],
-                "prefix": None,
-            }
+
         return package
 
     def definition_dump(self, child):
         # This is a definition.
 
-        # Add children
-        body = []
-        for abc in self.children:
-            body.append(DefinitionBodyItem(abc.dump(child=True)).get_definition())
-        if len(body) > 0:
-            self.grammar.definition.completion.body.body = DefinitionBody(
-                {"name": "DefinitionBody", "ownedRelatedElement": body}
-            )
+        self._ensure_body("definition")
 
-        if child:
-            package = {
-                "name": "DefinitionElement",
-                "prefix": None,
-                "ownedRelatedElement": self.grammar.get_definition(),
-            }
+        package = {
+            "name": "DefinitionElement",
+            "ownedRelatedElement": self.grammar.get_definition(),
+        }
+
+        if child == "DefinitionBody":
             package = {
                 "name": "DefinitionMember",
                 "prefix": None,
                 "ownedRelatedElement": [package],
             }
+
             package = {"name": "DefinitionBodyItem", "ownedRelationship": [package]}
 
-        else:
+        elif child == "PackageBody":
             # Add these packets to make this dump without parents
-            package = {
-                "name": "DefinitionElement",
-                "ownedRelatedElement": self.grammar.get_definition(),
-            }
+
             package = {
                 "name": "PackageMember",
                 "ownedRelatedElement": package,
                 "prefix": None,
             }
+
+        return package
+
+    def dump(self, child=None):
+        if "usage" in self.grammar.__dict__:
+            package = self.usage_dump(child)
+        else:
+            package = self.definition_dump(child)
+
+        if child is None:
             package = {
                 "name": "PackageBodyElement",
                 "ownedRelationship": [package],
                 "prefix": None,
             }
 
-        return package
-
-    def dump(self, child=False):
-        if "usage" in self.grammar.__dict__:
-            package = self.usage_dump(child)
-        else:
-            package = self.definition_dump(child)
-
         # Add the typed by definition to the package output
         if self.typedby is not None:
-            package["ownedRelationship"].insert(
-                0, self.typedby.dump(child)["ownedRelationship"][0]
-            )
+            if child is None:
+                package["ownedRelationship"].insert(
+                    0, self.typedby.dump(child="PackageBody")
+                )
+            elif child == "PackageBody":
+                package = [self.typedby.dump(child="PackageBody"), package]
+            else:
+                package["ownedRelationship"].insert(
+                    0, self.typedby.dump(child=child)["ownedRelationship"][0]
+                )
 
         return package
 
