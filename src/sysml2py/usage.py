@@ -32,18 +32,21 @@ from sysml2py.grammar.classes import (
     ItemDefinition,
 )
 
+
 class Usage:
     def __init__(self):
         self.name = str(uuidlib.uuid4())
         self.children = []
         self.typedby = None
         return self
-    
-    def _ensure_body(self, subgrammar='usage'):
+
+    def _ensure_body(self, subgrammar="usage"):
         # Add children
         body = []
         for abc in self.children:
-            body.append(DefinitionBodyItem(abc.dump(child='DefinitionBody')).get_definition())
+            body.append(
+                DefinitionBodyItem(abc.dump(child="DefinitionBody")).get_definition()
+            )
         if len(body) > 0:
             self.grammar.getattr(subgrammar).completion.body.body = DefinitionBody(
                 {"name": "DefinitionBody", "ownedRelatedElement": body}
@@ -53,7 +56,7 @@ class Usage:
     def usage_dump(self, child):
         # This is a usage.
 
-        self._ensure_body('usage')
+        self._ensure_body("usage")
 
         # Add packaging
         package = {
@@ -62,53 +65,52 @@ class Usage:
         }
         package = {"name": "OccurrenceUsageElement", "ownedRelatedElement": package}
 
-        if child == 'DefinitionBody':
+        if child == "DefinitionBody":
             package = {
                 "name": "OccurrenceUsageMember",
                 "prefix": None,
                 "ownedRelatedElement": [package],
             }
-            
+
             package = {"name": "DefinitionBodyItem", "ownedRelationship": [package]}
-        elif 'PackageBody':
+        elif "PackageBody":
             package = {"name": "UsageElement", "ownedRelatedElement": package}
             package = {
                 "name": "PackageMember",
                 "ownedRelatedElement": package,
                 "prefix": None,
             }
-                
+
         return package
 
     def definition_dump(self, child):
         # This is a definition.
 
-        self._ensure_body('definition')
+        self._ensure_body("definition")
 
         package = {
             "name": "DefinitionElement",
             "ownedRelatedElement": self.grammar.get_definition(),
         }
-        
-        if child == 'DefinitionBody':
+
+        if child == "DefinitionBody":
             package = {
                 "name": "DefinitionMember",
                 "prefix": None,
                 "ownedRelatedElement": [package],
             }
-               
+
             package = {"name": "DefinitionBodyItem", "ownedRelationship": [package]}
 
-        elif child =='PackageBody':
+        elif child == "PackageBody":
             # Add these packets to make this dump without parents
-            
+
             package = {
                 "name": "PackageMember",
                 "ownedRelatedElement": package,
                 "prefix": None,
             }
-            
-    
+
         return package
 
     def dump(self, child=None):
@@ -116,7 +118,7 @@ class Usage:
             package = self.usage_dump(child)
         else:
             package = self.definition_dump(child)
-            
+
         if child is None:
             package = {
                 "name": "PackageBodyElement",
@@ -127,10 +129,11 @@ class Usage:
         # Add the typed by definition to the package output
         if self.typedby is not None:
             if child is None:
-                package["ownedRelationship"].insert(0, self.typedby.dump(child='PackageBody')
+                package["ownedRelationship"].insert(
+                    0, self.typedby.dump(child="PackageBody")
                 )
-            elif child=='PackageBody':
-                package = [self.typedby.dump(child='PackageBody'), package]
+            elif child == "PackageBody":
+                package = [self.typedby.dump(child="PackageBody"), package]
             else:
                 package["ownedRelationship"].insert(
                     0, self.typedby.dump(child=child)["ownedRelationship"][0]

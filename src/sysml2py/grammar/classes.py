@@ -936,7 +936,7 @@ class UsageElement:
 
     def dump(self):
         return self.children.dump()
-    
+
     def get_definition(self):
         output = {
             "name": self.__class__.__name__,
