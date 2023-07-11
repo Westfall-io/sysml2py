@@ -15,13 +15,32 @@ def valid_definition(definition, name):
             if definition["name"] == name:
                 return True
             else:
+                print(definition["name"])
                 raise NotImplementedError
 
         else:
             raise AttributeError("This does not seem to be valid.")
     else:
-        print("Definition: {}".format(definition))
+        print("\n\nDefinition: {}".format(definition))
         raise TypeError("This does not seem to be valid.")
+
+
+def beautify(string):
+    level = 0
+    lines = string.split("\n")
+    ns = []
+    # print(lines)
+    for line in lines:
+        if line == "}":
+            level += -1
+
+        ns.append(level * "   " + line)
+
+        if line[-1] == "{":
+            # Last character is new bracket
+            level += 1
+
+    return "\n".join(ns)
 
 
 class RootNamespace:
@@ -35,6 +54,7 @@ class RootNamespace:
                 # This is a KerML Element
                 pass
             else:
+                print(definition)
                 raise NotImplementedError("Not expecting any other root node names.")
         else:
             raise AttributeError("This does not seem to be valid.")
@@ -59,7 +79,7 @@ class RootNamespace:
         output = []
         for child in self.children:
             output.append(child.dump())
-        return "\n".join(output)
+        return beautify("\n".join(output))
 
 
 class DefinitionElement:
@@ -107,6 +127,13 @@ class DefinitionElement:
             output.append(child.dump())
 
         return " ".join(filter(None, (output)))
+
+    def get_definition(self):
+        output = {"name": self.__class__.__name__, "ownedRelatedElement": []}
+
+        for item in self.children:
+            output["ownedRelatedElement"] = item.get_definition()
+        return output
 
 
 class InterfaceDefinition:
@@ -333,14 +360,18 @@ class ConnectionDefinition:
 
 
 class ItemDefinition:
-    def __init__(self, definition):
-        if valid_definition(definition, self.__class__.__name__):
-            self.keyword = "item def"
-            if definition["prefix"] is not None:
-                self.prefix = OccurrenceDefinitionPrefix(definition["prefix"])
-            else:
-                self.prefix = None
-            self.definition = Definition(definition["definition"])
+    def __init__(self, definition=None):
+        self.keyword = "item def"
+        if definition is not None:
+            if valid_definition(definition, self.__class__.__name__):
+                if definition["prefix"] is not None:
+                    self.prefix = OccurrenceDefinitionPrefix(definition["prefix"])
+                else:
+                    self.prefix = None
+                self.definition = Definition(definition["definition"])
+        else:
+            self.prefix = None
+            self.definition = Definition()
 
     def dump(self):
         output = []
@@ -350,6 +381,13 @@ class ItemDefinition:
         output.append(self.keyword)
         output.append(self.definition.dump())
         return " ".join(output)
+
+    def get_definition(self):
+        output = {"name": self.__class__.__name__, "prefix": None}
+        if self.prefix is not None:
+            output["prefix"] = self.prefix.get_definition()
+        output["definition"] = self.definition.get_definition()
+        return output
 
 
 class EnumerationDefinition:
@@ -515,29 +553,45 @@ class Documentation:
 
 
 class AttributeDefinition:
-    def __init__(self, definition):
-        if valid_definition(definition, "AttributeDefinition"):
-            if definition["prefix"] is not None:
-                raise NotImplementedError
+    def __init__(self, definition=None):
+        self.keyword = "attribute def"
+        if definition is not None:
+            if valid_definition(definition, "AttributeDefinition"):
+                if definition["prefix"] is not None:
+                    raise NotImplementedError
+                self.prefix = None
+                self.definition = Definition(definition["definition"])
+        else:
             self.prefix = None
-            self.keyword = "attribute def"
-            self.definition = Definition(definition["definition"])
+            self.definition = Definition()
 
     def dump(self):
         return " ".join(
             filter(None, (self.prefix, self.keyword, self.definition.dump()))
         )
 
+    def get_definition(self):
+        output = {"name": self.__class__.__name__, "prefix": None}
+        if self.prefix is not None:
+            output["prefix"] = self.prefix.get_definition()
+        output["definition"] = self.definition.get_definition()
+        return output
+
 
 class PartDefinition:
-    def __init__(self, definition):
-        if valid_definition(definition, "PartDefinition"):
-            if definition["prefix"] is not None:
-                self.prefix = OccurrenceDefinitionPrefix(definition["prefix"])
-            else:
-                self.prefix = None
+    def __init__(self, definition=None):
+        if definition is not None:
+            if valid_definition(definition, "PartDefinition"):
+                if definition["prefix"] is not None:
+                    self.prefix = OccurrenceDefinitionPrefix(definition["prefix"])
+                else:
+                    self.prefix = None
+                self.keyword = "part def"
+                self.definition = Definition(definition["definition"])
+        else:
+            self.prefix = None
             self.keyword = "part def"
-            self.definition = Definition(definition["definition"])
+            self.definition = Definition()
 
     def dump(self):
         output = []
@@ -548,6 +602,15 @@ class PartDefinition:
         output.append(self.definition.dump())
 
         return " ".join(output)
+
+    def get_definition(self):
+        output = {"name": self.__class__.__name__, "prefix": None}
+        if self.prefix is not None:
+            output["prefix"] = self.prefix.get_definition()
+
+        output["definition"] = self.definition.get_definition()
+
+        return output
 
 
 class OccurrenceDefinitionPrefix:
@@ -607,35 +670,53 @@ class LifeClassMembership:
 
 
 class Definition:
-    def __init__(self, definition):
-        if valid_definition(definition, "Definition"):
-            self.declaration = DefinitionDeclaration(definition["declaration"])
-            self.body = DefinitionBody(definition["body"])
+    def __init__(self, definition=None):
+        if definition is not None:
+            if valid_definition(definition, "Definition"):
+                self.declaration = DefinitionDeclaration(definition["declaration"])
+                self.body = DefinitionBody(definition["body"])
+        else:
+            self.declaration = DefinitionDeclaration()
+            self.body = DefinitionBody()
 
     def dump(self):
         return " ".join([self.declaration.dump(), self.body.dump()])
 
+    def get_definition(self):
+        return {
+            "name": self.__class__.__name__,
+            "body": self.body.get_definition(),
+            "declaration": self.declaration.get_definition(),
+        }
+
 
 class DefinitionDeclaration:
-    def __init__(self, definition):
-        if valid_definition(definition, self.__class__.__name__):
-            if "identification" in definition:
-                if definition["identification"] is not None:
-                    self.identification = Identification(definition["identification"])
+    def __init__(self, definition=None):
+        if definition is not None:
+            if valid_definition(definition, self.__class__.__name__):
+                if "identification" in definition:
+                    if definition["identification"] is not None:
+                        self.identification = Identification(
+                            definition["identification"]
+                        )
+                    else:
+                        self.identification = None
                 else:
                     self.identification = None
-            else:
-                self.identification = None
 
-            if "subclassificationpart" in definition:
-                if definition["subclassificationpart"] is not None:
-                    self.subclassificationpart = SubclassificationPart(
-                        definition["subclassificationpart"]
-                    )
+                if "subclassificationpart" in definition:
+                    if definition["subclassificationpart"] is not None:
+                        self.subclassificationpart = SubclassificationPart(
+                            definition["subclassificationpart"]
+                        )
+                    else:
+                        self.subclassificationpart = None
                 else:
                     self.subclassificationpart = None
-            else:
-                self.subclassificationpart = None
+
+        else:
+            self.identification = Identification()
+            self.subclassificationpart = None
 
     def dump(self):
         output = []
@@ -644,6 +725,22 @@ class DefinitionDeclaration:
         if self.subclassificationpart is not None:
             output.append(self.subclassificationpart.dump())
         return " ".join(output)
+
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "identification": None,
+            "subclassificationpart": None,
+        }
+        if self.identification is not None:
+            output["identification"] = self.identification.get_definition()
+
+        if self.subclassificationpart is not None:
+            output[
+                "subclassificationpart"
+            ] = self.subclassificationpart.get_definition()
+
+        return output
 
 
 class SubclassificationPart:
@@ -668,12 +765,15 @@ class OwnedSubclassification:
 
 
 class DefinitionBody:
-    def __init__(self, definition):
-        if valid_definition(definition, "DefinitionBody"):
+    def __init__(self, definition=None):
+        if definition is not None:
+            if valid_definition(definition, "DefinitionBody"):
+                self.children = []
+                if len(definition["ownedRelatedElement"]) > 0:
+                    for item in definition["ownedRelatedElement"]:
+                        self.children.append(DefinitionBodyItem(item))
+        else:
             self.children = []
-            if len(definition["ownedRelatedElement"]) > 0:
-                for item in definition["ownedRelatedElement"]:
-                    self.children.append(DefinitionBodyItem(item))
 
     def dump(self):
         if len(self.children) == 0:
@@ -683,6 +783,13 @@ class DefinitionBody:
             for child in self.children:
                 output.append(child.dump())
             return " {\n" + "\n".join(output) + "\n}"
+
+    def get_definition(self):
+        output = {"name": self.__class__.__name__, "ownedRelatedElement": []}
+        for child in self.children:
+            output["ownedRelatedElement"].append(child.get_definition())
+
+        return output
 
 
 class DefinitionBodyItem:
@@ -698,6 +805,7 @@ class DefinitionBodyItem:
                     elif item["name"] == "DefinitionMember":
                         self.children.append(DefinitionMember(item))
                     else:
+                        print(definition)
                         raise NotImplementedError
 
     def dump(self):
@@ -705,6 +813,14 @@ class DefinitionBodyItem:
         for child in self.children:
             output.append(child.dump())
         return "\n".join(output)
+
+    def get_definition(self):
+        output = {"name": self.__class__.__name__}
+        items = []
+        for item in self.children:
+            items.append(item.get_definition())
+        output["ownedRelationship"] = items
+        return output
 
 
 class DefinitionMember:
@@ -721,6 +837,19 @@ class DefinitionMember:
 
     def dump(self):
         return "\n".join([child.dump() for child in self.children])
+
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "prefix": None,
+            "ownedRelatedElement": [],
+        }
+        if self.prefix is not None:
+            output["prefix"] = self.prefix.get_definition()
+
+        for item in self.children:
+            output["ownedRelatedElement"].append(item.get_definition())
+        return output
 
 
 class OccurrenceUsageMember:
@@ -741,6 +870,20 @@ class OccurrenceUsageMember:
             output.append(child.dump())
         return "\n".join(output)
 
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "prefix": None,
+            "ownedRelatedElement": [],
+        }
+        if self.prefix is not None:
+            output["prefix"] = self.prefix.get_definition()
+
+        for child in self.children:
+            output["ownedRelatedElement"].append(child.get_definition())
+
+        return output
+
 
 class NonOccurrenceUsageMember:
     def __init__(self, definition):
@@ -759,6 +902,20 @@ class NonOccurrenceUsageMember:
         for child in self.children:
             output.append(child.dump())
         return "\n".join(output)
+
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "prefix": None,
+            "ownedRelatedElement": [],
+        }
+        if self.prefix is not None:
+            output["prefix"] = self.prefix.get_definition()
+
+        for child in self.children:
+            output["ownedRelatedElement"].append(child.get_definition())
+
+        return output
 
 
 class UsageElement:
@@ -792,6 +949,11 @@ class NonOccurrenceUsageElement:
 
     def dump(self):
         return self.children.dump()
+
+    def get_definition(self):
+        output = {"name": self.__class__.__name__}
+        output["ownedRelatedElement"] = self.children.get_definition()
+        return output
 
 
 class DefaultReferenceUsage:
@@ -841,6 +1003,12 @@ class ValuePart:
     def dump(self):
         return "".join([child.dump() for child in self.relationships])
 
+    def get_definition(self):
+        output = {"name": self.__class__.__name__, "ownedRelationship": []}
+        for child in self.relationships:
+            output["ownedRelationship"].append(child.get_definition())
+        return output
+
 
 class FeatureValue:
     def __init__(self, definition):
@@ -864,6 +1032,15 @@ class FeatureValue:
             output.append(child.dump())
         return " ".join(output)
 
+    def get_definition(self):
+        output = {"name": self.__class__.__name__, "ownedRelatedElement": []}
+        for child in self.elements:
+            output["ownedRelatedElement"].append(child.get_definition())
+        output["isEqual"] = self.isEqual
+        output["isInitial"] = self.isInitial
+        output["isDefault"] = self.isDefault
+        return output
+
 
 class OwnedExpression:
     def __init__(self, definition):
@@ -872,6 +1049,12 @@ class OwnedExpression:
 
     def dump(self):
         return self.expression.dump()
+
+    def get_definition(self):
+        return {
+            "name": self.__class__.__name__,
+            "expression": self.expression.get_definition(),
+        }
 
 
 class ConditionalExpression:
@@ -886,6 +1069,12 @@ class ConditionalExpression:
 
     def dump(self):
         return "".join(child.dump() for child in self.operands)
+
+    def get_definition(self):
+        output = {"name": self.__class__.__name__, "operator": [], "operand": []}
+        for child in self.operands:
+            output["operand"].append(child.get_definition())
+        return output
 
 
 class NullCoalescingExpression:
@@ -902,6 +1091,15 @@ class NullCoalescingExpression:
     def dump(self):
         return self.implies.dump()
 
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "operator": [],
+            "operand": [],
+            "implies": self.implies.get_definition(),
+        }
+        return output
+
 
 class ImpliesExpression:
     def __init__(self, definition):
@@ -916,6 +1114,15 @@ class ImpliesExpression:
 
     def dump(self):
         return self.orexpression.dump()
+
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "operator": [],
+            "operand": [],
+            "or": self.orexpression.get_definition(),
+        }
+        return output
 
 
 class OrExpression:
@@ -932,6 +1139,15 @@ class OrExpression:
     def dump(self):
         return self.xor.dump()
 
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "operator": [],
+            "operand": [],
+            "xor": self.xor.get_definition(),
+        }
+        return output
+
 
 class XorExpression:
     def __init__(self, definition):
@@ -947,6 +1163,15 @@ class XorExpression:
     def dump(self):
         return self.andexpression.dump()
 
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "operator": [],
+            "operand": [],
+            "and": self.andexpression.get_definition(),
+        }
+        return output
+
 
 class AndExpression:
     def __init__(self, definition):
@@ -961,6 +1186,15 @@ class AndExpression:
 
     def dump(self):
         return self.equality.dump()
+
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "operator": [],
+            "operand": [],
+            "equality": self.equality.get_definition(),
+        }
+        return output
 
 
 class EqualityExpression:
@@ -979,6 +1213,15 @@ class EqualityExpression:
     def dump(self):
         return self.classification.dump()
 
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "operator": [],
+            "operand": [],
+            "classification": self.classification.get_definition(),
+        }
+        return output
+
 
 class ClassificationExpression:
     def __init__(self, definition):
@@ -993,6 +1236,15 @@ class ClassificationExpression:
 
     def dump(self):
         return self.relational.dump()
+
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "operator": None,
+            "operand": [],
+            "relational": self.relational.get_definition(),
+        }
+        return output
 
 
 class RelationalExpression:
@@ -1009,6 +1261,15 @@ class RelationalExpression:
     def dump(self):
         return self.range.dump()
 
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "operator": [],
+            "operand": [],
+            "range": self.range.get_definition(),
+        }
+        return output
+
 
 class RangeExpression:
     def __init__(self, definition):
@@ -1023,6 +1284,15 @@ class RangeExpression:
 
     def dump(self):
         return self.additive.dump()
+
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "operator": "",
+            "operand": [],
+            "additive": self.additive.get_definition(),
+        }
+        return output
 
 
 class AdditiveExpression:
@@ -1041,6 +1311,15 @@ class AdditiveExpression:
     def dump(self):
         return self.multiplicitive.dump()
 
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "operator": [],
+            "operand": [],
+            "multiplicitive": self.multiplicitive.get_definition(),
+        }
+        return output
+
 
 class MultiplicativeExpression:
     def __init__(self, definition):
@@ -1055,6 +1334,15 @@ class MultiplicativeExpression:
 
     def dump(self):
         return self.exponential.dump()
+
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "operator": [],
+            "operand": [],
+            "exponential": self.exponential.get_definition(),
+        }
+        return output
 
 
 class ExponentiationExpression:
@@ -1071,6 +1359,15 @@ class ExponentiationExpression:
     def dump(self):
         return self.unary.dump()
 
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "operator": [],
+            "operand": [],
+            "unary": self.unary.get_definition(),
+        }
+        return output
+
 
 class UnaryExpression:
     def __init__(self, definition):
@@ -1085,6 +1382,15 @@ class UnaryExpression:
 
     def dump(self):
         return self.extent.dump()
+
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "operator": None,
+            "operand": [],
+            "extent": self.extent.get_definition(),
+        }
+        return output
 
 
 class ExtentExpression:
@@ -1101,6 +1407,16 @@ class ExtentExpression:
     def dump(self):
         return self.primary.dump()
 
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "operator": "",
+            "operand": [],
+            "primary": self.primary.get_definition(),
+            "ownedRelationship": [],
+        }
+        return output
+
 
 class PrimaryExpression:
     def __init__(self, definition):
@@ -1110,11 +1426,73 @@ class PrimaryExpression:
             else:
                 raise NotImplementedError
 
-            if not (definition["operand"] == [] and definition["operator"] == []):
+            if len(definition["ownedRelationship"]) > 0:
                 raise NotImplementedError
 
+            self.operator = []
+            self.operand = []
+
+            if not (definition["operand"] == [] and definition["operator"] == []):
+                for child in definition["operator"]:
+                    self.operator.append(child)
+                for child in definition["operand"]:
+                    if child["name"] == "SequenceExpression":
+                        self.operand.append(SequenceExpression(child))
+
     def dump(self):
-        return self.base.dump()
+        output = [self.base.dump()]
+        for k, v in enumerate(self.operator):
+            if v == "#":
+                output.append("# ({})".format(self.operand[k].dump()))
+
+            if v == "[":
+                output.append("[{}]".format(self.operand[k].dump()))
+
+            if v == "." or v == ".?":
+                raise NotImplementedError
+        if len(output) == 1:
+            return str(output[0])
+        else:
+            return " ".join(output)
+
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "operator": [],
+            "operand": [],
+            "base": self.base.get_definition(),
+            "ownedRelationship": [],
+        }
+        for child in self.operand:
+            output["operand"].append(child.get_definition())
+
+        for child in self.operator:
+            output["operator"].append(child)
+        return output
+
+
+class SequenceExpression:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            if not (definition["operand"] == [] and definition["operator"] == ""):
+                raise NotImplementedError
+
+            self.child = None
+            if definition["ownedRelationship"] is not None:
+                if definition["ownedRelationship"]["name"] == "OwnedExpression":
+                    self.child = OwnedExpression(definition["ownedRelationship"])
+
+    def dump(self):
+        return self.child.dump()
+
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "operator": "",
+            "operand": [],
+            "ownedRelationship": self.child.get_definition(),
+        }
+        return output
 
 
 class BaseExpression:
@@ -1136,6 +1514,13 @@ class BaseExpression:
     def dump(self):
         return self.relationship.dump()
 
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "ownedRelationship": self.relationship.get_definition(),
+        }
+        return output
+
 
 class FeatureReferenceExpression:
     def __init__(self, definition):
@@ -1147,6 +1532,15 @@ class FeatureReferenceExpression:
     def dump(self):
         return "".join([child.dump() for child in self.children])
 
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "ownedRelationship": [],
+        }
+        for child in self.children:
+            output["ownedRelationship"].append(child.get_definition())
+        return output
+
 
 class FeatureReferenceMember:
     def __init__(self, definition):
@@ -1155,6 +1549,13 @@ class FeatureReferenceMember:
 
     def dump(self):
         return self.memberElement.dump()
+
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "memberElement": self.memberElement.get_definition(),
+        }
+        return output
 
 
 class OccurrenceUsageElement:
@@ -1167,6 +1568,12 @@ class OccurrenceUsageElement:
 
     def dump(self):
         return self.children.dump()
+
+    def get_definition(self):
+        return {
+            "name": self.__class__.__name__,
+            "ownedRelatedElement": self.children.get_definition(),
+        }
 
 
 class StructureUsageElement:
@@ -1187,6 +1594,12 @@ class StructureUsageElement:
 
     def dump(self):
         return self.children.dump()
+
+    def get_definition(self):
+        return {
+            "name": self.__class__.__name__,
+            "ownedRelatedElement": self.children.get_definition(),
+        }
 
 
 class InterfaceUsage:
@@ -1461,28 +1874,47 @@ class OwnedReferenceSubsetting:
 
 
 class AttributeUsage:
-    def __init__(self, definition):
-        if valid_definition(definition, self.__class__.__name__):
-            if definition["prefix"] is not None:
-                raise NotImplementedError
-            self.prefix = definition["prefix"]
-            self.keyword = "attribute"
-            self.usage = Usage(definition["usage"])
+    def __init__(self, definition=None):
+        self.keyword = "attribute"
+        if definition is not None:
+            if valid_definition(definition, self.__class__.__name__):
+                if definition["prefix"] is not None:
+                    raise NotImplementedError
+                else:
+                    self.prefix = None
+                self.usage = Usage(definition["usage"])
+        else:
+            self.prefix = None
+            self.usage = Usage()
 
     def dump(self):
         return self.keyword + " " + self.usage.dump()
 
+    def get_definition(self):
+        output = {"name": self.__class__.__name__, "prefix": None}
+        if self.prefix is not None:
+            output["prefix"] = self.prefix.get_definition()
+
+        output["usage"] = self.usage.get_definition()
+
+        return output
+
 
 class PartUsage:
-    def __init__(self, definition):
-        if valid_definition(definition, "PartUsage"):
-            if definition["prefix"] is not None:
-                self.prefix = OccurrenceUsagePrefix(definition["prefix"])
-            else:
-                self.prefix = None
+    def __init__(self, definition=None):
+        if definition is not None:
+            if valid_definition(definition, "PartUsage"):
+                if definition["prefix"] is not None:
+                    self.prefix = OccurrenceUsagePrefix(definition["prefix"])
+                else:
+                    self.prefix = None
 
+                self.keyword = "part"
+                self.usage = Usage(definition["usage"])
+        else:
+            self.prefix = None
             self.keyword = "part"
-            self.usage = Usage(definition["usage"])
+            self.usage = Usage()
 
     def dump(self):
         output = []
@@ -1492,6 +1924,17 @@ class PartUsage:
         output.append(self.keyword)
         output.append(self.usage.dump())
         return " ".join(output)
+
+    def get_definition(self):
+        pre = None
+        if self.prefix is not None:
+            pre = self.prefix.get_definition()
+
+        u = None
+        if self.usage is not None:
+            u = self.usage.get_definition()
+
+        return {"name": self.__class__.__name__, "prefix": pre, "usage": u}
 
 
 class OccurrenceUsagePrefix:
@@ -1604,13 +2047,19 @@ class FeatureDirection:
 
 
 class ItemUsage:
-    def __init__(self, definition):
-        if valid_definition(definition, "ItemUsage"):
+    def __init__(self, definition=None):
+        if definition is not None:
+            if valid_definition(definition, "ItemUsage"):
+                self.prefix = None
+                if definition["prefix"] is not None:
+                    self.prefix = OccurrenceUsagePrefix(definition["prefix"])
+                self.keyword = "item"
+                self.usage = Usage(definition["usage"])
+        else:
+            # Create an empty item
             self.prefix = None
-            if definition["prefix"] is not None:
-                self.prefix = OccurrenceUsagePrefix(definition["prefix"])
             self.keyword = "item"
-            self.usage = Usage(definition["usage"])
+            self.usage = Usage()
 
     def dump(self):
         output = []
@@ -1620,40 +2069,74 @@ class ItemUsage:
         output.append(self.usage.dump())
         return " ".join(output)
 
+    def get_definition(self):
+        output = {}
+        output["name"] = self.__class__.__name__
+        if self.prefix is not None:
+            output["prefix"] = self.prefix.get_definition()
+        else:
+            output["prefix"] = None
+        output["usage"] = self.usage.get_definition()
+        return output
+
 
 class Usage:
-    def __init__(self, definition):
-        if valid_definition(definition, "Usage"):
-            self.declaration = UsageDeclaration(definition["declaration"])
-            self.completion = UsageCompletion(definition["completion"])
+    def __init__(self, definition=None):
+        if definition is not None:
+            if valid_definition(definition, "Usage"):
+                self.declaration = UsageDeclaration(definition["declaration"])
+                self.completion = UsageCompletion(definition["completion"])
+        else:
+            self.declaration = UsageDeclaration()
+            self.completion = UsageCompletion()
 
     def dump(self):
         return "".join([self.declaration.dump(), self.completion.dump()])
 
+    def get_definition(self):
+        output = {}
+        output["name"] = self.__class__.__name__
+        output["declaration"] = self.declaration.get_definition()
+        output["completion"] = self.completion.get_definition()
+        return output
+
 
 class UsageDeclaration:
-    def __init__(self, definition):
-        if valid_definition(definition, "UsageDeclaration"):
-            self.declaration = FeatureDeclaration(definition["declaration"])
+    def __init__(self, definition=None):
+        if definition is not None:
+            if valid_definition(definition, "UsageDeclaration"):
+                self.declaration = FeatureDeclaration(definition["declaration"])
+        else:
+            self.declaration = FeatureDeclaration()
 
     def dump(self):
         return self.declaration.dump()
 
+    def get_definition(self):
+        return {
+            "name": self.__class__.__name__,
+            "declaration": self.declaration.get_definition(),
+        }
+
 
 class FeatureDeclaration:
-    def __init__(self, definition):
-        if valid_definition(definition, "FeatureDeclaration"):
-            if definition["identification"] is not None:
-                self.identification = Identification(definition["identification"])
-            else:
-                self.identification = None
+    def __init__(self, definition=None):
+        if definition is not None:
+            if valid_definition(definition, "FeatureDeclaration"):
+                if definition["identification"] is not None:
+                    self.identification = Identification(definition["identification"])
+                else:
+                    self.identification = None
 
-            if definition["specialization"] is not None:
-                self.specialization = FeatureSpecializationPart(
-                    definition["specialization"]
-                )
-            else:
-                self.specialization = None
+                if definition["specialization"] is not None:
+                    self.specialization = FeatureSpecializationPart(
+                        definition["specialization"]
+                    )
+                else:
+                    self.specialization = None
+        else:
+            self.identification = None
+            self.specialization = None
 
     def dump(self):
         output = []
@@ -1665,32 +2148,54 @@ class FeatureDeclaration:
 
         return "".join(output)
 
+    def get_definition(self):
+        iden = None
+        spec = None
+        if self.identification is not None:
+            iden = self.identification.get_definition()
+
+        if self.specialization is not None:
+            spec = self.specialization.get_definition()
+
+        return {
+            "name": self.__class__.__name__,
+            "identification": iden,
+            "specialization": spec,
+        }
+
 
 class FeatureSpecializationPart:
-    def __init__(self, definition):
-        if valid_definition(definition, "FeatureSpecializationPart"):
-            if definition["multiplicity"] is not None:
-                # We found the set where one specialization came first
-                # ( specialization+=FeatureSpecialization )+
-                #    multiplicity=MultiplicityPart?
-                #    specialization2+=FeatureSpecialization*
-                self.multiplicity = MultiplicityPart(definition["multiplicity"])
-            elif definition["multiplicity2"] is not None:
-                # We found the set where the multiplicity came first
-                # multiplicity2=MultiplicityPart specialization+=FeatureSpecialization*
-                self.multiplicity = MultiplicityPart(definition["multiplicity2"])
-            else:
-                # We found the case where none were specified
-                self.multiplicity = None
+    def __init__(self, definition=None):
+        if definition is not None:
+            if valid_definition(definition, "FeatureSpecializationPart"):
+                if definition["multiplicity"] is not None:
+                    # We found the set where one specialization came first
+                    # ( specialization+=FeatureSpecialization )+
+                    #    multiplicity=MultiplicityPart?
+                    #    specialization2+=FeatureSpecialization*
+                    self.multiplicity = MultiplicityPart(definition["multiplicity"])
+                elif definition["multiplicity2"] is not None:
+                    # We found the set where the multiplicity came first
+                    # multiplicity2=MultiplicityPart specialization+=FeatureSpecialization*
+                    self.multiplicity = MultiplicityPart(definition["multiplicity2"])
+                else:
+                    # We found the case where none were specified
+                    self.multiplicity = None
 
+                self.specializations = []
+                for specialization in definition["specialization"]:
+                    self.specializations.append(FeatureSpecialization(specialization))
+
+                self.specializations2 = []
+                if definition["specialization2"] is not None:
+                    for specialization in definition["specialization2"]:
+                        self.specializations2.append(
+                            FeatureSpecialization(specialization)
+                        )
+        else:
+            self.multiplicity = None
             self.specializations = []
-            for specialization in definition["specialization"]:
-                self.specializations.append(FeatureSpecialization(specialization))
-
             self.specializations2 = []
-            if definition["specialization2"] is not None:
-                for specialization in definition["specialization2"]:
-                    self.specializations2.append(FeatureSpecialization(specialization))
 
     def dump(self):
         if len(self.specializations2) > 0:
@@ -1717,6 +2222,28 @@ class FeatureSpecializationPart:
                 output.append(child.dump())
 
         return "".join(output)
+
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "multiplicity": None,
+            "multiplicity2": None,  # This is never used in this fashion.
+            "specialization": [],
+            "specialization2": [],
+        }
+
+        if self.multiplicity is not None:
+            output["multiplicity"].get_definition()
+
+        if len(self.specializations) > 0:
+            for child in self.specializations:
+                output["specialization"].append(child.get_definition())
+
+        if len(self.specializations2) > 0:
+            for child in self.specializations2:
+                output["specialization2"].append(child.get_definition())
+
+        return output
 
 
 class MultiplicityPart:
@@ -1813,6 +2340,9 @@ class LiteralInteger:
     def dump(self):
         return self.element
 
+    def get_definition(self):
+        return {"name": self.__class__.__name__, "value": self.element}
+
 
 class LiteralReal:
     def __init__(self, definition):
@@ -1848,6 +2378,13 @@ class FeatureSpecialization:
 
     def dump(self):
         return self.relationship.dump()
+
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "ownedRelationship": self.relationship.get_definition(),
+        }
+        return output
 
 
 class Redefinitions:
@@ -1961,6 +2498,14 @@ class Typings:
     def dump(self):
         return self.typing.dump()
 
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "ownedRelationship": self.relationships,
+            "typedby": self.typing.get_definition(),
+        }
+        return output
+
 
 class TypedBy:
     def __init__(self, definition):
@@ -1980,6 +2525,13 @@ class TypedBy:
             output.append(relationship.dump())
         return self.keyword + "".join(output)
 
+    def get_definition(self):
+        output = {"name": self.__class__.__name__, "ownedRelationship": []}
+        for child in self.relationships:
+            output["ownedRelationship"].append(child.get_definition())
+
+        return output
+
 
 class FeatureTyping:
     def __init__(self, definition):
@@ -1995,6 +2547,14 @@ class FeatureTyping:
 
     def dump(self):
         return self.relationship.dump()
+
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "ownedRelationship": self.relationship.get_definition(),
+        }
+
+        return output
 
 
 class ConjugatedPortTyping:
@@ -2019,6 +2579,11 @@ class OwnedFeatureTyping:
     def dump(self):
         return self.type.dump()
 
+    def get_definition(self):
+        output = {"name": self.__class__.__name__, "type": self.type.get_definition()}
+
+        return output
+
 
 class FeatureType:
     def __init__(self, definition):
@@ -2031,15 +2596,27 @@ class FeatureType:
     def dump(self):
         return self.type.dump()
 
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "ownedRelatedElement": [],
+            "type": self.type.get_definition(),
+        }
+        return output
+
 
 class UsageCompletion:
-    def __init__(self, definition):
-        if valid_definition(definition, "UsageCompletion"):
-            if definition["valuepart"] is None:
-                self.valuepart = None
-            else:
-                self.valuepart = ValuePart(definition["valuepart"])
-            self.body = UsageBody(definition["body"])
+    def __init__(self, definition=None):
+        if definition is not None:
+            if valid_definition(definition, "UsageCompletion"):
+                if definition["valuepart"] is None:
+                    self.valuepart = None
+                else:
+                    self.valuepart = ValuePart(definition["valuepart"])
+                self.body = UsageBody(definition["body"])
+        else:
+            self.valuepart = None
+            self.body = UsageBody()
 
     def dump(self):
         output = []
@@ -2049,14 +2626,31 @@ class UsageCompletion:
         output.append(self.body.dump())
         return "".join(output)
 
+    def get_definition(self):
+        vp = None
+        if self.valuepart is not None:
+            vp = self.valuepart.get_definition()
+
+        return {
+            "name": self.__class__.__name__,
+            "valuepart": vp,
+            "body": self.body.get_definition(),
+        }
+
 
 class UsageBody:
-    def __init__(self, definition):
-        if valid_definition(definition, "UsageBody"):
-            self.body = DefinitionBody(definition["body"])
+    def __init__(self, definition=None):
+        if definition is not None:
+            if valid_definition(definition, "UsageBody"):
+                self.body = DefinitionBody(definition["body"])
+        else:
+            self.body = DefinitionBody()
 
     def dump(self):
         return self.body.dump()
+
+    def get_definition(self):
+        return {"name": self.__class__.__name__, "body": self.body.get_definition()}
 
 
 class PackageMember:
@@ -2116,16 +2710,34 @@ class Package:
 
 
 class Identification:
-    def __init__(self, definition):
-        if valid_definition(definition, "Identification"):
-            if definition["declaredShortName"] == None:
-                self.declaredShortName = None
-            else:
-                self.declaredShortName = "<" + definition["declaredShortName"] + ">"
-            self.declaredName = definition["declaredName"]
+    def __init__(self, definition=None):
+        if definition is not None:
+            if valid_definition(definition, "Identification"):
+                if definition["declaredShortName"] == None:
+                    self.declaredShortName = None
+                else:
+                    if definition["declaredShortName"][0] == "<":
+                        definition["declaredShortName"] = definition[
+                            "declaredShortName"
+                        ][1:]
+                    if definition["declaredShortName"][-1] == ">":
+                        definition["declaredShortName"] = definition[
+                            "declaredShortName"
+                        ][:-1]
+                    self.declaredShortName = "<" + definition["declaredShortName"] + ">"
+                self.declaredName = definition["declaredName"]
+        else:
+            self.declaredName = None
+            self.declaredShortName = None
 
     def dump(self):
         return " ".join(filter(None, (self.declaredShortName, self.declaredName)))
+
+    def get_definition(self):
+        output = {"name": self.__class__.__name__}
+        output["declaredShortName"] = self.declaredShortName
+        output["declaredName"] = self.declaredName
+        return output
 
 
 class PackageDeclaration:
@@ -2317,7 +2929,7 @@ class ImportPrefix:
 class ImportedNamespace:
     # The grammar for this file is currently broken.
     def __init__(self, definition):
-        if valid_definition(definition, "ImportedNamespace"):
+        if valid_definition(definition, self.__class__.__name__):
             self.namespaces = QualifiedName(definition["namespace"])
 
     def dump(self):
@@ -2333,6 +2945,12 @@ class QualifiedName:
 
     def dump(self):
         return "::".join(self.names)
+
+    def get_definition(self):
+        output = {"name": self.__class__.__name__}
+        output["name1"] = self.names[0]
+        output["names"] = self.names[1:]
+        return output
 
 
 class VisibilityIndicator:

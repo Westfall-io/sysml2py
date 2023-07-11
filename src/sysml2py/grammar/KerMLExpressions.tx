@@ -295,27 +295,16 @@ ExtentExpression :
 
 PrimaryExpression :
 	base=BaseExpression
-	(  '.'
-	  ownedRelationship += FeatureChainMember
-	)?
-	( (
-	    operator = '#' '(' operand += SequenceExpression ')'
-	  |
-	    operator = '[' operand += SequenceExpression ']'
-	  |  '->'
-	    ownedRelationship += ReferenceTyping
-	    ( operand += BodyExpression
-	    | operand += FunctionReferenceExpression
-	    | ArgumentList
-	    )
-	  |  '.'
-	    operand += BodyExpression
-	  |  '.?'
-	    operand += BodyExpression
+	(  '.' ownedRelationship += FeatureChainMember )?
+	(
+    ( operator += '#' '(' operand += SequenceExpression ')'
+      | operator += '[' operand += SequenceExpression ']'
+      | operator += '->' ownedRelationship += ReferenceTyping
+        ( operand += BodyExpression | operand += FunctionReferenceExpression | operand+= ArgumentList )
+      |  operator += '.' operand += BodyExpression
+      |  operator += '.?' operand += BodyExpression
 	  )
-	  (  '.'
-	  	ownedRelationship += FeatureChainMember
-	  )?
+	  (  '.' ownedRelationship += FeatureChainMember )?
 	)*
 ;
 
@@ -379,11 +368,7 @@ BodyParameter :
 // Sequence Expressions
 
 SequenceExpression :
-	OwnedExpression
-	( ','
-	|  operator = ','
-	  operand += SequenceExpression
-	)?
+	ownedRelationship=OwnedExpression ( ',' |  operator = ',' operand += SequenceExpression)?
 ;
 
 // Feature Reference Expressions
