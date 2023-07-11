@@ -11,6 +11,7 @@ __author__ = "Christopher Cox"
 
 from sysml2py.usage import Item, Attribute, Part
 
+
 def load(fp):
     """SysML load from file pointer
 
@@ -35,7 +36,7 @@ def load(fp):
 
     """
     import io
-    
+
     if not isinstance(fp, io.TextIOWrapper):
         raise TypeError(
             f"the SysML object must be _io.TextIOWrapper, "
@@ -69,8 +70,8 @@ def loads(s, formatting="json"):
 
     """
     import importlib.resources as pkg_resources
-    
-    from textx import metamodel_from_file,TextXSyntaxError
+
+    from textx import metamodel_from_file, TextXSyntaxError
 
     import sysml2py
     from sysml2py.formatting import reformat
@@ -91,6 +92,7 @@ def loads(s, formatting="json"):
     except TextXSyntaxError as e:
         print(e)
         import sys
+
         sys.exit()
 
     if formatting == "json":
