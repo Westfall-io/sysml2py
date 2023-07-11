@@ -11,10 +11,11 @@ classes consistent with the [SysML v2.0 standard](https://github.com/Systems-Mod
 sysml2py requires the following Python packages:
 - [textX](https://github.com/textX/textX)
 - [pyyaml](https://github.com/yaml/pyyaml)
+- [astropy](https://github.com/astropy/astropy)
 
 ## Installation
 
-Multiple installation methods are supported by poliastro, including:
+Multiple installation methods are supported by sysml2py, including:
 
 |                             **Logo**                              | **Platform** |                                    **Command**                                    |
 |:-----------------------------------------------------------------:|:------------:|:---------------------------------------------------------------------------------:|
@@ -24,6 +25,41 @@ Multiple installation methods are supported by poliastro, including:
 ## Documentation
 
 Documentation can be found [here.](https://westfall-io.github.io/sysml2py/)
+
+### Basic Usage
+
+The code below will create a part called Stage 1, with a shortname of <'3.1'>
+referencing a specific requirement or document. It has a mass attribute of 100
+kg. It has a thrust attribute of 1000 N. These attributes are created and placed
+as a child of the part. Next, we recall the part value for thrust and add 199 N.
+Finally, we can dump the output from this class as grammar output and load it
+into the classtree function which takes the initial grammar and converts it into
+classes which correctly format the output.
+```
+  from sysml2py.formatting import classtree
+  from sysml2py import Attribute, Part
+
+  import astropy.units as u
+  a = Attribute()._set_name('mass')
+  a.set_value(100*u.kg)
+  b = Attribute()._set_name('thrust')
+  b.set_value(1000*u.N)
+  c = Part()._set_name("Stage_1")._set_name("'3.1'", short=True)
+  c._set_child(a)
+  c._set_child(b)
+  v = "Stage_1.thrust"
+  c._get_child(v).set_value(c._get_child(v).get_value()+199*u.N)
+  print(classtree(c.dump()).dump())
+```
+
+It will output the following, which isn't yet fully correct as we need to import
+the SI units to be valid SysML.
+```
+  part <'3.1'> Stage_1 {
+    attribute mass= 100.0 [kg];
+    attribute thrust= 1199.0 [N];
+  }
+```
 
 ## License
 sysml2py is released under the MIT license, hence allowing commercial use of the library.
