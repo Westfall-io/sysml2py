@@ -150,7 +150,7 @@ class Usage:
         if hasattr(self.grammar, "usage"):
             path = self.grammar.usage.declaration.declaration
         elif hasattr(self.grammar, "definition"):
-            path = self.grammar.definition.declaration.declaration
+            path = self.grammar.definition.declaration
         else:
             if hasattr(self.grammar.declaration, "declaration"):
                 path = self.grammar.declaration.declaration
