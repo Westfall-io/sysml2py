@@ -33,7 +33,7 @@ from sysml2py.grammar.classes import (
     PortUsage,
     PortDefinition,
     DefaultReferenceUsage,
-    RefPrefix
+    RefPrefix,
 )
 
 
@@ -51,7 +51,7 @@ class Usage:
             body.append(
                 DefinitionBodyItem(abc.dump(child="DefinitionBody")).get_definition()
             )
-            
+
         if len(body) > 0:
             getattr(self.grammar, subgrammar).completion.body.body = DefinitionBody(
                 {"name": "DefinitionBody", "ownedRelatedElement": body}
@@ -156,10 +156,10 @@ class Usage:
                 path = self.grammar.declaration.declaration
             else:
                 path = self.grammar.declaration
-        
+
         if path.identification is None:
             path.identification = Identification()
-            
+
         if short:
             path.identification.declaredShortName = "<" + name + ">"
         else:
@@ -267,17 +267,17 @@ class Usage:
                     print(child.children.__class__.__name__)
                     raise NotImplementedError
         return self
-    
+
     def add_directed_feature(self, direction, name=str(uuidlib.uuid4())):
         self._set_child(DefaultReference()._set_name(name).set_direction(direction))
         return self
-    
+
     def modify_directed_feature(self, direction, name):
         child = self._get_child(name)
         if child is not None:
             pass
         else:
-            raise AttributeError('Invalid Feature Name or Chain')
+            raise AttributeError("Invalid Feature Name or Chain")
 
 
 class Attribute(Usage):
@@ -606,7 +606,8 @@ class Item(Usage):
             self.grammar = ItemDefinition()
         else:
             self.grammar = ItemUsage()
-            
+
+
 class Port(Usage):
     def __init__(self, definition=False, name=None):
         Usage.__init__(self)
@@ -614,32 +615,36 @@ class Port(Usage):
             self.grammar = PortDefinition()
         else:
             self.grammar = PortUsage()
-        
+
+
 class DefaultReference(Usage):
     def __init__(self):
         Usage.__init__(self)
         self.grammar = DefaultReferenceUsage()
-        
+
     def set_direction(self, direction):
         r = RefPrefix()
-        if direction == 'in':
+        if direction == "in":
             r.direction.isIn = True
-        elif direction == 'out':
+        elif direction == "out":
             r.direction.isOut = True
-        elif direction == 'inout':
+        elif direction == "inout":
             r.direction.isInOut = True
         else:
             raise NotImplementedError
         self.grammar.prefix = r
         return self
-    
+
     def usage_dump(self, child):
         # This is a usage.
 
         self._ensure_body("definition")
 
         # Add packaging
-        package = {"name": "NonOccurrenceUsageElement", "ownedRelatedElement": self.grammar.get_definition()}
+        package = {
+            "name": "NonOccurrenceUsageElement",
+            "ownedRelatedElement": self.grammar.get_definition(),
+        }
 
         if child == "DefinitionBody":
             package = {
@@ -658,7 +663,7 @@ class DefaultReference(Usage):
             }
 
         return package
-    
+
     def dump(self, child=None):
         package = self.usage_dump(child)
 
@@ -683,4 +688,3 @@ class DefaultReference(Usage):
                 )
 
         return package
-        
