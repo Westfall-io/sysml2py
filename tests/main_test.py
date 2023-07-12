@@ -11,6 +11,7 @@ import string
 from sysml2py import loads
 from sysml2py.formatting import classtree
 
+
 def remove_comments(string):
     pattern = r"(\".*?\"|\'.*?\')|(//[^\r\n]*$)"
     # first group captures quoted strings (double or single)
