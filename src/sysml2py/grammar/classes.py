@@ -272,17 +272,20 @@ class DefaultInterfaceEnd:
 
 
 class PortDefinition:
-    def __init__(self, definition):
-        if valid_definition(definition, self.__class__.__name__):
-            self.keyword = "port def"
-            self.prefix = None
-            self.definition = None
-
-            if definition["prefix"] is not None:
-                self.prefix = DefinitionPrefix(definition["prefix"])
-
-            if definition["definition"] is not None:
-                self.definition = Definition(definition["definition"])
+    def __init__(self, definition=None):
+        self.keyword = "port def"
+        self.prefix = None
+        if definition is not None:
+            if valid_definition(definition, self.__class__.__name__):
+                if definition["prefix"] is not None:
+                    self.prefix = DefinitionPrefix(definition["prefix"])
+    
+                if definition["definition"] is not None:
+                    self.definition = Definition(definition["definition"])
+                else:
+                    raise AttributeError('Definition is required.')
+        else:
+            self.definition = Definition()
 
     def dump(self):
         output = []
@@ -295,6 +298,16 @@ class PortDefinition:
             output.append(self.definition.dump())
 
         return " ".join(output)
+    
+    def get_definition(self):
+        output = {
+            'name': self.__class__.__name__,
+            'prefix': None}
+        if self.prefix is not None:
+            output['prefix'] = self.prefix.get_definition()
+            
+        output['definition'] = self.definition.get_definition()
+        return output
 
 
 class DefinitionPrefix:
@@ -966,19 +979,22 @@ class NonOccurrenceUsageElement:
 
 
 class DefaultReferenceUsage:
-    def __init__(self, definition):
-        if valid_definition(definition, "DefaultReferenceUsage"):
-            if definition["prefix"] is not None:
-                self.prefix = RefPrefix(definition["prefix"])
-            else:
-                self.prefix = None
-
-            self.declaration = UsageDeclaration(definition["declaration"])
-            if definition["valuepart"] is not None:
-                self.valuepart = ValuePart(definition["valuepart"])
-            else:
-                self.valuepart = None
-            self.body = UsageBody(definition["body"])
+    def __init__(self, definition=None):
+        self.prefix = None
+        self.valuepart = None
+        if definition is not None:
+            if valid_definition(definition, "DefaultReferenceUsage"):
+                if definition["prefix"] is not None:
+                    self.prefix = RefPrefix(definition["prefix"])
+                    
+                self.declaration = UsageDeclaration(definition["declaration"])
+                if definition["valuepart"] is not None:
+                    self.valuepart = ValuePart(definition["valuepart"])
+                    
+                self.body = UsageBody(definition["body"])
+        else:
+            self.declaration = UsageDeclaration()
+            self.body = UsageBody()
 
     def dump(self):
         output = []
@@ -990,6 +1006,19 @@ class DefaultReferenceUsage:
         output.append(self.body.dump())
 
         return " ".join(output)
+    
+    def get_definition(self):
+        output = {"name": self.__class__.__name__,
+                  "prefix": None,
+                  "valuepart": None}
+        if self.prefix is not None:
+            output['prefix'] = self.prefix.get_definition()
+        
+        if self.valuepart is not None:
+            output['valuepart'] = self.valuepart.get_definition()
+        output['declaration'] = self.declaration.get_definition()    
+        output['body'] = self.body.get_definition()
+        return output
 
 
 class ValuePart:
@@ -1741,17 +1770,21 @@ class InterfaceEnd:
 
 
 class PortUsage:
-    def __init__(self, definition):
-        if valid_definition(definition, self.__class__.__name__):
+    def __init__(self, definition=None):
+        self.keyword = "port"
+        if definition is not None:
+            if valid_definition(definition, self.__class__.__name__):
+                self.prefix = None
+                self.usage = None
+    
+                if definition["prefix"] is not None:
+                    self.prefix = OccurrenceUsagePrefix(definition["prefix"])
+    
+                if definition["usage"] is not None:
+                    self.usage = Usage(definition["usage"])
+        else:
             self.prefix = None
-            self.keyword = "port"
-            self.usage = None
-
-            if definition["prefix"] is not None:
-                self.prefix = OccurrenceUsagePrefix(definition["prefix"])
-
-            if definition["usage"] is not None:
-                self.usage = Usage(definition["usage"])
+            self.usage = Usage()
 
     def dump(self):
         output = []
@@ -1764,6 +1797,15 @@ class PortUsage:
             output.append(self.usage.dump())
 
         return " ".join(output)
+    
+    def get_definition(self):
+        output = {"name": self.__class__.__name__, "prefix": None}
+        if self.prefix is not None:
+            output["prefix"] = self.prefix.get_definition()
+
+        output["usage"] = self.usage.get_definition()
+
+        return output
 
 
 class ConnectionUsage:
@@ -2002,23 +2044,33 @@ class BasicUsagePrefix:
 
 
 class RefPrefix:
-    def __init__(self, definition):
-        if valid_definition(definition, self.__class__.__name__):
-            if definition["direction"] is not None:
-                self.direction = FeatureDirection(definition["direction"])
-            else:
-                self.direction = None
-
-            self.isAbstract = definition["isAbstract"]
-            self.isVariation = definition["isVariation"]
-            self.isReadOnly = definition["isReadOnly"]
-            self.isDerived = definition["isDerived"]
-            self.isEnd = definition["isEnd"]
+    def __init__(self, definition=None):
+        self.direction = None
+        if definition is not None:
+            if valid_definition(definition, self.__class__.__name__):
+                if definition["direction"] is not None:
+                    self.direction = FeatureDirection(definition["direction"])
+                    
+                self.isAbstract = definition["isAbstract"]
+                self.isVariation = definition["isVariation"]
+                self.isReadOnly = definition["isReadOnly"]
+                self.isDerived = definition["isDerived"]
+                self.isEnd = definition["isEnd"]
+                
+        else:
+            self.direction = FeatureDirection()
+            self.isAbstract = False
+            self.isVariation = False
+            self.isReadOnly = False
+            self.isDerived = False
+            self.isEnd = False
 
     def dump(self):
         output = []
         if self.direction is not None:
-            output.append(self.direction.dump())
+            direction = self.direction.dump()
+            if not direction == "":
+                output.append(direction)
 
         if self.isAbstract:
             output.append("abstract")
@@ -2035,14 +2087,29 @@ class RefPrefix:
             output.append("end")
 
         return " ".join(output)
+    
+    def get_definition(self):
+        output = {'name': self.__class__.__name__}
+        output["isAbstract"] = self.isAbstract
+        output["isVariation"] = self.isVariation
+        output["isReadOnly"] = self.isReadOnly
+        output["isDerived"] = self.isDerived
+        output["isEnd"] = self.isEnd
+        output['direction'] = self.direction.get_definition()
+        return output
 
 
 class FeatureDirection:
-    def __init__(self, definition):
-        if valid_definition(definition, self.__class__.__name__):
-            self.isIn = definition["in"] == "in "
-            self.isOut = definition["out"] == "out"
-            self.isInOut = definition["inout"] == "inout"
+    def __init__(self, definition=None):
+        if definition is not None:
+            if valid_definition(definition, self.__class__.__name__):
+                self.isIn = definition["in"] == "in "
+                self.isOut = definition["out"] == "out"
+                self.isInOut = definition["inout"] == "inout"
+        else:
+            self.isIn = False
+            self.isOut = False
+            self.isInOut = False
 
     def dump(self):
         if self.isInOut:
@@ -2052,7 +2119,23 @@ class FeatureDirection:
         elif self.isOut:
             return "out"
         else:
-            raise NotImplementedError
+            return ""
+            
+    def get_definition(self):
+        output = {
+            'name': self.__class__.__name__,
+            'in': "",
+            'out': "",
+            'inout': ''}
+        if self.isIn:
+            output["in"] = 'in '
+        
+        if self.isOut:
+            output["out"] = "out"
+            
+        if self.isInOut:
+            output["inout"] = "inout"
+        return output
 
 
 class ItemUsage:
