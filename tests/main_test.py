@@ -11,6 +11,7 @@ import string
 from sysml2py import loads
 from sysml2py.formatting import classtree
 
+
 def remove_comments(string):
     pattern = r"(\".*?\"|\'.*?\')|(//[^\r\n]*$)"
     # first group captures quoted strings (double or single)
@@ -27,12 +28,14 @@ def remove_comments(string):
 
     return regex.sub(_replacer, string)
 
+
 def strip_ws(text):
     text = remove_comments(text)
     text = text.replace("specializes", ":>")
     text = text.replace("subsets", ":>")
     text = text.replace("redefines", ":>>")
     return text.translate(str.maketrans("", "", string.whitespace))
+
 
 # def test_package():
 #     text = "package Package1;"

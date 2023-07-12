@@ -8,13 +8,10 @@ Created on Tue Jul 11 10:14:18 2023
 
 import uuid as uuidlib
 
-from sysml2py.grammar.classes import (
-    Identification,
-    PackageMember,
-    PackageBody
-)
+from sysml2py.grammar.classes import Identification, PackageMember, PackageBody
 
 from sysml2py.grammar.classes import Package as PackageGrammar
+
 
 class Package:
     def __init__(self):
@@ -22,25 +19,17 @@ class Package:
         self.children = []
         self.typedby = None
         self.grammar = PackageGrammar()
-    
+
     def _set_name(self, name, short=False):
         if short:
             if self.grammar.declaration.identification is None:
-                self.grammar.declaration.identification = (
-                    Identification()
-                )
-            self.grammar.declaration.identification.declaredShortName = (
-                "<" + name + ">"
-            )
+                self.grammar.declaration.identification = Identification()
+            self.grammar.declaration.identification.declaredShortName = "<" + name + ">"
         else:
             self.name = name
             if self.grammar.declaration.identification is None:
-                self.grammar.declaration.identification = (
-                    Identification()
-                )
-            self.grammar.declaration.identification.declaredName = (
-                name
-            )
+                self.grammar.declaration.identification = Identification()
+            self.grammar.declaration.identification.declaredName = name
 
         return self
 
@@ -69,12 +58,12 @@ class Package:
                     return child
                 else:
                     return child._get_child(featurechain)
-                
+
     def _ensure_body(self):
         # Add children
         body = []
         for abc in self.children:
-            v = abc.dump(child='PackageBody')
+            v = abc.dump(child="PackageBody")
             if isinstance(v, list):
                 for subchild in v:
                     body.append(PackageMember(subchild).get_definition())
@@ -85,11 +74,10 @@ class Package:
                 {"name": "PackageBody", "ownedRelationship": body}
             )
         return self
-                
+
     def dump(self, child=None):
-        
         self._ensure_body()
-            
+
         package = {
             "name": "DefinitionElement",
             "ownedRelatedElement": self.grammar.get_definition(),
