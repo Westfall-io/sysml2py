@@ -27,7 +27,7 @@ jobs:
       - name: Test with pytest
         run: |
           pip install pytest pytest-cov pytest-timeout
-          pytest --timeout=300 tests/main_test.py --doctest-modules --junitxml=junit/test-results-${{ matrix.python-version }}.xml --cov=com --cov-report=xml --cov-report=html
+          pytest --timeout=300 . --doctest-modules --junitxml=junit/test-results-${{ matrix.python-version }}.xml --cov=com --cov-report=xml --cov-report=html
       - name: Upload pytest test results
         uses: actions/upload-artifact@v3
         with:
