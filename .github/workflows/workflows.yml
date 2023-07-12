@@ -34,7 +34,7 @@ jobs:
       - name: Test with pytest
         run: |
           pip install pytest-timeout pytest-html
-          pytest --timeout=300 . --doctest-modules --html=report-${{ matrix.python-version }}.html --self-contained-html --junitxml=junit/test-results-${{ matrix.python-version }}.xml
+          pytest --timeout=300 tests --doctest-modules --html=report-${{ matrix.python-version }}.html --self-contained-html --junitxml=junit/test-results-${{ matrix.python-version }}.xml
       - name: Upload pytest test results
         uses: actions/upload-artifact@v3
         with:

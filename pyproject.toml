@@ -27,6 +27,11 @@ where = ["src/sysml2py", "src"]
 [tool.setuptools.package-data]
 grammar = ["*.tx"]
 
+[tool.pytest.ini_options]
+pythonpath = [
+  "src"
+]
+
 [tool.semantic_release]
 branch = "main"
 version_variable = "pyproject.toml:version"
