@@ -7,16 +7,9 @@ Created on Mon May 29 23:20:18 2023
 """
 import re
 import string
-import os
-import sys
-
-print("CWD:")
-print(os.getcwd())
-sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "./src")))
 
 from sysml2py import loads
 from sysml2py.formatting import classtree
-
 
 def remove_comments(string):
     pattern = r"(\".*?\"|\'.*?\')|(//[^\r\n]*$)"
@@ -34,14 +27,12 @@ def remove_comments(string):
 
     return regex.sub(_replacer, string)
 
-
 def strip_ws(text):
     text = remove_comments(text)
     text = text.replace("specializes", ":>")
     text = text.replace("subsets", ":>")
     text = text.replace("redefines", ":>>")
     return text.translate(str.maketrans("", "", string.whitespace))
-
 
 # def test_package():
 #     text = "package Package1;"

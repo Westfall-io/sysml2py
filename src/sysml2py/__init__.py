@@ -7,12 +7,7 @@ Created on Mon May 29 23:26:16 2023
 """
 
 __all__ = ["load", "loads"]
-__author__ = "Christopher Cox"
-
-import os
-import sys
-
-sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "./src")))
+__author__ = "Christopher Cox"s
 
 from sysml2py.usage import Item, Attribute, Part
 from sysml2py.definition import Package
