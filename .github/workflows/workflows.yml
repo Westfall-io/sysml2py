@@ -26,7 +26,7 @@ jobs:
           pip install -r requirements.txt
       - name: Test with pytest
         run: |
-          pip install pytest pytest-cov pytest-timeout
+          pip install pytest pytest-cov pytest-timeout pytest-html
           pytest --timeout=300 . --doctest-modules --html=report-${{ matrix.python-version }}.html --self-contained-html --junitxml=junit/test-results-${{ matrix.python-version }}.xml --cov=com --cov-report=xml --cov-report=html
       - name: Upload pytest test results
         uses: actions/upload-artifact@v3
