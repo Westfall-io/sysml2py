@@ -30,6 +30,10 @@ from sysml2py.grammar.classes import (
     PartDefinition,
     ItemUsage,
     ItemDefinition,
+    PortUsage,
+    PortDefinition,
+    DefaultReferenceUsage,
+    RefPrefix,
 )
 
 
@@ -47,8 +51,9 @@ class Usage:
             body.append(
                 DefinitionBodyItem(abc.dump(child="DefinitionBody")).get_definition()
             )
+
         if len(body) > 0:
-            self.grammar.getattr(subgrammar).completion.body.body = DefinitionBody(
+            getattr(self.grammar, subgrammar).completion.body.body = DefinitionBody(
                 {"name": "DefinitionBody", "ownedRelatedElement": body}
             )
         return self
@@ -143,43 +148,25 @@ class Usage:
 
     def _set_name(self, name, short=False):
         if hasattr(self.grammar, "usage"):
-            if short:
-                if self.grammar.usage.declaration.declaration.identification is None:
-                    self.grammar.usage.declaration.declaration.identification = (
-                        Identification()
-                    )
-                self.grammar.usage.declaration.declaration.identification.declaredShortName = (
-                    "<" + name + ">"
-                )
-            else:
-                self.name = name
-                if self.grammar.usage.declaration.declaration.identification is None:
-                    self.grammar.usage.declaration.declaration.identification = (
-                        Identification()
-                    )
-                self.grammar.usage.declaration.declaration.identification.declaredName = (
-                    name
-                )
-
-            return self
+            path = self.grammar.usage.declaration.declaration
+        elif hasattr(self.grammar, "definition"):
+            path = self.grammar.definition.declaration
         else:
-            if short:
-                if self.grammar.definition.declaration.identification is None:
-                    self.grammar.definition.declaration.identification = (
-                        Identification()
-                    )
-                self.grammar.definition.declaration.identification.declaredShortName = (
-                    "<" + name + ">"
-                )
+            if hasattr(self.grammar.declaration, "declaration"):
+                path = self.grammar.declaration.declaration
             else:
-                self.name = name
-                if self.grammar.definition.declaration.identification is None:
-                    self.grammar.definition.declaration.identification = (
-                        Identification()
-                    )
-                self.grammar.definition.declaration.identification.declaredName = name
+                path = self.grammar.declaration
 
-            return self
+        if path.identification is None:
+            path.identification = Identification()
+
+        if short:
+            path.identification.declaredShortName = "<" + name + ">"
+        else:
+            self.name = name
+            path.identification.declaredName = name
+
+        return self
 
     def _get_name(self):
         return self.grammar.usage.declaration.declaration.identification.declaredName
@@ -280,6 +267,17 @@ class Usage:
                     print(child.children.__class__.__name__)
                     raise NotImplementedError
         return self
+
+    def add_directed_feature(self, direction, name=str(uuidlib.uuid4())):
+        self._set_child(DefaultReference()._set_name(name).set_direction(direction))
+        return self
+
+    def modify_directed_feature(self, direction, name):
+        child = self._get_child(name)
+        if child is not None:
+            pass
+        else:
+            raise AttributeError("Invalid Feature Name or Chain")
 
 
 class Attribute(Usage):
@@ -608,3 +606,85 @@ class Item(Usage):
             self.grammar = ItemDefinition()
         else:
             self.grammar = ItemUsage()
+
+
+class Port(Usage):
+    def __init__(self, definition=False, name=None):
+        Usage.__init__(self)
+        if definition:
+            self.grammar = PortDefinition()
+        else:
+            self.grammar = PortUsage()
+
+
+class DefaultReference(Usage):
+    def __init__(self):
+        Usage.__init__(self)
+        self.grammar = DefaultReferenceUsage()
+
+    def set_direction(self, direction):
+        r = RefPrefix()
+        if direction == "in":
+            r.direction.isIn = True
+        elif direction == "out":
+            r.direction.isOut = True
+        elif direction == "inout":
+            r.direction.isInOut = True
+        else:
+            raise NotImplementedError
+        self.grammar.prefix = r
+        return self
+
+    def usage_dump(self, child):
+        # This is a usage.
+
+        self._ensure_body("definition")
+
+        # Add packaging
+        package = {
+            "name": "NonOccurrenceUsageElement",
+            "ownedRelatedElement": self.grammar.get_definition(),
+        }
+
+        if child == "DefinitionBody":
+            package = {
+                "name": "NonOccurrenceUsageMember",
+                "prefix": None,
+                "ownedRelatedElement": [package],
+            }
+
+            package = {"name": "DefinitionBodyItem", "ownedRelationship": [package]}
+        elif "PackageBody":
+            package = {"name": "UsageElement", "ownedRelatedElement": package}
+            package = {
+                "name": "PackageMember",
+                "ownedRelatedElement": package,
+                "prefix": None,
+            }
+
+        return package
+
+    def dump(self, child=None):
+        package = self.usage_dump(child)
+
+        if child is None:
+            package = {
+                "name": "PackageBodyElement",
+                "ownedRelationship": [package],
+                "prefix": None,
+            }
+
+        # Add the typed by definition to the package output
+        if self.typedby is not None:
+            if child is None:
+                package["ownedRelationship"].insert(
+                    0, self.typedby.dump(child="PackageBody")
+                )
+            elif child == "PackageBody":
+                package = [self.typedby.dump(child="PackageBody"), package]
+            else:
+                package["ownedRelationship"].insert(
+                    0, self.typedby.dump(child=child)["ownedRelationship"][0]
+                )
+
+        return package
