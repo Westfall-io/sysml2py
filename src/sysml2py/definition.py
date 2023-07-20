@@ -100,3 +100,6 @@ class Package:
             raise NotImplementedError
 
         return package
+    
+    def load_from_grammar(self, grammar):
+        return self

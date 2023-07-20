@@ -8,7 +8,7 @@ Created on Tue Jul 11 16:46:28 2023
 
 from sysml2py.formatting import classtree
 from sysml2py import Package, Item
-from sysml2py import loads
+from sysml2py import load_grammar as loads
 
 
 def test_package():
