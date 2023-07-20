@@ -17,13 +17,13 @@ def load_grammar(fp, formatting="json"):
     """SysML load from file pointer
 
     Deserialize ``fp`` (a ``.read()``-supporting file-like object containing
-    a SysML v2.0 document) or ``s`` (a ``str`` instance containing a SysML 
+    a SysML v2.0 document) or ``s`` (a ``str`` instance containing a SysML
     v2.0 document) to a Python dictionary object.
 
     Parameters
     ----------
     fp : _io.TextIOWrapper or str
-        File pointer to SysML v2.0 document or string instance of SysML v2.0 
+        File pointer to SysML v2.0 document or string instance of SysML v2.0
         document
 
     Returns
@@ -38,7 +38,7 @@ def load_grammar(fp, formatting="json"):
         Input was not _io.TextIOWrapper
 
     """
-    
+
     """SysML load from string
 
     Deserialize 
@@ -72,8 +72,7 @@ def load_grammar(fp, formatting="json"):
             f"the SysML object must be _io.TextIOWrapper or str "
             f"not {fp.__class__.__name__}"
         )
-        
-        
+
     import importlib.resources as pkg_resources
 
     from textx import metamodel_from_file, TextXSyntaxError
@@ -103,8 +102,9 @@ def load_grammar(fp, formatting="json"):
     if formatting == "json":
         return reformat(model)
     else:
-        return model 
-    
+        return model
+
+
 def load(fp):
     """SysML load from file pointer
 
