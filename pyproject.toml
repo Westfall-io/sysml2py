@@ -43,6 +43,7 @@ tag_commit = true
 commit_parser = "semantic_release.history.emoji_parser"
 patch_without_tag = true
 build_command = "pip install poetry && poetry build"
+#build_command = "pip install build && python -m build"
 
 [project.urls]
 "Homepage" = "https://github.com/Westfall-io/sysml2py"
