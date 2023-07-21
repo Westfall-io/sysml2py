@@ -8,7 +8,7 @@ Created on Mon May 29 23:20:18 2023
 import re
 import string
 
-from sysml2py import loads
+from sysml2py import load_grammar as loads
 from sysml2py.formatting import classtree
 
 
