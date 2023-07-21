@@ -7,13 +7,15 @@ Created on Fri Jun 30 23:23:31 2023
 """
 
 
-import os
+#import os
 
-os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+#os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
 import uuid as uuidlib
 
 import astropy.units as u
+
+from sysml2py.formatting import classtree
 
 from sysml2py.grammar.classes import (
     Identification,
@@ -117,8 +119,8 @@ class Usage:
             }
 
         return package
-
-    def dump(self, child=None):
+    
+    def _get_definition(self, child):
         if "usage" in self.grammar.__dict__:
             package = self.usage_dump(child)
         else:
@@ -135,16 +137,19 @@ class Usage:
         if self.typedby is not None:
             if child is None:
                 package["ownedRelationship"].insert(
-                    0, self.typedby.dump(child="PackageBody")
+                    0, self.typedby._get_definition(child="PackageBody")
                 )
             elif child == "PackageBody":
-                package = [self.typedby.dump(child="PackageBody"), package]
+                package = [self.typedby._get_definition(child="PackageBody"), package]
             else:
                 package["ownedRelationship"].insert(
-                    0, self.typedby.dump(child=child)["ownedRelationship"][0]
+                    0, self.typedby._get_definition(child=child)["ownedRelationship"][0]
                 )
 
         return package
+
+    def dump(self, child=None):
+        return classtree(self._get_definition(child)).dump()
 
     def _set_name(self, name, short=False):
         if hasattr(self.grammar, "usage"):
@@ -240,33 +245,48 @@ class Usage:
         return self
 
     def load_from_grammar(self, grammar):
+        #!TODO Typed By
         self.__init__()
         self.grammar = grammar
-        self.name = grammar.usage.declaration.declaration.identification.declaredName
-        if len(grammar.usage.completion.body.body.children) == 0:
-            pass
+        children = []
+        if 'usage' in self.grammar.__dict__:
+            # This is a usage
+            u_name = grammar.usage.declaration.declaration.identification.declaredName
+            a_children = grammar.usage.completion.body.body.children
+            
+            if len(a_children) > 0:
+                children = a_children[0].children[0].children
         else:
-            for child in (
-                grammar.usage.completion.body.body.children[0].children[0].children
-            ):
-                if child.children.__class__.__name__ == "AttributeUsage":
-                    self.children.append(Attribute().load_from_grammar(child.children))
-                elif child.children.__class__.__name__ == "StructureUsageElement":
-                    if child.children.children.__class__.__name__ == "PartUsage":
-                        self.children.append(
-                            Part().load_from_grammar(child.children.children)
-                        )
-                    elif child.children.children.__class__.__name__ == "ItemUsage":
-                        self.children.append(
-                            Item().load_from_grammar(child.children.children)
-                        )
-                    else:
-                        print(child.children.children.__class__.__name__)
-                        raise NotImplementedError
+            # This is a definition
+            u_name= grammar.definition.declaration.identification.declaredName
+            a_children = grammar.definition.body.children
+            if len(a_children) > 0:
+                children = a_children
+            
+        if u_name is not None:
+            self.name = u_name
+            
+        for child in children:
+            if child.children.__class__.__name__ == "AttributeUsage":
+                self.children.append(Attribute().load_from_grammar(child.children))
+            elif child.children.__class__.__name__ == "StructureUsageElement":
+                if child.children.children.__class__.__name__ == "PartUsage":
+                    self.children.append(
+                        Part().load_from_grammar(child.children.children)
+                    )
+                elif child.children.children.__class__.__name__ == "ItemUsage":
+                    self.children.append(
+                        Item().load_from_grammar(child.children.children)
+                    )
                 else:
-                    print(child.children.__class__.__name__)
+                    print(child.children.children.__class__.__name__)
                     raise NotImplementedError
+            else:
+                print(child.children.__class__.__name__)
+                raise NotImplementedError
+        
         return self
+            
 
     def add_directed_feature(self, direction, name=str(uuidlib.uuid4())):
         self._set_child(DefaultReference()._set_name(name).set_direction(direction))
