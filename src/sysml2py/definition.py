@@ -25,10 +25,10 @@ class Model:
         self.children = []
         self.typedby = None
         self.grammar = None
-        
+
     def load(self: type[ModelType], s: str) -> ModelType:
         from sysml2py import load_grammar
-        
+
         # Try to load the grammar from the string
         try:
             definition = load_grammar(s)
@@ -36,7 +36,7 @@ class Model:
             import sys
             print('Invalid SysML input, please correct the error.')
             sys.exit()
-        
+
         # Ensure this is valid
         if definition['name'] == 'PackageBodyElement':
             # This is a root element
@@ -45,7 +45,7 @@ class Model:
             import sys
             print('SysML does not match a base model.')
             sys.exit()
-        
+
         # Add each sub-element to children.
         member_grammar = []
         for member in definition:
@@ -57,11 +57,11 @@ class Model:
                     member_grammar.append(p._get_definition(child='PackageBody'))
                 else:
                     raise NotImplementedError
-        
+
         self.grammar = RootNamespace({'name': 'PackageBodyElement', 'ownedRelationship': member_grammar})
-        
+
         return self
-    
+
     def _ensure_body(self):
         # Add children
         body = []
@@ -72,19 +72,19 @@ class Model:
                     body.append(PackageMember(subchild).get_definition())
             else:
                 body.append(PackageMember(v).get_definition())
-                
+
         if len(body) > 0:
             self.grammar = RootNamespace({'name': 'PackageBodyElement', 'ownedRelationship': body})
-            
+
         return self
-    
+
     def _get_definition(self):
         return self.grammar.get_definition()
-    
+
     def dump(self):
         self._ensure_body()
         return classtree(self._get_definition()).dump()
-    
+
     def _set_child(self, child):
         self.children.append(child)
         return self
@@ -168,7 +168,7 @@ class Package:
             self.grammar.body = PackageBody(
                 {"name": "PackageBody", "ownedRelationship": body}
             )
-    
+
     def _get_definition(self, child):
         self._ensure_body()
 
@@ -192,12 +192,12 @@ class Package:
         if self.typedby is not None:
             # Packages cannot be typed, they should import from other packages
             raise NotImplementedError
-        
+
         return package
 
     def dump(self, child=None):
         return classtree(self._get_definition(child=False)).dump()
-    
+
     def load_from_grammar(self, grammar):
         self.name = grammar.declaration.identification.declaredName
         self.grammar = grammar
@@ -218,6 +218,6 @@ class Package:
                 else:
                     print(child.children[0].children[0].__class__.__name__)
                     raise NotImplementedError
-            
+
         #self.children.append()
         return self
