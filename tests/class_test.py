@@ -12,7 +12,7 @@ from sysml2py import load_grammar as loads
 
 
 def test_package():
-    p = classtree(Package().dump()).dump()
+    p = classtree(Package()._get_definition()).dump()
 
     text = """package ;"""
     q = classtree(loads(text)).dump()
@@ -22,7 +22,7 @@ def test_package():
 
 def test_package_name():
     name = "Rocket"
-    p = classtree(Package()._set_name(name).dump()).dump()
+    p = classtree(Package()._set_name(name)._get_definition()).dump()
 
     text = "package " + name + ";"
     q = classtree(loads(text)).dump()
@@ -32,7 +32,7 @@ def test_package_name():
 
 def test_package_shortname():
     name = "'3.1'"
-    p = classtree(Package()._set_name(name, short=True).dump()).dump()
+    p = classtree(Package()._set_name(name, short=True)._get_definition()).dump()
 
     text = "package <" + name + ">;"
     q = classtree(loads(text)).dump()
@@ -44,7 +44,7 @@ def test_package_setbothnames():
     name = "Rocket"
     shortname = "'3.1'"
     p = classtree(
-        Package()._set_name(name)._set_name(shortname, short=True).dump()
+        Package()._set_name(name)._set_name(shortname, short=True)._get_definition()
     ).dump()
 
     text = "package <" + shortname + "> " + name + ";"
@@ -63,7 +63,7 @@ def test_package_addchild():
     p1 = Package()._set_name("Rocket")
     p2 = Package()._set_name("Engine")
     p1._set_child(p2)
-    p = classtree(p1.dump()).dump()
+    p = classtree(p1._get_definition()).dump()
 
     text = """package Rocket {
        package Engine;
@@ -78,7 +78,7 @@ def test_package_get_child():
     p1 = Package()._set_name("Rocket")
     p2 = Package()._set_name("Engine")
     p1._set_child(p2)
-    p = classtree(p1._get_child("Rocket.Engine").dump()).dump()
+    p = classtree(p1._get_child("Rocket.Engine")._get_definition()).dump()
 
     text = """package Engine;"""
 
@@ -91,7 +91,7 @@ def test_package_get_child_method2():
     p1 = Package()._set_name("Rocket")
     p2 = Package()._set_name("Engine")
     p1._set_child(p2)
-    p = classtree(p1._get_child("Engine").dump()).dump()
+    p = classtree(p1._get_child("Engine")._get_definition()).dump()
 
     text = """package Engine;"""
 
@@ -106,7 +106,7 @@ def test_package_typed_child():
     i2 = Item()._set_name("Hydrogen")
     p1._set_child(i2)
     i2._set_typed_by(i1)
-    p = classtree(p1.dump()).dump()
+    p = classtree(p1._get_definition()).dump()
 
     text = """package Rocket {
        item def Fuel ;
