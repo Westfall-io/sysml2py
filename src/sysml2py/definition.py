@@ -12,12 +12,18 @@ from typing import TypeVar
 from textx import TextXSyntaxError
 
 from sysml2py.formatting import classtree
-from sysml2py.grammar.classes import Identification, PackageMember, PackageBody, RootNamespace
+from sysml2py.grammar.classes import (
+    Identification,
+    PackageMember,
+    PackageBody,
+    RootNamespace,
+)
 from sysml2py.grammar.classes import Package as PackageGrammar
 
 from sysml2py import Part, Item
 
 ModelType = TypeVar("Model", bound="Model")
+
 
 class Model:
     def __init__(self):
@@ -34,31 +40,37 @@ class Model:
             definition = load_grammar(s)
         except TextXSyntaxError:
             import sys
-            print('Invalid SysML input, please correct the error.')
+
+            print("Invalid SysML input, please correct the error.")
             sys.exit()
 
         # Ensure this is valid
-        if definition['name'] == 'PackageBodyElement':
+        if definition["name"] == "PackageBodyElement":
             # This is a root element
-            definition = definition['ownedRelationship']
+            definition = definition["ownedRelationship"]
         else:
             import sys
-            print('SysML does not match a base model.')
+
+            print("SysML does not match a base model.")
             sys.exit()
 
         # Add each sub-element to children.
         member_grammar = []
         for member in definition:
-            if member['ownedRelatedElement']['name'] == 'DefinitionElement':
-                de = member['ownedRelatedElement']
-                if de['ownedRelatedElement']['name'] == 'Package':
-                    p = Package().load_from_grammar(PackageGrammar(de['ownedRelatedElement']))
+            if member["ownedRelatedElement"]["name"] == "DefinitionElement":
+                de = member["ownedRelatedElement"]
+                if de["ownedRelatedElement"]["name"] == "Package":
+                    p = Package().load_from_grammar(
+                        PackageGrammar(de["ownedRelatedElement"])
+                    )
                     self.children.append(p)
-                    member_grammar.append(p._get_definition(child='PackageBody'))
+                    member_grammar.append(p._get_definition(child="PackageBody"))
                 else:
                     raise NotImplementedError
 
-        self.grammar = RootNamespace({'name': 'PackageBodyElement', 'ownedRelationship': member_grammar})
+        self.grammar = RootNamespace(
+            {"name": "PackageBodyElement", "ownedRelationship": member_grammar}
+        )
 
         return self
 
@@ -74,7 +86,9 @@ class Model:
                 body.append(PackageMember(v).get_definition())
 
         if len(body) > 0:
-            self.grammar = RootNamespace({'name': 'PackageBodyElement', 'ownedRelationship': body})
+            self.grammar = RootNamespace(
+                {"name": "PackageBodyElement", "ownedRelationship": body}
+            )
 
         return self
 
@@ -107,6 +121,7 @@ class Model:
                     return child
                 else:
                     return child._get_child(featurechain)
+
 
 class Package:
     def __init__(self):
@@ -202,22 +217,35 @@ class Package:
         self.name = grammar.declaration.identification.declaredName
         self.grammar = grammar
         for child in grammar.body.children:
-            if child.children[0].__class__.__name__ == 'UsageElement':
+            if child.children[0].__class__.__name__ == "UsageElement":
                 # PackageMember -> UsageElement
-                if child.children[0].children.children.children.__class__.__name__ == 'ItemUsage':
-                    self.children.append(Item().load_from_grammar(child.children[0].children.children.children))
+                if (
+                    child.children[0].children.children.children.__class__.__name__
+                    == "ItemUsage"
+                ):
+                    self.children.append(
+                        Item().load_from_grammar(
+                            child.children[0].children.children.children
+                        )
+                    )
                 else:
                     print(child.children[0].children[0].__class__.__name__)
                     raise NotImplementedError
             else:
                 # Not a UsageElement
-                if child.children[0].children[0].__class__.__name__ == 'Package':
-                    self.children.append(Package().load_from_grammar(child.children[0].children[0]))
-                elif child.children[0].children[0].__class__.__name__ == 'ItemDefinition':
-                    self.children.append(Item().load_from_grammar(child.children[0].children[0]))
+                if child.children[0].children[0].__class__.__name__ == "Package":
+                    self.children.append(
+                        Package().load_from_grammar(child.children[0].children[0])
+                    )
+                elif (
+                    child.children[0].children[0].__class__.__name__ == "ItemDefinition"
+                ):
+                    self.children.append(
+                        Item().load_from_grammar(child.children[0].children[0])
+                    )
                 else:
                     print(child.children[0].children[0].__class__.__name__)
                     raise NotImplementedError
 
-        #self.children.append()
+        # self.children.append()
         return self

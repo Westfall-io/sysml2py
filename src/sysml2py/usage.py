@@ -7,9 +7,9 @@ Created on Fri Jun 30 23:23:31 2023
 """
 
 
-#import os
+# import os
 
-#os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+# os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
 import uuid as uuidlib
 
@@ -119,7 +119,7 @@ class Usage:
             }
 
         return package
-    
+
     def _get_definition(self, child):
         if "usage" in self.grammar.__dict__:
             package = self.usage_dump(child)
@@ -249,23 +249,23 @@ class Usage:
         self.__init__()
         self.grammar = grammar
         children = []
-        if 'usage' in self.grammar.__dict__:
+        if "usage" in self.grammar.__dict__:
             # This is a usage
             u_name = grammar.usage.declaration.declaration.identification.declaredName
             a_children = grammar.usage.completion.body.body.children
-            
+
             if len(a_children) > 0:
                 children = a_children[0].children[0].children
         else:
             # This is a definition
-            u_name= grammar.definition.declaration.identification.declaredName
+            u_name = grammar.definition.declaration.identification.declaredName
             a_children = grammar.definition.body.children
             if len(a_children) > 0:
                 children = a_children
-            
+
         if u_name is not None:
             self.name = u_name
-            
+
         for child in children:
             if child.children.__class__.__name__ == "AttributeUsage":
                 self.children.append(Attribute().load_from_grammar(child.children))
@@ -284,9 +284,8 @@ class Usage:
             else:
                 print(child.children.__class__.__name__)
                 raise NotImplementedError
-        
+
         return self
-            
 
     def add_directed_feature(self, direction, name=str(uuidlib.uuid4())):
         self._set_child(DefaultReference()._set_name(name).set_direction(direction))

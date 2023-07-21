@@ -63,7 +63,7 @@ class RootNamespace:
     def load_package_body(self, definition):
         for member in definition:
             if isinstance(member, dict):
-            # Options here are PackageMember, ElementFilterMember, AliasMember, Import
+                # Options here are PackageMember, ElementFilterMember, AliasMember, Import
                 if member["name"] == "PackageMember":
                     memberclass = PackageMember(member)
                 elif member["name"] == "ElementFilterMember":
@@ -75,25 +75,27 @@ class RootNamespace:
                 else:
                     print(member["name"])
                     raise AttributeError("Error")
-    
+
                 self.children.append(memberclass)
             else:
                 print(member)
-                raise TypeError('Invalid definition, member was not type dict')
+                raise TypeError("Invalid definition, member was not type dict")
 
     def dump(self):
         output = []
         for child in self.children:
             output.append(child.dump())
         return beautify("\n".join(output))
-    
+
     def get_definition(self):
         output = {
-            'name': "PackageBodyElement", # !TODO This isn't always the case
-            'ownedRelationship': []}
+            "name": "PackageBodyElement",  # !TODO This isn't always the case
+            "ownedRelationship": [],
+        }
         for member in self.children:
-            output['ownedRelationship'].append(member.get_definition())
+            output["ownedRelationship"].append(member.get_definition())
         return output
+
 
 class DefinitionElement:
     def __init__(self, definition):

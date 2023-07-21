@@ -7,7 +7,8 @@ Created on Wed May 31 13:26:53 2023
 """
 
 from sysml2py.grammar.classes import RootNamespace
-#from sysml2py import Part
+
+# from sysml2py import Part
 
 
 def remove_classes(model):

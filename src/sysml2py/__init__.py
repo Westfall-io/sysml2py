@@ -139,5 +139,5 @@ def load(fp):
     return loads(fp.read())
 
 
-def loads(s:str):
+def loads(s: str):
     return Model().load(s)
