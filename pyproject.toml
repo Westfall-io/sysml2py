@@ -49,16 +49,15 @@ build_command = "pip install build && python -m build"
 "Bug Tracker" = "https://github.com/Westfall-io/sysml2py/issues"
 
 [tool.poetry]
-name = "poetry-demo"
+name = "sysml2py"
 version = "0.1.0"
 description = ""
-authors = ["Sébastien Eustace <sebastien@eustace.io>"]
+authors = ["Christopher Cox <chris.cox@westfall.io>"]
 readme = "README.md"
-packages = [{include = "poetry_demo"}]
+packages = [{include = "sysml2py"}]
 
 [tool.poetry.dependencies]
 python = "^3.9"
 textx = "^3.1.1"
 astropy = "^5.3.1"
 pyyaml = "^6.0.1"
-mypy = "^1.4.1"
