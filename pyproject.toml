@@ -1,6 +1,8 @@
 [build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
+#requires = ["setuptools>=61.0"]
+#build-backend = "setuptools.build_meta"
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "sysml2py"
@@ -12,6 +14,7 @@ description = "SysML v2.0 Parser"
 readme = "README.md"
 requires-python = ">=3.7"
 classifiers = [
+    "Development Status :: 3 - Alpha",
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
@@ -26,6 +29,11 @@ where = ["src/sysml2py", "src"]
 [tool.setuptools.package-data]
 grammar = ["*.tx"]
 
+[tool.pytest.ini_options]
+pythonpath = [
+  "src"
+]
+
 [tool.semantic_release]
 branch = "main"
 version_variable = "pyproject.toml:version"
@@ -39,3 +47,18 @@ build_command = "pip install build && python -m build"
 [project.urls]
 "Homepage" = "https://github.com/Westfall-io/sysml2py"
 "Bug Tracker" = "https://github.com/Westfall-io/sysml2py/issues"
+
+[tool.poetry]
+name = "poetry-demo"
+version = "0.1.0"
+description = ""
+authors = ["Sébastien Eustace <sebastien@eustace.io>"]
+readme = "README.md"
+packages = [{include = "poetry_demo"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+textx = "^3.1.1"
+astropy = "^5.3.1"
+pyyaml = "^6.0.1"
+mypy = "^1.4.1"

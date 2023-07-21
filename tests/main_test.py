@@ -5,21 +5,11 @@ Created on Mon May 29 23:20:18 2023
 
 @author: christophercox
 """
-import pytest
-import yaml
 import re
-
-import os
-import sys
-
-print("CWD:")
-print(os.getcwd())
-sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "./src")))
-
-from sysml2py import load, loads
-from sysml2py.formatting import classtree
-
 import string
+
+from sysml2py import load_grammar as loads
+from sysml2py.formatting import classtree
 
 
 def remove_comments(string):

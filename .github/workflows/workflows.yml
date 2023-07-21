@@ -24,14 +24,28 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+      - name: Test ${{ github.event.push.head }} coverage
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python -m pip install coveralls pytest
+          python -m coverage run --source=src -m pytest tests && coverage report
+          coveralls
       - name: Test with pytest
         run: |
-          pip install pytest pytest-cov pytest-timeout
-          pytest --timeout=300 tests/main_test.py --doctest-modules --junitxml=junit/test-results-${{ matrix.python-version }}.xml --cov=com --cov-report=xml --cov-report=html
+          pip install pytest-timeout pytest-html
+          pytest --timeout=300 tests --doctest-modules --html=report-${{ matrix.python-version }}.html --self-contained-html --junitxml=junit/test-results-${{ matrix.python-version }}.xml
       - name: Upload pytest test results
         uses: actions/upload-artifact@v3
         with:
-          name: pytest-results-${{ matrix.python-version }}
+          name: pytest-junit-results-${{ matrix.python-version }}
           path: junit/test-results-${{ matrix.python-version }}.xml
+        # Use always() to always run this step to publish test results when there are test failures
+        if: ${{ always() }}
+      - name: Upload pytest test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: pytest-html-results-${{ matrix.python-version }}
+          path: report-${{ matrix.python-version }}.html
         # Use always() to always run this step to publish test results when there are test failures
         if: ${{ always() }}

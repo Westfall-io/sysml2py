@@ -31,6 +31,7 @@ def beautify(string):
     ns = []
     # print(lines)
     for line in lines:
+        line = line.rstrip()
         if line == "}":
             level += -1
 
@@ -61,25 +62,39 @@ class RootNamespace:
 
     def load_package_body(self, definition):
         for member in definition:
-            # Options here are PackageMember, ElementFilterMember, AliasMember, Import
-            if member["name"] == "PackageMember":
-                memberclass = PackageMember(member)
-            elif member["name"] == "ElementFilterMember":
-                raise NotImplementedError
-            elif member["name"] == "AliasMember":
-                raise NotImplementedError
-            elif member["name"] == "Import":
-                raise NotImplementedError
-            else:
-                raise AttributeError("Error")
+            if isinstance(member, dict):
+                # Options here are PackageMember, ElementFilterMember, AliasMember, Import
+                if member["name"] == "PackageMember":
+                    memberclass = PackageMember(member)
+                elif member["name"] == "ElementFilterMember":
+                    raise NotImplementedError
+                elif member["name"] == "AliasMember":
+                    raise NotImplementedError
+                elif member["name"] == "Import":
+                    raise NotImplementedError
+                else:
+                    print(member["name"])
+                    raise AttributeError("Error")
 
-            self.children.append(memberclass)
+                self.children.append(memberclass)
+            else:
+                print(member)
+                raise TypeError("Invalid definition, member was not type dict")
 
     def dump(self):
         output = []
         for child in self.children:
             output.append(child.dump())
         return beautify("\n".join(output))
+
+    def get_definition(self):
+        output = {
+            "name": "PackageBodyElement",  # !TODO This isn't always the case
+            "ownedRelationship": [],
+        }
+        for member in self.children:
+            output["ownedRelationship"].append(member.get_definition())
+        return output
 
 
 class DefinitionElement:
@@ -270,17 +285,20 @@ class DefaultInterfaceEnd:
 
 
 class PortDefinition:
-    def __init__(self, definition):
-        if valid_definition(definition, self.__class__.__name__):
-            self.keyword = "port def"
-            self.prefix = None
-            self.definition = None
+    def __init__(self, definition=None):
+        self.keyword = "port def"
+        self.prefix = None
+        if definition is not None:
+            if valid_definition(definition, self.__class__.__name__):
+                if definition["prefix"] is not None:
+                    self.prefix = DefinitionPrefix(definition["prefix"])
 
-            if definition["prefix"] is not None:
-                self.prefix = DefinitionPrefix(definition["prefix"])
-
-            if definition["definition"] is not None:
-                self.definition = Definition(definition["definition"])
+                if definition["definition"] is not None:
+                    self.definition = Definition(definition["definition"])
+                else:
+                    raise AttributeError("Definition is required.")
+        else:
+            self.definition = Definition()
 
     def dump(self):
         output = []
@@ -293,6 +311,14 @@ class PortDefinition:
             output.append(self.definition.dump())
 
         return " ".join(output)
+
+    def get_definition(self):
+        output = {"name": self.__class__.__name__, "prefix": None}
+        if self.prefix is not None:
+            output["prefix"] = self.prefix.get_definition()
+
+        output["definition"] = self.definition.get_definition()
+        return output
 
 
 class DefinitionPrefix:
@@ -935,6 +961,13 @@ class UsageElement:
     def dump(self):
         return self.children.dump()
 
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "ownedRelatedElement": self.children.get_definition(),
+        }
+        return output
+
 
 class NonOccurrenceUsageElement:
     def __init__(self, definition):
@@ -957,19 +990,22 @@ class NonOccurrenceUsageElement:
 
 
 class DefaultReferenceUsage:
-    def __init__(self, definition):
-        if valid_definition(definition, "DefaultReferenceUsage"):
-            if definition["prefix"] is not None:
-                self.prefix = RefPrefix(definition["prefix"])
-            else:
-                self.prefix = None
+    def __init__(self, definition=None):
+        self.prefix = None
+        self.valuepart = None
+        if definition is not None:
+            if valid_definition(definition, "DefaultReferenceUsage"):
+                if definition["prefix"] is not None:
+                    self.prefix = RefPrefix(definition["prefix"])
 
-            self.declaration = UsageDeclaration(definition["declaration"])
-            if definition["valuepart"] is not None:
-                self.valuepart = ValuePart(definition["valuepart"])
-            else:
-                self.valuepart = None
-            self.body = UsageBody(definition["body"])
+                self.declaration = UsageDeclaration(definition["declaration"])
+                if definition["valuepart"] is not None:
+                    self.valuepart = ValuePart(definition["valuepart"])
+
+                self.body = UsageBody(definition["body"])
+        else:
+            self.declaration = UsageDeclaration()
+            self.body = UsageBody()
 
     def dump(self):
         output = []
@@ -981,6 +1017,17 @@ class DefaultReferenceUsage:
         output.append(self.body.dump())
 
         return " ".join(output)
+
+    def get_definition(self):
+        output = {"name": self.__class__.__name__, "prefix": None, "valuepart": None}
+        if self.prefix is not None:
+            output["prefix"] = self.prefix.get_definition()
+
+        if self.valuepart is not None:
+            output["valuepart"] = self.valuepart.get_definition()
+        output["declaration"] = self.declaration.get_definition()
+        output["body"] = self.body.get_definition()
+        return output
 
 
 class ValuePart:
@@ -1732,17 +1779,21 @@ class InterfaceEnd:
 
 
 class PortUsage:
-    def __init__(self, definition):
-        if valid_definition(definition, self.__class__.__name__):
+    def __init__(self, definition=None):
+        self.keyword = "port"
+        if definition is not None:
+            if valid_definition(definition, self.__class__.__name__):
+                self.prefix = None
+                self.usage = None
+
+                if definition["prefix"] is not None:
+                    self.prefix = OccurrenceUsagePrefix(definition["prefix"])
+
+                if definition["usage"] is not None:
+                    self.usage = Usage(definition["usage"])
+        else:
             self.prefix = None
-            self.keyword = "port"
-            self.usage = None
-
-            if definition["prefix"] is not None:
-                self.prefix = OccurrenceUsagePrefix(definition["prefix"])
-
-            if definition["usage"] is not None:
-                self.usage = Usage(definition["usage"])
+            self.usage = Usage()
 
     def dump(self):
         output = []
@@ -1755,6 +1806,15 @@ class PortUsage:
             output.append(self.usage.dump())
 
         return " ".join(output)
+
+    def get_definition(self):
+        output = {"name": self.__class__.__name__, "prefix": None}
+        if self.prefix is not None:
+            output["prefix"] = self.prefix.get_definition()
+
+        output["usage"] = self.usage.get_definition()
+
+        return output
 
 
 class ConnectionUsage:
@@ -1993,23 +2053,33 @@ class BasicUsagePrefix:
 
 
 class RefPrefix:
-    def __init__(self, definition):
-        if valid_definition(definition, self.__class__.__name__):
-            if definition["direction"] is not None:
-                self.direction = FeatureDirection(definition["direction"])
-            else:
-                self.direction = None
+    def __init__(self, definition=None):
+        self.direction = None
+        if definition is not None:
+            if valid_definition(definition, self.__class__.__name__):
+                if definition["direction"] is not None:
+                    self.direction = FeatureDirection(definition["direction"])
 
-            self.isAbstract = definition["isAbstract"]
-            self.isVariation = definition["isVariation"]
-            self.isReadOnly = definition["isReadOnly"]
-            self.isDerived = definition["isDerived"]
-            self.isEnd = definition["isEnd"]
+                self.isAbstract = definition["isAbstract"]
+                self.isVariation = definition["isVariation"]
+                self.isReadOnly = definition["isReadOnly"]
+                self.isDerived = definition["isDerived"]
+                self.isEnd = definition["isEnd"]
+
+        else:
+            self.direction = FeatureDirection()
+            self.isAbstract = False
+            self.isVariation = False
+            self.isReadOnly = False
+            self.isDerived = False
+            self.isEnd = False
 
     def dump(self):
         output = []
         if self.direction is not None:
-            output.append(self.direction.dump())
+            direction = self.direction.dump()
+            if not direction == "":
+                output.append(direction)
 
         if self.isAbstract:
             output.append("abstract")
@@ -2027,13 +2097,28 @@ class RefPrefix:
 
         return " ".join(output)
 
+    def get_definition(self):
+        output = {"name": self.__class__.__name__}
+        output["isAbstract"] = self.isAbstract
+        output["isVariation"] = self.isVariation
+        output["isReadOnly"] = self.isReadOnly
+        output["isDerived"] = self.isDerived
+        output["isEnd"] = self.isEnd
+        output["direction"] = self.direction.get_definition()
+        return output
+
 
 class FeatureDirection:
-    def __init__(self, definition):
-        if valid_definition(definition, self.__class__.__name__):
-            self.isIn = definition["in"] == "in "
-            self.isOut = definition["out"] == "out"
-            self.isInOut = definition["inout"] == "inout"
+    def __init__(self, definition=None):
+        if definition is not None:
+            if valid_definition(definition, self.__class__.__name__):
+                self.isIn = definition["in"] == "in "
+                self.isOut = definition["out"] == "out"
+                self.isInOut = definition["inout"] == "inout"
+        else:
+            self.isIn = False
+            self.isOut = False
+            self.isInOut = False
 
     def dump(self):
         if self.isInOut:
@@ -2043,7 +2128,19 @@ class FeatureDirection:
         elif self.isOut:
             return "out"
         else:
-            raise NotImplementedError
+            return ""
+
+    def get_definition(self):
+        output = {"name": self.__class__.__name__, "in": "", "out": "", "inout": ""}
+        if self.isIn:
+            output["in"] = "in "
+
+        if self.isOut:
+            output["out"] = "out"
+
+        if self.isInOut:
+            output["inout"] = "inout"
+        return output
 
 
 class ItemUsage:
@@ -2682,6 +2779,20 @@ class PackageMember:
         else:
             return "".join(output)
 
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "prefix": None,
+            "ownedRelationship": [],
+        }
+        if self.prefix is not None:
+            output["prefix"] = self.prefix.get_definition()
+
+        for child in self.children:
+            output["ownedRelatedElement"] = child.get_definition()
+
+        return output
+
 
 class MemberPrefix:
     def __init__(self, definition):
@@ -2691,22 +2802,41 @@ class MemberPrefix:
     def dump(self):
         return self.visibility.dump()
 
+    def get_definition(self):
+        output = {"name": self.__class__.__name__}
+        output["visibility"] = self.visibility.get_definition()
+        return output
+
 
 class Package:
-    def __init__(self, definition):
-        if valid_definition(definition, "Package"):
-            # Elements inside of a package
-            # ownedRelationship += PrefixMetadataMember
-            # declaration = PackageDeclaration
-            # body = PackageBody
+    def __init__(self, definition=None):
+        if definition is not None:
+            if valid_definition(definition, self.__class__.__name__):
+                # Elements inside of a package
+                # ownedRelationship += PrefixMetadataMember
+                # declaration = PackageDeclaration
+                # body = PackageBody
+                self.relationships = []
+                for rel in definition["ownedRelationship"]:
+                    self.relationships.append(json.dumps(rel))
+                self.declaration = PackageDeclaration(definition["declaration"])
+                self.body = PackageBody(definition["body"])
+        else:
             self.relationships = []
-            for rel in definition["ownedRelationship"]:
-                self.relationships.append(json.dumps(rel))
-            self.declaration = PackageDeclaration(definition["declaration"])
-            self.body = PackageBody(definition["body"])
+            self.declaration = PackageDeclaration()
+            self.body = PackageBody()
 
     def dump(self):
         return "".join([self.declaration.dump(), self.body.dump()])
+
+    def get_definition(self):
+        output = {"name": self.__class__.__name__, "ownedRelationship": []}
+        for rel in self.relationships:
+            output["ownedRelationship"] = rel.get_definition()
+        output["declaration"] = self.declaration.get_definition()
+        output["body"] = self.body.get_definition()
+
+        return output
 
 
 class Identification:
@@ -2741,37 +2871,49 @@ class Identification:
 
 
 class PackageDeclaration:
-    def __init__(self, definition):
-        if valid_definition(definition, "PackageDeclaration"):
-            self.identification = Identification(definition["identification"])
+    def __init__(self, definition=None):
+        if definition is not None:
+            if valid_definition(definition, "PackageDeclaration"):
+                self.identification = Identification(definition["identification"])
+        else:
+            self.identification = Identification()
 
     def dump(self):
         return "package " + self.identification.dump()
 
+    def get_definition(self):
+        return {
+            "name": self.__class__.__name__,
+            "identification": self.identification.get_definition(),
+        }
+
 
 class PackageBody:
-    def __init__(self, definition):
+    def __init__(self, definition=None):
         self.children = []
-        if valid_definition(definition, "PackageBody"):
-            if "ownedRelationship" in definition:
-                for relationship in definition["ownedRelationship"]:
-                    if "name" in relationship:
-                        if relationship["name"] == "PackageMember":
-                            self.children.append(PackageMember(relationship))
-                        elif relationship["name"] == "ElementFilterMember":
-                            raise NotImplementedError
-                        elif relationship["name"] == "AliasMember":
-                            self.children.append(AliasMember(relationship))
-                        elif relationship["name"] == "Import":
-                            self.children.append(Import(relationship))
+        if definition is not None:
+            if valid_definition(definition, "PackageBody"):
+                if "ownedRelationship" in definition:
+                    for relationship in definition["ownedRelationship"]:
+                        if "name" in relationship:
+                            if relationship["name"] == "PackageMember":
+                                self.children.append(PackageMember(relationship))
+                            elif relationship["name"] == "ElementFilterMember":
+                                raise NotImplementedError
+                            elif relationship["name"] == "AliasMember":
+                                self.children.append(AliasMember(relationship))
+                            elif relationship["name"] == "Import":
+                                self.children.append(Import(relationship))
+                            else:
+                                raise AttributeError(
+                                    "Failed to match this relationship"
+                                )
                         else:
-                            raise AttributeError("Failed to match this relationship")
-                    else:
-                        raise NotImplementedError
-            else:
-                raise NotImplementedError
-        else:
-            raise AttributeError("This does not seem to be valid.")
+                            raise NotImplementedError
+                else:
+                    raise NotImplementedError
+            # else: handled inside function
+        # else: no new definitions needed
 
     def dump(self):
         #!TODO This won't work
@@ -2782,6 +2924,12 @@ class PackageBody:
             for child in self.children:
                 output.append(child.dump())
             return " { \n" + "\n".join(output) + "\n}"
+
+    def get_definition(self):
+        output = {"name": self.__class__.__name__, "ownedRelationship": []}
+        for child in self.children:
+            output["ownedRelationship"].append(child.get_definition())
+        return output
 
 
 class AliasMember:
