@@ -184,7 +184,7 @@ class Package:
                 {"name": "PackageBody", "ownedRelationship": body}
             )
 
-    def _get_definition(self, child):
+    def _get_definition(self, child=None):
         self._ensure_body()
 
         package = {
