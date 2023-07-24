@@ -2,6 +2,17 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.1 (2023-07-24)
+
+### :bug:
+
+* :bug: Fix poetry build for pypi builds. ([`3c90e28`](https://github.com/Westfall-io/sysml2py/commit/3c90e28707710002018569509f87e9266ccef446))
+
+### Other
+
+* Merge pull request #42 from Westfall-io/dev0.4.x ([`51f22aa`](https://github.com/Westfall-io/sysml2py/commit/51f22aa1933245fa4b72bfd9efdee95978b0d44c))
+* Merge pull request #41 from Westfall-io/40-pypi-build-includes-src-in-build-structure ([`4bda86e`](https://github.com/Westfall-io/sysml2py/commit/4bda86ea694bbec2ac7439f65d7dbd0bbaea38fb))
+
 ## v0.4.0 (2023-07-21)
 
 ### :sparkles:
