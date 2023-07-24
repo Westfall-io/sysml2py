@@ -6,7 +6,7 @@ build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "sysml2py"
-version = "0.4.1"
+version = "0.4.2"
 authors = [
   { name="Christopher Cox", email="chris.cox@westfall.io" },
 ]
@@ -51,7 +51,7 @@ build_command = "pip install poetry && poetry build"
 
 [tool.poetry]
 name = "sysml2py"
-version = "0.4.1"
+version = "0.4.2"
 description = ""
 authors = ["Christopher Cox <chris.cox@westfall.io>"]
 readme = "README.md"

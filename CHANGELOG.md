@@ -2,6 +2,19 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.2 (2023-07-24)
+
+### :bug:
+
+* :bug: Enforce some syntax with Models always starting with packages. ([`0cccdf1`](https://github.com/Westfall-io/sysml2py/commit/0cccdf1d5f97c864d82edffc9ec54bd93cf1cb54))
+
+### Other
+
+* Merge pull request #45 from Westfall-io/dev0.4.x ([`fd4e43c`](https://github.com/Westfall-io/sysml2py/commit/fd4e43c5406f3a2b81ce7b9e21a39800f32d3dd4))
+* Merge pull request #44 from Westfall-io/43-modelload-wont-add-non-package-to-children ([`cbaa6aa`](https://github.com/Westfall-io/sysml2py/commit/cbaa6aaa5116adcc555763b865c75c95e3cc30a0))
+* :robot: Format code with black ([`1937b6e`](https://github.com/Westfall-io/sysml2py/commit/1937b6ee8d446abdf52bb975cadc2b898d978c35))
+* :green_heart: Adding github actions back into commit. ([`e1ab9f4`](https://github.com/Westfall-io/sysml2py/commit/e1ab9f4b7fa53591ce11de3f5813a67b7070dc8c))
+
 ## v0.4.1 (2023-07-24)
 
 ### :bug:
