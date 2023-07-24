@@ -118,13 +118,14 @@ def test_package_typed_child():
     q = classtree(loads(text)).dump()
 
     assert p == q
-    
+
+
 def test_model_cannot_dump_error():
     m = Model()
-    with pytest.raises(ValueError,match='Base Model has no elements.'):
+    with pytest.raises(ValueError, match="Base Model has no elements."):
         m.dump()
-        
-        
+
+
 def test_model_load():
     p1 = Package()._set_name("Rocket")
     i1 = Item(definition=True)._set_name("Fuel")

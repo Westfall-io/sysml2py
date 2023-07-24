@@ -66,9 +66,9 @@ class Model:
                     self.children.append(p)
                     member_grammar.append(p._get_definition(child="PackageBody"))
                 else:
-                    raise ValueError('Base Model must be encapsulated by a package.')
+                    raise ValueError("Base Model must be encapsulated by a package.")
             else:
-                raise ValueError('Base Model must be encapsulated by a package.')
+                raise ValueError("Base Model must be encapsulated by a package.")
 
         self.grammar = RootNamespace(
             {"name": "PackageBodyElement", "ownedRelationship": member_grammar}
@@ -99,8 +99,8 @@ class Model:
 
     def dump(self):
         if len(self.children) == 0:
-            raise ValueError('Base Model has no elements to output.')
-            
+            raise ValueError("Base Model has no elements to output.")
+
         self._ensure_body()
         return classtree(self._get_definition()).dump()
 
