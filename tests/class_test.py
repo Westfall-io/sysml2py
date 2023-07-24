@@ -6,8 +6,10 @@ Created on Tue Jul 11 16:46:28 2023
 @author: christophercox
 """
 
+import pytest
+
 from sysml2py.formatting import classtree
-from sysml2py import Package, Item
+from sysml2py import Package, Item, Model
 from sysml2py import load_grammar as loads
 
 
@@ -116,3 +118,26 @@ def test_package_typed_child():
     q = classtree(loads(text)).dump()
 
     assert p == q
+    
+def test_model_cannot_dump_error():
+    m = Model()
+    with pytest.raises(ValueError,match='Base Model has no elements.'):
+        m.dump()
+        
+        
+def test_model_load():
+    p1 = Package()._set_name("Rocket")
+    i1 = Item(definition=True)._set_name("Fuel")
+    i2 = Item()._set_name("Hydrogen")
+    p1._set_child(i2)
+    i2._set_typed_by(i1)
+    p = classtree(p1._get_definition())
+
+    text = """package Rocket {
+       item def Fuel ;
+       item Hydrogen : Fuel;
+    }"""
+
+    q = Model().load(text)
+
+    assert p.dump() == q.dump()
