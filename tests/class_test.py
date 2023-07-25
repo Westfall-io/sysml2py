@@ -197,12 +197,18 @@ def test_item_getchild():
     assert i1._get_child("Fuel.Fuel_child").dump() == i2.dump()
 
 
-def test_item_getchild_error():
+def test_item_getchild_error_int():
     i1 = Item()._set_name("Fuel")
     ic1 = Item()._set_name("Fuel_child")
     i1._set_child(ic1)
     with pytest.raises(TypeError):
-        i1._get_child("Fuel.error")
+        i1._get_child(1)
+        
+def test_item_getchild_error_str():
+    i1 = Item()._set_name("Fuel")
+    ic1 = Item()._set_name("Fuel_child")
+    i1._set_child(ic1)
+    assert i1._get_child("Fuel.error") == None
 
 
 def test_item_typedby():
@@ -286,13 +292,18 @@ def test_part_getchild():
     assert i1._get_child("Fuel.Fuel_child").dump() == i2.dump()
 
 
-def test_part_getchild_error():
+def test_part_getchild_error_int():
     i1 = Part()._set_name("Fuel")
     ic1 = Part()._set_name("Fuel_child")
     i1._set_child(ic1)
     with pytest.raises(TypeError):
-        i1._get_child("Fuel.error")
-
+        i1._get_child(1)
+        
+def test_item_getchild_error_str():
+    i1 = Part()._set_name("Fuel")
+    ic1 = Part()._set_name("Fuel_child")
+    i1._set_child(ic1)
+    assert i1._get_child("Fuel.error") == None
 
 def test_part_typedby():
     p1 = Package()._set_name("Store")
