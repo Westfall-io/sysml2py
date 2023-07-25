@@ -11,11 +11,12 @@ from sysml2py import load, loads, load_grammar
 
 from functions import strip_ws
 
+
 def test_grammar_load_fromfile(single_package):
-    with open('temp.txt', 'w') as f:
+    with open("temp.txt", "w") as f:
         f.write(single_package)
     f.close()
 
-    f = open('temp.txt', 'r')
+    f = open("temp.txt", "r")
     grammar = load_grammar(f)
     assert strip_ws(classtree(grammar).dump()) == strip_ws(single_package)
