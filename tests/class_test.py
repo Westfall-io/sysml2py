@@ -153,12 +153,14 @@ def test_item():
 
     assert strip_ws(i1.dump()) == strip_ws(i2.dump())
 
+
 def test_item_def():
     i1 = Item(definition=True)
     text = """item def;"""
     i2 = classtree(loads(text))
 
     assert strip_ws(i1.dump()) == strip_ws(i2.dump())
+
 
 def test_item_name():
     i1 = Item()._set_name("Fuel")
@@ -167,11 +169,13 @@ def test_item_name():
 
     assert strip_ws(i1.dump()) == strip_ws(i2.dump())
 
+
 def test_item_getname():
     name = "Fuel"
     i1 = Item()._set_name(name)
 
     assert i1._get_name() == name
+
 
 def test_item_setchild():
     i1 = Item()._set_name("Fuel")
@@ -184,6 +188,7 @@ def test_item_setchild():
 
     assert strip_ws(i1.dump()) == strip_ws(i2.dump())
 
+
 def test_item_getchild():
     i1 = Item()._set_name("Fuel")
     ic1 = Item()._set_name("Fuel_child")
@@ -191,22 +196,24 @@ def test_item_getchild():
     text = """item Fuel_child;"""
     i2 = classtree(loads(text))
 
-    assert strip_ws(i1._get_child('Fuel.Fuel_child').dump()) == strip_ws(i2.dump())
+    assert strip_ws(i1._get_child("Fuel.Fuel_child").dump()) == strip_ws(i2.dump())
+
 
 def test_item_typedby():
-    p1 = Package()._set_name('Store')
-    i1 = Item()._set_name('apple')
-    i2 = Item(definition=True)._set_name('Fruit')
+    p1 = Package()._set_name("Store")
+    i1 = Item()._set_name("apple")
+    i2 = Item(definition=True)._set_name("Fruit")
     p1._set_child(i1)
     i1._set_typed_by(i2)
 
-    text = '''package Store {
+    text = """package Store {
        item def Fruit ;
        item apple : Fruit;
-    }'''
+    }"""
     p2 = classtree(loads(text))
 
     assert p1.dump() == p2.dump()
+
 
 def test_attribute_units():
     import astropy.units as u
