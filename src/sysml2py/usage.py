@@ -206,7 +206,7 @@ class Usage:
         if "definition" in typed.grammar.__dict__:
             self.typedby = typed
             if "definition" in self.grammar.__dict__:
-                raise ValueError('A definition element cannot be defined.')
+                raise ValueError("A definition element cannot be defined.")
             else:
                 if self.grammar.usage.declaration.declaration.specialization is None:
                     package = {
@@ -242,7 +242,7 @@ class Usage:
                         FeatureSpecializationPart(package)
                     )
         else:
-            raise ValueError('Typed by element was not a definition.')
+            raise ValueError("Typed by element was not a definition.")
         return self
 
     def load_from_grammar(self, grammar):
