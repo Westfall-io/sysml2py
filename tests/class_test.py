@@ -327,16 +327,7 @@ def test_port_directed_in():
        in Fuel ;
     }'''
     o2 = classtree(loads(text))
-    assert o1.dump() = o2.dump()
-    
-def test_port_directed_in():
-    o1 = Port()._set_name('FuelHose')
-    o1.add_directed_feature('in', 'Fuel')
-    text = '''port FuelHose {
-       in Fuel ;
-    }'''
-    o2 = classtree(loads(text))
-    assert o1.dump() = o2.dump()
+    assert o1.dump() == o2.dump()
     
 def test_port_directed_out():
     o1 = Port()._set_name('FuelHose')
@@ -345,7 +336,7 @@ def test_port_directed_out():
        out Fuel ;
     }'''
     o2 = classtree(loads(text))
-    assert o1.dump() = o2.dump()
+    assert o1.dump() == o2.dump()
     
 def test_port_directed_inout():
     o1 = Port()._set_name('FuelHose')
@@ -354,7 +345,7 @@ def test_port_directed_inout():
        inout Fuel ;
     }'''
     o2 = classtree(loads(text))
-    assert o1.dump() = o2.dump()
+    assert o1.dump() == o2.dump()
     
 def test_port_directed_error():
     o1 = Port()
