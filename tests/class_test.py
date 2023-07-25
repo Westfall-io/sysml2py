@@ -12,6 +12,8 @@ from sysml2py.formatting import classtree
 from sysml2py import Package, Item, Model, Attribute
 from sysml2py import load_grammar as loads
 
+from .functions import strip_ws
+
 
 def test_package():
     p = classtree(Package()._get_definition()).dump()
@@ -142,7 +144,32 @@ def test_model_load():
     q = Model().load(text)
 
     assert p.dump() == q.dump()
-
+    
+def test_item():
+    i1 = Item()
+    text = """item;"""
+    i2 = classtree(loads(text))
+    
+    assert strip_ws(i1.dump()) == strip_ws(i2.dump())
+    
+def test_item_name():
+    i1 = Item()._set_name("Fuel")
+    text = """item Fuel;"""
+    i2 = classtree(loads(text))
+    
+    assert strip_ws(i1.dump()) == strip_ws(i2.dump())
+    
+def test_item_child():
+    i1 = Item()._set_name("Fuel")
+    ic1 = Item()
+    i1._set_child(ic1)
+    text = """item Fuel
+        item;
+    }"""
+    i2 = classtree(loads(text))
+    
+    assert strip_ws(i1.dump()) == strip_ws(i2.dump())
+    
 
 def test_attribute_units():
     import astropy.units as u
