@@ -14,6 +14,7 @@ from textx import TextXSyntaxError
 
 from .functions import strip_ws
 
+
 def test_grammar_load_fromfile(single_package):
     with open("temp.txt", "w") as f:
         f.write(single_package)
@@ -52,7 +53,8 @@ def test_load_fromstr(single_package):
 def test_load_fromstr_error(single_package):
     with pytest.raises(TypeError):
         loads({})
-        
+
+
 def test_invalid_sysml():
     with pytest.raises(TextXSyntaxError):
-        loads('error')
+        loads("error")
