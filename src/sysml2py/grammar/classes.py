@@ -16,7 +16,7 @@ def valid_definition(definition, name):
                 return True
             else:
                 print(definition["name"])
-                raise ValueError('The name of the element did not match.')
+                raise ValueError("The name of the element did not match.")
 
         else:
             raise AttributeError("This does not seem to be valid.")
