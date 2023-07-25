@@ -8,7 +8,7 @@ Created on Mon Jul 24 22:52:46 2023
 
 import pytest
 
-from sysml2py.grammar import RootNamespace
+from sysml2py.grammar.classes import RootNamespace
         
 def test_model_cannot_dump_error():
     with pytest.raises(TypeError):
