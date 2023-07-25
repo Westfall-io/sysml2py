@@ -151,14 +151,12 @@ def test_item():
 
     assert i1.dump() == i2.dump()
 
-
 def test_item_def():
     i1 = Item(definition=True)
     text = """item def;"""
     i2 = classtree(loads(text))
 
     assert i1.dump() == i2.dump()
-
 
 def test_item_name():
     i1 = Item()._set_name("Fuel")
@@ -167,13 +165,18 @@ def test_item_name():
 
     assert i1.dump() == i2.dump()
 
+def test_item_shortname():
+    i1 = Item()._set_name("3.1", short=True)
+    text = """item <'3.1'>;"""
+    i2 = classtree(loads(text))
+
+    assert i1.dump() == i2.dump()
 
 def test_item_getname():
     name = "Fuel"
     i1 = Item()._set_name(name)
 
     assert i1._get_name() == name
-
 
 def test_item_setchild():
     i1 = Item()._set_name("Fuel")
@@ -195,6 +198,26 @@ def test_item_getchild():
     i2 = classtree(loads(text))
 
     assert i1._get_child("Fuel.Fuel_child").dump() == i2.dump()
+    
+def test_item_getchild_skipelement():
+    i1 = Item()._set_name("Fuel")
+    ic1 = Item()._set_name("Fuel_child")
+    i1._set_child(ic1)
+    text = """item Fuel_child;"""
+    i2 = classtree(loads(text))
+
+    assert i1._get_child("Fuel_child").dump() == i2.dump()
+    
+def test_item_getchild_threelevel():
+    i1 = Item()._set_name("Fuel")
+    ic1 = Item()._set_name("child")
+    ic2 = Item()._set_name("subchild")
+    i1._set_child(ic1)
+    ic1.set_child(ic2)
+    text = """item subchild;"""
+    i2 = classtree(loads(text))
+
+    assert i1._get_child("Fuel.child.subchild").dump() == i2.dump()
 
 
 def test_item_getchild_error_int():
@@ -264,6 +287,12 @@ def test_part_name():
 
     assert i1.dump() == i2.dump()
 
+def test_part_shortname():
+    i1 = Part()._set_name("3.1", short=True)
+    text = """part <'3.1'>;"""
+    i2 = classtree(loads(text))
+
+    assert i1.dump() == i2.dump()
 
 def test_part_getname():
     name = "Fuel"
@@ -344,6 +373,12 @@ def test_port():
 
     assert o1.dump() == o2.dump()
 
+def test_port_def():
+    o1 = Port(definition=True)
+    text = """port def;"""
+    o2 = classtree(loads(text))
+
+    assert o1.dump() == o2.dump()
 
 def test_port_directed_in():
     o1 = Port()._set_name("FuelHose")
@@ -379,6 +414,22 @@ def test_port_directed_error():
     o1 = Port()
     with pytest.raises(ValueError):
         o1.add_directed_feature("error", "Fuel")
+
+def test_item_def_subchild():
+    i = Item(definition=True)._set_name('Engine')
+    import astropy.units as u
+
+    a = Attribute()._set_name("mass")
+    a.set_value(100 * u.kg)
+    i._set_child(a)
+
+    text = """item Engine{
+        attribute mass= 100.0 [kg];
+    }"""
+
+    q = classtree(loads(text))
+
+    assert a.dump() == q.dump()
 
 
 def test_attribute_units():
