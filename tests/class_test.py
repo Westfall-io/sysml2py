@@ -173,8 +173,9 @@ def test_item_child():
 
 def test_attribute_units():
     import astropy.units as u
-    a = Attribute()._set_name('mass')
-    a.set_value(100*u.kg)
+
+    a = Attribute()._set_name("mass")
+    a.set_value(100 * u.kg)
 
     text = """attribute mass= 100.0 [kg];"""
 
