@@ -227,11 +227,13 @@ def test_item_typedby_invalidusage_twousage():
     with pytest.raises(ValueError):
         i1._set_typed_by(i2)
 
+
 def test_item_typedby_invalidusage_twodef():
     i1 = Item(definition=True)._set_name("apple")
     i2 = Item(definition=True)._set_name("Fruit")
     with pytest.raises(ValueError):
         i1._set_typed_by(i2)
+
 
 def test_part():
     i1 = Part()
@@ -315,7 +317,8 @@ def test_part_typedby_invalidusage_twousage():
     i2 = Part()._set_name("Fruit")
     with pytest.raises(ValueError):
         i1._set_typed_by(i2)
-        
+
+
 def test_part_typedby_invalidusage_twodef():
     i1 = Part(definition=True)._set_name("apple")
     i2 = Part(definition=True)._set_name("Fruit")
