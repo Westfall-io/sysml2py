@@ -104,7 +104,7 @@ class DefinitionElement:
             # This is a SysML Element
             if isinstance(definition["ownedRelatedElement"], str):
                 raise NotImplementedError
-                
+
             de = definition["ownedRelatedElement"]["name"]
             if de == "Package":
                 self.children.append(Package(definition["ownedRelatedElement"]))

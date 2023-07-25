@@ -51,7 +51,9 @@ class Usage:
         body = []
         for abc in self.children:
             body.append(
-                DefinitionBodyItem(abc._get_definition(child="DefinitionBody")).get_definition()
+                DefinitionBodyItem(
+                    abc._get_definition(child="DefinitionBody")
+                ).get_definition()
             )
 
         if len(body) > 0:
@@ -682,7 +684,7 @@ class DefaultReference(Usage):
             }
 
         return package
-    
+
     def _get_definition(self, child=None):
         package = self.usage_dump(child)
 
