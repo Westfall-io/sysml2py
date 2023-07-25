@@ -655,7 +655,7 @@ class DefaultReference(Usage):
         elif direction == "inout":
             r.direction.isInOut = True
         else:
-            raise NotImplementedError
+            raise ValueError
         self.grammar.prefix = r
         return self
 

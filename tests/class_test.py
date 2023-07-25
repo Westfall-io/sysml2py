@@ -300,8 +300,55 @@ def test_part_typedby_invalidusage():
     i2 = Part()._set_name('Fruit')
     with pytest.raises(ValueError):
         i1._set_typed_by(i2)
+        
+def test_port():
+    o1 = Port()
+    text = '''port;'''
+    o2 = classtree(loads(text))
+    
+    assert o1.dump() == o2.dump()
 
-
+def test_port_directed_in():
+    o1 = Port()._set_name('FuelHose')
+    o1.add_directed_feature('in', 'Fuel')
+    text = '''port FuelHose {
+       in Fuel ;
+    }'''
+    o2 = classtree(loads(text))
+    assert o1.dump() = o2.dump()
+    
+def test_port_directed_in():
+    o1 = Port()._set_name('FuelHose')
+    o1.add_directed_feature('in', 'Fuel')
+    text = '''port FuelHose {
+       in Fuel ;
+    }'''
+    o2 = classtree(loads(text))
+    assert o1.dump() = o2.dump()
+    
+def test_port_directed_out():
+    o1 = Port()._set_name('FuelHose')
+    o1.add_directed_feature('out', 'Fuel')
+    text = '''port FuelHose {
+       out Fuel ;
+    }'''
+    o2 = classtree(loads(text))
+    assert o1.dump() = o2.dump()
+    
+def test_port_directed_inout():
+    o1 = Port()._set_name('FuelHose')
+    o1.add_directed_feature('inout', 'Fuel')
+    text = '''port FuelHose {
+       inout Fuel ;
+    }'''
+    o2 = classtree(loads(text))
+    assert o1.dump() = o2.dump()
+    
+def test_port_directed_error():
+    o1 = Port()
+    with pytest.raises(ValueError):
+        o1.add_directed_feature('error', 'Fuel')
+    
 def test_attribute_units():
     import astropy.units as u
 
