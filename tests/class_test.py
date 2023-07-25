@@ -220,12 +220,17 @@ def test_item_typedby():
     assert p1.dump() == p2.dump()
 
 
-def test_item_typedby_invalidusage():
+def test_item_typedby_invalidusage_twousage():
     i1 = Item()._set_name("apple")
     i2 = Item()._set_name("Fruit")
     with pytest.raises(ValueError):
         i1._set_typed_by(i2)
 
+def test_item_typedby_invalidusage_twodef():
+    i1 = Item(definition=True)._set_name("apple")
+    i2 = Item(definition=True)._set_name("Fruit")
+    with pytest.raises(ValueError):
+        i1._set_typed_by(i2)
 
 def test_part():
     i1 = Part()
@@ -304,9 +309,15 @@ def test_part_typedby():
     assert p1.dump() == p2.dump()
 
 
-def test_part_typedby_invalidusage():
+def test_part_typedby_invalidusage_twousage():
     i1 = Part()._set_name("apple")
     i2 = Part()._set_name("Fruit")
+    with pytest.raises(ValueError):
+        i1._set_typed_by(i2)
+        
+def test_part_typedby_invalidusage_twodef():
+    i1 = Part(definition=True)._set_name("apple")
+    i2 = Part(definition=True)._set_name("Fruit")
     with pytest.raises(ValueError):
         i1._set_typed_by(i2)
 

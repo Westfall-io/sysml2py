@@ -36,13 +36,7 @@ class Model:
         from sysml2py import load_grammar
 
         # Try to load the grammar from the string
-        try:
-            definition = load_grammar(s)
-        except TextXSyntaxError:
-            import sys
-
-            print("Invalid SysML input, please correct the error.")
-            sys.exit()
+        definition = load_grammar(s)
 
         # Ensure this is valid
         if definition["name"] == "PackageBodyElement":
