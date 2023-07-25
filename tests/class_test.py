@@ -12,6 +12,7 @@ from sysml2py.formatting import classtree
 from sysml2py import Package, Item, Model, Attribute, Part, Port
 from sysml2py import load_grammar as loads
 
+
 def test_package():
     p = classtree(Package()._get_definition()).dump()
 

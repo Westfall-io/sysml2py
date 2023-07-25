@@ -80,7 +80,7 @@ def load_grammar(fp):
     import sysml2py
     from sysml2py.formatting import reformat
 
-    #try:
+    # try:
     grammar = str((pkg_resources.files(sysml2py) / "grammar/SysML.tx"))
     # except:
     #     try:
@@ -92,7 +92,7 @@ def load_grammar(fp):
         model = meta.model_from_str(s, debug=False)
     except TextXSyntaxError as e:
         print("TextX returned the following error: {}".format(e))
-        raise TextXSyntaxError('Invalid SysML')
+        raise TextXSyntaxError("Invalid SysML")
 
     return reformat(model)
 
