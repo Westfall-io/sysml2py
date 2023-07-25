@@ -9,7 +9,7 @@ Created on Tue Jul 11 16:46:28 2023
 import pytest
 
 from sysml2py.formatting import classtree
-from sysml2py import Package, Item, Model
+from sysml2py import Package, Item, Model, Attribute
 from sysml2py import load_grammar as loads
 
 
@@ -142,3 +142,24 @@ def test_model_load():
     q = Model().load(text)
 
     assert p.dump() == q.dump()
+    
+def test_attribute_units():
+    import astropy.units as u
+    a = Attribute()._set_name('mass')
+    a.set_value(100*u.kg)
+    
+    text = """attribute mass= 100.0 [kg]"""
+    
+    q = classtree(loads(text))
+    
+    assert a.dump() == q.dump()
+    
+def test_attribute_nounits():
+    a = Attribute()._set_name('mass')
+    a.set_value(100)
+    
+    text = """attribute mass= 100.0"""
+    
+    q = classtree(loads(text))
+    
+    assert a.dump() == q.dump()

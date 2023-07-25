@@ -343,136 +343,139 @@ class Attribute(Usage):
                 "ownedRelatedElement": package,
                 "prefix": None,
             }
-            package = {
-                "name": "PackageBodyElement",
-                "ownedRelationship": [package],
-                "prefix": None,
-            }
         return package
 
     def set_value(self, value):
+        if not isinstance(value, u.quantity.Quantity):
+            value = value*u.one
         if isinstance(value, u.quantity.Quantity):
-            package_units = {
-                "name": "QualifiedName",
-                "name1": str(value.unit),
-                "names": [],
-            }
-            package_units = {
-                "name": "FeatureReferenceMember",
-                "memberElement": package_units,
-            }
-            package_units = {
-                "name": "FeatureReferenceExpression",
-                "ownedRelationship": [package_units],
-            }
-            package_units = {
-                "name": "BaseExpression",
-                "ownedRelationship": package_units,
-            }
-            package_units = {
-                "name": "PrimaryExpression",
-                "operand": [],
-                "base": package_units,
-                "operator": [],
-                "ownedRelationship": [],
-            }
-            package_units = {
-                "name": "ExtentExpression",
-                "operator": "",
-                "ownedRelationship": [],
-                "primary": package_units,
-            }
-            package_units = {
-                "name": "UnaryExpression",
-                "operand": [],
-                "operator": None,
-                "extent": package_units,
-            }
-            package_units = {
-                "name": "ExponentiationExpression",
-                "operand": [],
-                "operator": [],
-                "unary": package_units,
-            }
-            package_units = {
-                "name": "MultiplicativeExpression",
-                "operand": [],
-                "operator": [],
-                "exponential": package_units,
-            }
-            package_units = {
-                "name": "AdditiveExpression",
-                "operand": [],
-                "operator": [],
-                "multiplicitive": package_units,
-            }
-            package_units = {
-                "name": "RangeExpression",
-                "operand": [],
-                "operator": "",
-                "additive": package_units,
-            }
-            package_units = {
-                "name": "RelationalExpression",
-                "operand": [],
-                "operator": [],
-                "range": package_units,
-            }
-            package_units = {
-                "name": "ClassificationExpression",
-                "operand": [],
-                "operator": None,
-                "ownedRelationship": [],
-                "relational": package_units,
-            }
-            package_units = {
-                "name": "EqualityExpression",
-                "operand": [],
-                "operator": [],
-                "classification": package_units,
-            }
-            package_units = {
-                "name": "AndExpression",
-                "operand": [],
-                "operator": [],
-                "equality": package_units,
-            }
-            package_units = {
-                "name": "XorExpression",
-                "operand": [],
-                "operator": [],
-                "and": package_units,
-            }
-            package_units = {
-                "name": "OrExpression",
-                "xor": package_units,
-                "operand": [],
-                "operator": [],
-            }
-            package_units = {
-                "name": "ImpliesExpression",
-                "operand": [],
-                "operator": [],
-                "or": package_units,
-            }
-            package_units = {
-                "name": "NullCoalescingExpression",
-                "implies": package_units,
-                "operator": [],
-                "operand": [],
-            }
-            package_units = {
-                "name": "ConditionalExpression",
-                "operator": None,
-                "operand": [package_units],
-            }
-            package_units = {"name": "OwnedExpression", "expression": package_units}
-            package_units = {
-                "name": "SequenceExpression",
-                "operand": [],
-                "operator": "",
-                "ownedRelationship": package_units,
-            }
+            if str(value.unit) != '':
+                package_units = {
+                    "name": "QualifiedName",
+                    "name1": str(value.unit),
+                    "names": [],
+                }
+                package_units = {
+                    "name": "FeatureReferenceMember",
+                    "memberElement": package_units,
+                }
+                package_units = {
+                    "name": "FeatureReferenceExpression",
+                    "ownedRelationship": [package_units],
+                }
+                package_units = {
+                    "name": "BaseExpression",
+                    "ownedRelationship": package_units,
+                }
+                package_units = {
+                    "name": "PrimaryExpression",
+                    "operand": [],
+                    "base": package_units,
+                    "operator": [],
+                    "ownedRelationship": [],
+                }
+                package_units = {
+                    "name": "ExtentExpression",
+                    "operator": "",
+                    "ownedRelationship": [],
+                    "primary": package_units,
+                }
+                package_units = {
+                    "name": "UnaryExpression",
+                    "operand": [],
+                    "operator": None,
+                    "extent": package_units,
+                }
+                package_units = {
+                    "name": "ExponentiationExpression",
+                    "operand": [],
+                    "operator": [],
+                    "unary": package_units,
+                }
+                package_units = {
+                    "name": "MultiplicativeExpression",
+                    "operand": [],
+                    "operator": [],
+                    "exponential": package_units,
+                }
+                package_units = {
+                    "name": "AdditiveExpression",
+                    "operand": [],
+                    "operator": [],
+                    "multiplicitive": package_units,
+                }
+                package_units = {
+                    "name": "RangeExpression",
+                    "operand": [],
+                    "operator": "",
+                    "additive": package_units,
+                }
+                package_units = {
+                    "name": "RelationalExpression",
+                    "operand": [],
+                    "operator": [],
+                    "range": package_units,
+                }
+                package_units = {
+                    "name": "ClassificationExpression",
+                    "operand": [],
+                    "operator": None,
+                    "ownedRelationship": [],
+                    "relational": package_units,
+                }
+                package_units = {
+                    "name": "EqualityExpression",
+                    "operand": [],
+                    "operator": [],
+                    "classification": package_units,
+                }
+                package_units = {
+                    "name": "AndExpression",
+                    "operand": [],
+                    "operator": [],
+                    "equality": package_units,
+                }
+                package_units = {
+                    "name": "XorExpression",
+                    "operand": [],
+                    "operator": [],
+                    "and": package_units,
+                }
+                package_units = {
+                    "name": "OrExpression",
+                    "xor": package_units,
+                    "operand": [],
+                    "operator": [],
+                }
+                package_units = {
+                    "name": "ImpliesExpression",
+                    "operand": [],
+                    "operator": [],
+                    "or": package_units,
+                }
+                package_units = {
+                    "name": "NullCoalescingExpression",
+                    "implies": package_units,
+                    "operator": [],
+                    "operand": [],
+                }
+                package_units = {
+                    "name": "ConditionalExpression",
+                    "operator": None,
+                    "operand": [package_units],
+                }
+                package_units = {"name": "OwnedExpression", "expression": package_units}
+                package_units = {
+                    "name": "SequenceExpression",
+                    "operand": [],
+                    "operator": "",
+                    "ownedRelationship": package_units,
+                }
+                package_units = [package_units]
+                operator = ["["]
+            else:
+                package_units = []
+                operator = []
 
             package = {
                 "name": "BaseExpression",
@@ -483,9 +486,9 @@ class Attribute(Usage):
             }
             package = {
                 "name": "PrimaryExpression",
-                "operand": [package_units],
+                "operand": package_units,
                 "base": package,
-                "operator": ["["],
+                "operator": operator,
                 "ownedRelationship": [],
             }
             package = {
