@@ -684,10 +684,7 @@ class DefaultReference(Usage):
         return package
     
     def _get_definition(self, child=None):
-        if "usage" in self.grammar.__dict__:
-            package = self.usage_dump(child)
-        else:
-            package = self.definition_dump(child)
+        package = self.usage_dump(child)
 
         if child is None:
             package = {
