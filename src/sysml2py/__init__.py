@@ -6,7 +6,7 @@ Created on Mon May 29 23:26:16 2023
 @author: christophercox
 """
 
-__all__ = ["load", "loads"]
+__all__ = ["load", "loads", "load_grammar"]
 __author__ = "Christopher Cox"
 
 from sysml2py.usage import Item, Attribute, Part, Port
