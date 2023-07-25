@@ -196,14 +196,16 @@ def test_item_getchild():
     text = """item Fuel_child;"""
     i2 = classtree(loads(text))
 
-    assert i1._get_child('Fuel.Fuel_child').dump() == i2.dump()
+    assert i1._get_child("Fuel.Fuel_child").dump() == i2.dump()
+
 
 def test_item_getchild_error():
     i1 = Item()._set_name("Fuel")
     ic1 = Item()._set_name("Fuel_child")
     i1._set_child(ic1)
     with pytest.raises(TypeError):
-        i1._get_child('Fuel.error')
+        i1._get_child("Fuel.error")
+
 
 def test_item_typedby():
     p1 = Package()._set_name("Store")
@@ -220,11 +222,13 @@ def test_item_typedby():
 
     assert p1.dump() == p2.dump()
 
+
 def test_item_typedby_invalidusage():
-    i1 = Item()._set_name('apple')
-    i2 = Item()._set_name('Fruit')
+    i1 = Item()._set_name("apple")
+    i2 = Item()._set_name("Fruit")
     with pytest.raises(ValueError):
         i1._set_typed_by(i2)
+
 
 def test_part():
     i1 = Part()
@@ -233,12 +237,14 @@ def test_part():
 
     assert i1.dump() == i2.dump()
 
+
 def test_part_def():
     i1 = Part(definition=True)
     text = """part def;"""
     i2 = classtree(loads(text))
 
     assert i1.dump() == i2.dump()
+
 
 def test_part_name():
     i1 = Part()._set_name("Fuel")
@@ -247,11 +253,13 @@ def test_part_name():
 
     assert i1.dump() == i2.dump()
 
+
 def test_part_getname():
     name = "Fuel"
     i1 = Part()._set_name(name)
 
     assert i1._get_name() == name
+
 
 def test_part_setchild():
     i1 = Part()._set_name("Fuel")
@@ -264,6 +272,7 @@ def test_part_setchild():
 
     assert i1.dump() == i2.dump()
 
+
 def test_part_getchild():
     i1 = Part()._set_name("Fuel")
     ic1 = Part()._set_name("Fuel_child")
@@ -271,33 +280,36 @@ def test_part_getchild():
     text = """part Fuel_child;"""
     i2 = classtree(loads(text))
 
-    assert i1._get_child('Fuel.Fuel_child').dump() == i2.dump()
+    assert i1._get_child("Fuel.Fuel_child").dump() == i2.dump()
+
 
 def test_part_getchild_error():
     i1 = Part()._set_name("Fuel")
     ic1 = Part()._set_name("Fuel_child")
     i1._set_child(ic1)
     with pytest.raises(TypeError):
-        i1._get_child('Fuel.error')
+        i1._get_child("Fuel.error")
+
 
 def test_part_typedby():
-    p1 = Package()._set_name('Store')
-    i1 = Part()._set_name('apple')
-    i2 = Part(definition=True)._set_name('Fruit')
+    p1 = Package()._set_name("Store")
+    i1 = Part()._set_name("apple")
+    i2 = Part(definition=True)._set_name("Fruit")
     p1._set_child(i1)
     i1._set_typed_by(i2)
 
-    text = '''package Store {
+    text = """package Store {
        part def Fruit ;
        part apple : Fruit;
-    }'''
+    }"""
     p2 = classtree(loads(text))
 
     assert p1.dump() == p2.dump()
 
+
 def test_part_typedby_invalidusage():
-    i1 = Part()._set_name('apple')
-    i2 = Part()._set_name('Fruit')
+    i1 = Part()._set_name("apple")
+    i2 = Part()._set_name("Fruit")
     with pytest.raises(ValueError):
         i1._set_typed_by(i2)
 
