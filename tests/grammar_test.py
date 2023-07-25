@@ -10,6 +10,7 @@ import pytest
 
 from sysml2py.grammar.classes import RootNamespace
 
+
 def test_model_cannot_dump_error():
     with pytest.raises(TypeError):
         RootNamespace("string")
