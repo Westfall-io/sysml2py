@@ -347,9 +347,9 @@ class Attribute(Usage):
 
     def set_value(self, value):
         if not isinstance(value, u.quantity.Quantity):
-            value = value*u.one
+            value = value * u.one
         if isinstance(value, u.quantity.Quantity):
-            if str(value.unit) != '':
+            if str(value.unit) != "":
                 package_units = {
                     "name": "QualifiedName",
                     "name1": str(value.unit),

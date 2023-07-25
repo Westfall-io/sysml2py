@@ -142,24 +142,26 @@ def test_model_load():
     q = Model().load(text)
 
     assert p.dump() == q.dump()
-    
+
+
 def test_attribute_units():
     import astropy.units as u
     a = Attribute()._set_name('mass')
     a.set_value(100*u.kg)
-    
+
     text = """attribute mass= 100.0 [kg];"""
-    
+
     q = classtree(loads(text))
-    
+
     assert a.dump() == q.dump()
-    
+
+
 def test_attribute_nounits():
-    a = Attribute()._set_name('mass')
+    a = Attribute()._set_name("mass")
     a.set_value(100)
-    
+
     text = """attribute mass= 100.0;"""
-    
+
     q = classtree(loads(text))
-    
+
     assert a.dump() == q.dump()
