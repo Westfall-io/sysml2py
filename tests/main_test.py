@@ -8,6 +8,7 @@ Created on Mon May 29 23:20:18 2023
 import pytest
 
 from sysml2py import load, loads, load_grammar
+from sysml2py.formatting import classtree
 
 from .functions import strip_ws
 
