@@ -36,7 +36,7 @@ def test_load_fromfile(single_package):
     assert strip_ws(model.dump()) == strip_ws(single_package)
 
 def test_load_fromfile_error(single_package):
-    with pytest.raises(TypeError)
+    with pytest.raises(TypeError):
         load('string')
 
 def test_load_fromstr(single_package):
@@ -44,5 +44,5 @@ def test_load_fromstr(single_package):
     assert strip_ws(model.dump()) == strip_ws(single_package)
 
 def test_load_fromstr_error(single_package):
-    with pytest.raises(TypeError)
+    with pytest.raises(TypeError):
         model = loads({})
