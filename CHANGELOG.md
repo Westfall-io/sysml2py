@@ -2,6 +2,18 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.3 (2023-07-25)
+
+### :bug:
+
+* :bug: Fixed issue with port subnodes. ([`67720b1`](https://github.com/Westfall-io/sysml2py/commit/67720b19307df138dff10d5138f74aba1fa87734))
+* :bug: Fixed issue with usage classes with body objects. ([`afc5522`](https://github.com/Westfall-io/sysml2py/commit/afc5522c64088595030f68d578af2f303613226e))
+
+### Other
+
+* Merge pull request #47 from Westfall-io/dev0.4.x ([`21356d5`](https://github.com/Westfall-io/sysml2py/commit/21356d50a0081fade7f9404290f00eb5f601c8a3))
+* :robot: Format code with black ([`bd4ad15`](https://github.com/Westfall-io/sysml2py/commit/bd4ad15305dbf000f419e44f07d7db8f72afee12))
+
 ## v0.4.2 (2023-07-24)
 
 ### :bug:
