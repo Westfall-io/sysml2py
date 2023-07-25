@@ -14,9 +14,11 @@ from sysml2py.formatting import classtree
 
 from .functions import strip_ws
 
+
 def test_model_cannot_dump_error():
     with pytest.raises(TypeError):
         RootNamespace("string")
+
 
 def test_grammar_invalid_dictionary():
     with pytest.raises(AttributeError):
@@ -26,6 +28,7 @@ def test_grammar_invalid_dictionary():
 def test_grammar_invalid_rootnamespace():
     with pytest.raises(ValueError):
         RootNamespace({"name": "invalid"})
+
 
 # def test_package():
 #     text = "package Package1;"
