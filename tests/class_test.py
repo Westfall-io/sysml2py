@@ -169,7 +169,7 @@ def test_item_name():
 
 
 def test_item_shortname():
-    i1 = Item()._set_name("3.1", short=True)
+    i1 = Item()._set_name("'3.1'", short=True)
     text = """item <'3.1'>;"""
     i2 = classtree(loads(text))
 
@@ -220,7 +220,7 @@ def test_item_getchild_threelevel():
     ic1 = Item()._set_name("child")
     ic2 = Item()._set_name("subchild")
     i1._set_child(ic1)
-    ic1.set_child(ic2)
+    ic1._set_child(ic2)
     text = """item subchild;"""
     i2 = classtree(loads(text))
 
@@ -297,7 +297,7 @@ def test_part_name():
 
 
 def test_part_shortname():
-    i1 = Part()._set_name("3.1", short=True)
+    i1 = Part()._set_name("'3.1'", short=True)
     text = """part <'3.1'>;"""
     i2 = classtree(loads(text))
 
@@ -341,7 +341,7 @@ def test_part_getchild_error_int():
         i1._get_child(1)
 
 
-def test_item_getchild_error_str():
+def test_part_getchild_error_str():
     i1 = Part()._set_name("Fuel")
     ic1 = Part()._set_name("Fuel_child")
     i1._set_child(ic1)
@@ -438,13 +438,13 @@ def test_item_def_subchild():
     a.set_value(100 * u.kg)
     i._set_child(a)
 
-    text = """item Engine{
+    text = """item Engine {
         attribute mass= 100.0 [kg];
     }"""
 
     q = classtree(loads(text))
 
-    assert a.dump() == q.dump()
+    assert i.dump() == q.dump()
 
 
 def test_attribute_units():
