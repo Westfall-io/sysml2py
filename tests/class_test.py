@@ -9,7 +9,7 @@ Created on Tue Jul 11 16:46:28 2023
 import pytest
 
 from sysml2py.formatting import classtree
-from sysml2py import Package, Item, Model, Attribute
+from sysml2py import Package, Item, Model, Attribute, Part, Port
 from sysml2py import load_grammar as loads
 
 from .functions import strip_ws
@@ -151,21 +151,21 @@ def test_item():
     text = """item;"""
     i2 = classtree(loads(text))
 
-    assert strip_ws(i1.dump()) == strip_ws(i2.dump())
+    assert i1.dump() == i2.dump()
 
 def test_item_def():
     i1 = Item(definition=True)
     text = """item def;"""
     i2 = classtree(loads(text))
 
-    assert strip_ws(i1.dump()) == strip_ws(i2.dump())
+    assert i1.dump() == i2.dump()
 
 def test_item_name():
     i1 = Item()._set_name("Fuel")
     text = """item Fuel;"""
     i2 = classtree(loads(text))
 
-    assert strip_ws(i1.dump()) == strip_ws(i2.dump())
+    assert i1.dump() == i2.dump()
 
 def test_item_getname():
     name = "Fuel"
@@ -182,7 +182,7 @@ def test_item_setchild():
     }"""
     i2 = classtree(loads(text))
 
-    assert strip_ws(i1.dump()) == strip_ws(i2.dump())
+    assert i1.dump() == i2.dump()
 
 def test_item_getchild():
     i1 = Item()._set_name("Fuel")
@@ -191,7 +191,14 @@ def test_item_getchild():
     text = """item Fuel_child;"""
     i2 = classtree(loads(text))
 
-    assert strip_ws(i1._get_child('Fuel.Fuel_child').dump()) == strip_ws(i2.dump())
+    assert i1._get_child('Fuel.Fuel_child').dump() == i2.dump()
+    
+def test_item_getchild_error():
+    i1 = Item()._set_name("Fuel")
+    ic1 = Item()._set_name("Fuel_child")
+    i1._set_child(ic1)
+    with pytest.raises(TypeError):
+        i1._get_child('Fuel.error')
 
 def test_item_typedby():
     p1 = Package()._set_name('Store')
@@ -207,6 +214,87 @@ def test_item_typedby():
     p2 = classtree(loads(text))
 
     assert p1.dump() == p2.dump()
+    
+def test_item_typedby_invalidusage():
+    i1 = Item()._set_name('apple')
+    i2 = Item()._set_name('Fruit')
+    with pytest.raises(ValueError):
+        i1._set_typed_by(i2)
+        
+def test_part():
+    i1 = Part()
+    text = """part;"""
+    i2 = classtree(loads(text))
+
+    assert i1.dump() == i2.dump()
+
+def test_part_def():
+    i1 = Part(definition=True)
+    text = """part def;"""
+    i2 = classtree(loads(text))
+
+    assert i1.dump() == i2.dump()
+
+def test_part_name():
+    i1 = Part()._set_name("Fuel")
+    text = """part Fuel;"""
+    i2 = classtree(loads(text))
+
+    assert i1.dump() == i2.dump()
+
+def test_part_getname():
+    name = "Fuel"
+    i1 = Part()._set_name(name)
+
+    assert i1._get_name() == name
+
+def test_part_setchild():
+    i1 = Part()._set_name("Fuel")
+    ic1 = Part()
+    i1._set_child(ic1)
+    text = """part Fuel {
+        part;
+    }"""
+    i2 = classtree(loads(text))
+
+    assert i1.dump() == i2.dump()
+
+def test_part_getchild():
+    i1 = Part()._set_name("Fuel")
+    ic1 = Part()._set_name("Fuel_child")
+    i1._set_child(ic1)
+    text = """part Fuel_child;"""
+    i2 = classtree(loads(text))
+
+    assert i1._get_child('Fuel.Fuel_child').dump() == i2.dump()
+    
+def test_part_getchild_error():
+    i1 = Part()._set_name("Fuel")
+    ic1 = Part()._set_name("Fuel_child")
+    i1._set_child(ic1)
+    with pytest.raises(TypeError):
+        i1._get_child('Fuel.error')
+
+def test_part_typedby():
+    p1 = Package()._set_name('Store')
+    i1 = Part()._set_name('apple')
+    i2 = Part(definition=True)._set_name('Fruit')
+    p1._set_child(i1)
+    i1._set_typed_by(i2)
+
+    text = '''package Store {
+       part def Fruit ;
+       part apple : Fruit;
+    }'''
+    p2 = classtree(loads(text))
+
+    assert p1.dump() == p2.dump()
+    
+def test_part_typedby_invalidusage():
+    i1 = Part()._set_name('apple')
+    i2 = Part()._set_name('Fruit')
+    with pytest.raises(ValueError):
+        i1._set_typed_by(i2)
 
 def test_attribute_units():
     import astropy.units as u

@@ -111,7 +111,7 @@ class Usage:
 
             package = {"name": "DefinitionBodyItem", "ownedRelationship": [package]}
 
-        elif child == "PackageBody":
+        elif child == "PackageBody" or child == None:
             # Add these packets to make this dump without parents
 
             package = {
@@ -150,8 +150,8 @@ class Usage:
 
         return package
 
-    def dump(self):
-        return classtree(self._get_definition()).dump()
+    def dump(self, child=None):
+        return classtree(self._get_definition(child)).dump()
 
     def _set_name(self, name, short=False):
         if hasattr(self.grammar, "usage"):
@@ -206,7 +206,7 @@ class Usage:
         if "definition" in typed.grammar.__dict__:
             self.typedby = typed
             if "definition" in self.grammar.__dict__:
-                raise NotImplementedError
+                raise ValueError
             else:
                 if self.grammar.usage.declaration.declaration.specialization is None:
                     package = {
