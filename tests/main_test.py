@@ -9,7 +9,7 @@ import pytest
 
 from sysml2py import load, loads, load_grammar
 
-from functions import strip_ws
+from .functions import strip_ws
 
 def test_grammar_load_fromfile(single_package):
     with open('temp.txt', 'w') as f:

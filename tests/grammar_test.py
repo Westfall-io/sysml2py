@@ -12,7 +12,7 @@ from sysml2py.grammar.classes import RootNamespace
 from sysml2py import load_grammar as loads
 from sysml2py.formatting import classtree
 
-from functions import strip_ws
+from .functions import strip_ws
 
 def test_model_cannot_dump_error():
     with pytest.raises(TypeError):
