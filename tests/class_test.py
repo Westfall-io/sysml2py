@@ -203,7 +203,8 @@ def test_item_getchild_error_int():
     i1._set_child(ic1)
     with pytest.raises(TypeError):
         i1._get_child(1)
-        
+
+
 def test_item_getchild_error_str():
     i1 = Item()._set_name("Fuel")
     ic1 = Item()._set_name("Fuel_child")
@@ -300,12 +301,14 @@ def test_part_getchild_error_int():
     i1._set_child(ic1)
     with pytest.raises(TypeError):
         i1._get_child(1)
-        
+
+
 def test_item_getchild_error_str():
     i1 = Part()._set_name("Fuel")
     ic1 = Part()._set_name("Fuel_child")
     i1._set_child(ic1)
     assert i1._get_child("Fuel.error") == None
+
 
 def test_part_typedby():
     p1 = Package()._set_name("Store")
