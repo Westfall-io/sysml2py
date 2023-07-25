@@ -148,7 +148,7 @@ def test_attribute_units():
     a = Attribute()._set_name('mass')
     a.set_value(100*u.kg)
     
-    text = """attribute mass= 100.0 [kg]"""
+    text = """attribute mass= 100.0 [kg];"""
     
     q = classtree(loads(text))
     
@@ -158,7 +158,7 @@ def test_attribute_nounits():
     a = Attribute()._set_name('mass')
     a.set_value(100)
     
-    text = """attribute mass= 100.0"""
+    text = """attribute mass= 100.0;"""
     
     q = classtree(loads(text))
     
