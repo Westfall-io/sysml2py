@@ -104,36 +104,39 @@ class DefinitionElement:
             # This is a SysML Element
             if isinstance(definition["ownedRelatedElement"], str):
                 raise NotImplementedError
-            if definition["ownedRelatedElement"]["name"] == "Package":
+
+            de = definition["ownedRelatedElement"]["name"]
+            if de == "Package":
                 self.children.append(Package(definition["ownedRelatedElement"]))
-            elif definition["ownedRelatedElement"]["name"] == "PartDefinition":
+            elif de == "PartDefinition":
                 self.children.append(PartDefinition(definition["ownedRelatedElement"]))
-            elif definition["ownedRelatedElement"]["name"] == "AttributeDefinition":
+            elif de == "AttributeDefinition":
                 self.children.append(
                     AttributeDefinition(definition["ownedRelatedElement"])
                 )
-            elif definition["ownedRelatedElement"]["name"] == "AnnotatingElement":
+            elif de == "AnnotatingElement":
                 self.children.append(
                     AnnotatingElement(definition["ownedRelatedElement"])
                 )
 
-            elif definition["ownedRelatedElement"]["name"] == "EnumerationDefinition":
+            elif de == "EnumerationDefinition":
                 self.children.append(
                     EnumerationDefinition(definition["ownedRelatedElement"])
                 )
-            elif definition["ownedRelatedElement"]["name"] == "ItemDefinition":
+            elif de == "ItemDefinition":
                 self.children.append(ItemDefinition(definition["ownedRelatedElement"]))
-            elif definition["ownedRelatedElement"]["name"] == "ConnectionDefinition":
+            elif de == "ConnectionDefinition":
                 self.children.append(
                     ConnectionDefinition(definition["ownedRelatedElement"])
                 )
-            elif definition["ownedRelatedElement"]["name"] == "PortDefinition":
+            elif de == "PortDefinition":
                 self.children.append(PortDefinition(definition["ownedRelatedElement"]))
-            elif definition["ownedRelatedElement"]["name"] == "InterfaceDefinition":
+            elif de == "InterfaceDefinition":
                 self.children.append(
                     InterfaceDefinition(definition["ownedRelatedElement"])
                 )
             else:
+                print(de)
                 raise NotImplementedError
 
     def dump(self):

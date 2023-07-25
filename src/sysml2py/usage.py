@@ -51,7 +51,9 @@ class Usage:
         body = []
         for abc in self.children:
             body.append(
-                DefinitionBodyItem(abc.dump(child="DefinitionBody")).get_definition()
+                DefinitionBodyItem(
+                    abc._get_definition(child="DefinitionBody")
+                ).get_definition()
             )
 
         if len(body) > 0:
@@ -148,8 +150,8 @@ class Usage:
 
         return package
 
-    def dump(self, child=None):
-        return classtree(self._get_definition(child)).dump()
+    def dump(self):
+        return classtree(self._get_definition()).dump()
 
     def _set_name(self, name, short=False):
         if hasattr(self.grammar, "usage"):
@@ -680,6 +682,31 @@ class DefaultReference(Usage):
                 "ownedRelatedElement": package,
                 "prefix": None,
             }
+
+        return package
+
+    def _get_definition(self, child=None):
+        package = self.usage_dump(child)
+
+        if child is None:
+            package = {
+                "name": "PackageBodyElement",
+                "ownedRelationship": [package],
+                "prefix": None,
+            }
+
+        # Add the typed by definition to the package output
+        if self.typedby is not None:
+            if child is None:
+                package["ownedRelationship"].insert(
+                    0, self.typedby._get_definition(child="PackageBody")
+                )
+            elif child == "PackageBody":
+                package = [self.typedby._get_definition(child="PackageBody"), package]
+            else:
+                package["ownedRelationship"].insert(
+                    0, self.typedby._get_definition(child=child)["ownedRelationship"][0]
+                )
 
         return package
 
