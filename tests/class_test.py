@@ -331,6 +331,7 @@ def test_part_load_grammar():
     p = Part()
 
     text = """package Rocket {
+        package EngineAssembly;
         part Tank {
             item def Fuel ;
             item Hydrogen : Fuel;

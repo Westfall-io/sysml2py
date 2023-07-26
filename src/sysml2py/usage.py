@@ -719,27 +719,27 @@ class DefaultReference(Usage):
 
         return package
 
-    def dump(self, child=None):
-        package = self.usage_dump(child)
+    # def dump(self, child=None):
+    #     package = self.usage_dump(child)
 
-        if child is None:
-            package = {
-                "name": "PackageBodyElement",
-                "ownedRelationship": [package],
-                "prefix": None,
-            }
+    #     if child is None:
+    #         package = {
+    #             "name": "PackageBodyElement",
+    #             "ownedRelationship": [package],
+    #             "prefix": None,
+    #         }
 
-        # Add the typed by definition to the package output
-        if self.typedby is not None:
-            if child is None:
-                package["ownedRelationship"].insert(
-                    0, self.typedby.dump(child="PackageBody")
-                )
-            elif child == "PackageBody":
-                package = [self.typedby.dump(child="PackageBody"), package]
-            else:
-                package["ownedRelationship"].insert(
-                    0, self.typedby.dump(child=child)["ownedRelationship"][0]
-                )
+    #     # Add the typed by definition to the package output
+    #     if self.typedby is not None:
+    #         if child is None:
+    #             package["ownedRelationship"].insert(
+    #                 0, self.typedby.dump(child="PackageBody")
+    #             )
+    #         elif child == "PackageBody":
+    #             package = [self.typedby.dump(child="PackageBody"), package]
+    #         else:
+    #             package["ownedRelationship"].insert(
+    #                 0, self.typedby.dump(child=child)["ownedRelationship"][0]
+    #             )
 
-        return package
+    #     return package
