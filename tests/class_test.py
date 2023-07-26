@@ -529,7 +529,8 @@ def test_attribute_definition():
     q = classtree(loads(text))
 
     assert a.dump() == q.dump()
-    
+
+
 def test_attribute_units():
     import astropy.units as u
 
