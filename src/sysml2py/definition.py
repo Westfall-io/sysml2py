@@ -36,17 +36,7 @@ class Model:
         from sysml2py import load_grammar
 
         # Try to load the grammar from the string
-        definition = load_grammar(s)
-
-        # Ensure this is valid
-        if definition["name"] == "PackageBodyElement":
-            # This is a root element
-            definition = definition["ownedRelationship"]
-        else:
-            import sys
-
-            print("SysML does not match a base model.")
-            sys.exit()
+        definition = load_grammar(s)["ownedRelationship"]
 
         # Add each sub-element to children.
         member_grammar = []
