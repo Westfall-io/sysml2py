@@ -276,22 +276,16 @@ class Usage:
             if isinstance(sc, list):
                 if len(sc) == 1:
                     sc = sc[0]
-                    
+
             if sc.__class__.__name__ == "AttributeUsage":
                 self.children.append(Attribute().load_from_grammar(sc))
             elif sc.__class__.__name__ == "ItemDefinition":
-                self.children.append(
-                    Item().load_from_grammar(sc)
-                )
+                self.children.append(Item().load_from_grammar(sc))
             elif sc.__class__.__name__ == "StructureUsageElement":
                 if sc.children.__class__.__name__ == "PartUsage":
-                    self.children.append(
-                        Part().load_from_grammar(sc.children)
-                    )
+                    self.children.append(Part().load_from_grammar(sc.children))
                 elif sc.children.__class__.__name__ == "ItemUsage":
-                    self.children.append(
-                        Item().load_from_grammar(sc.children)
-                    )
+                    self.children.append(Item().load_from_grammar(sc.children))
                 else:
                     print(child.children.children.__class__.__name__)
                     raise NotImplementedError
