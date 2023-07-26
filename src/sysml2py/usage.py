@@ -244,6 +244,10 @@ class Usage:
         else:
             raise ValueError("Typed by element was not a definition.")
         return self
+    
+    def _get_grammar(self):
+        self._ensure_body()
+        return self.grammar
 
     def load_from_grammar(self, grammar):
         #!TODO Typed By
