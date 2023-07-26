@@ -529,9 +529,11 @@ def test_attribute_units():
     q = classtree(loads(text))
 
     assert a.dump() == q.dump()
-    
+
+
 def test_attribute_getunits():
     import astropy.units as u
+
     value = 100 * u.kg
 
     a = Attribute()._set_name("mass")
