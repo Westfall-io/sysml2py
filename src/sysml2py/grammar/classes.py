@@ -1554,10 +1554,10 @@ class PrimaryExpression:
             if v == "." or v == ".?":
                 raise NotImplementedError
 
-        if self.children1 is not None:
-            output.append("." + self.children1.dump())
+        if self.children2 is not None:
+            output.append("." + self.children2.dump())
 
-        return " ".join(output)
+        return "".join(output)
 
     def get_definition(self):
         output = {
