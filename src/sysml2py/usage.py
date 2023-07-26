@@ -82,13 +82,13 @@ class Usage:
             }
 
             package = {"name": "DefinitionBodyItem", "ownedRelationship": [package]}
-        elif "PackageBody":
-            package = {"name": "UsageElement", "ownedRelatedElement": package}
-            package = {
-                "name": "PackageMember",
-                "ownedRelatedElement": package,
-                "prefix": None,
-            }
+        # elif "PackageBody":
+        #     package = {"name": "UsageElement", "ownedRelatedElement": package}
+        #     package = {
+        #         "name": "PackageMember",
+        #         "ownedRelatedElement": package,
+        #         "prefix": None,
+        #     }
 
         return package
 
@@ -684,13 +684,13 @@ class DefaultReference(Usage):
             }
 
             package = {"name": "DefinitionBodyItem", "ownedRelationship": [package]}
-        elif "PackageBody":
-            package = {"name": "UsageElement", "ownedRelatedElement": package}
-            package = {
-                "name": "PackageMember",
-                "ownedRelatedElement": package,
-                "prefix": None,
-            }
+        # elif "PackageBody":
+        #     package = {"name": "UsageElement", "ownedRelatedElement": package}
+        #     package = {
+        #         "name": "PackageMember",
+        #         "ownedRelatedElement": package,
+        #         "prefix": None,
+        #     }
 
         return package
 
