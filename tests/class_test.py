@@ -519,6 +519,17 @@ def test_port_directed_error():
 #     assert i.dump() == q.dump()
 
 
+def test_attribute_definition():
+    import astropy.units as u
+
+    a = Attribute(definition=True)._set_name("mass")
+
+    text = """attribute def mass;"""
+
+    q = classtree(loads(text))
+
+    assert a.dump() == q.dump()
+    
 def test_attribute_units():
     import astropy.units as u
 
