@@ -625,8 +625,9 @@ def test_Training_Binding_Connectors_Example_1():
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
 
+
 def test_Training_Binding_Connectors_Example_2():
-    text = '''package 'Binding Connectors Example-2' {
+    text = """package 'Binding Connectors Example-2' {
     	import 'Port Example'::*;
 
     	part def Vehicle;
@@ -651,10 +652,11 @@ def test_Training_Binding_Connectors_Example_2():
     			}
     		}
     	}
-    }'''
+    }"""
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
+
 
 # Flow connections
 
