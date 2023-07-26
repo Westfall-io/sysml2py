@@ -979,6 +979,8 @@ class NonOccurrenceUsageElement:
                 self.children = DefaultReferenceUsage(definition["ownedRelatedElement"])
             elif definition["ownedRelatedElement"]["name"] == "AttributeUsage":
                 self.children = AttributeUsage(definition["ownedRelatedElement"])
+            elif definition["ownedRelatedElement"]["name"] == "BindingConnector":
+                self.children = BindingConnector(definition["ownedRelatedElement"])
             else:
                 print(definition["ownedRelatedElement"]["name"])
                 raise NotImplementedError
@@ -991,6 +993,47 @@ class NonOccurrenceUsageElement:
         output["ownedRelatedElement"] = self.children.get_definition()
         return output
 
+class BindingConnector:
+    def __init__(self, definition=None):
+        self.prefix = None
+        self.declaration = None
+        self.keyword = 'bind'
+        self.children = []
+        if definition is not None:
+            if valid_definition(definition, self.__class__.__name__):
+                if definition['prefix'] is not None:
+                    #self.prefix = UsagePrefix(definition['prefix'])
+                    pass
+                if definition['declaration'] is not None:
+                    self.declaration = UsageDeclaration(definition['declaration'])
+                
+                if len(definition['ownedRelationship']) == 0:
+                    pass
+                elif len(definition['ownedRelationship']) == 2:
+                    for child in definition['ownedRelationship']:
+                        self.children.append(ConnectorEndMember(child))
+                else:
+                    raise NotImplementedError
+
+                self.body = DefinitionBody(definition['body'])
+                    
+    def dump(self):
+        output = []
+        if self.prefix is not None:
+            output.append(self.prefix.dump())
+        if self.declaration is not None:
+            output.append('binding')
+            output.append(self.declaration.dump())
+        output.append(self.keyword)
+        
+        connectors = []
+        for child in self.children:
+            connectors.append(child.dump())
+        output.append(' = '.join(connectors))
+        
+        output.append(self.body.dump())
+            
+        return ' '.join(output)
 
 class DefaultReferenceUsage:
     def __init__(self, definition=None):

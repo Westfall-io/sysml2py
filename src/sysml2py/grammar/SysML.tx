@@ -989,10 +989,10 @@ BindingKeyword :
 ;
 
 BindingConnector :
-	UsagePrefix ( BindingKeyword UsageDeclaration? )?
+	prefix=UsagePrefix ( BindingKeyword declaration=UsageDeclaration? )?
 	'bind' ownedRelationship += ConnectorEndMember
 	'=' ownedRelationship += ConnectorEndMember
-	DefinitionBody
+	body=DefinitionBody
 ;
 
 /* Successions */
