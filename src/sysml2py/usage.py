@@ -111,7 +111,7 @@ class Usage:
 
             package = {"name": "DefinitionBodyItem", "ownedRelationship": [package]}
 
-        elif child == "PackageBody":
+        elif child == "PackageBody" or child == None:
             # Add these packets to make this dump without parents
 
             package = {
@@ -150,8 +150,8 @@ class Usage:
 
         return package
 
-    def dump(self):
-        return classtree(self._get_definition()).dump()
+    def dump(self, child=None):
+        return classtree(self._get_definition(child)).dump()
 
     def _set_name(self, name, short=False):
         if hasattr(self.grammar, "usage"):
@@ -206,7 +206,7 @@ class Usage:
         if "definition" in typed.grammar.__dict__:
             self.typedby = typed
             if "definition" in self.grammar.__dict__:
-                raise NotImplementedError
+                raise ValueError("A definition element cannot be defined.")
             else:
                 if self.grammar.usage.declaration.declaration.specialization is None:
                     package = {
@@ -242,9 +242,12 @@ class Usage:
                         FeatureSpecializationPart(package)
                     )
         else:
-            print(typed.grammar.__dict__)
-            raise NotImplementedError
+            raise ValueError("Typed by element was not a definition.")
         return self
+
+    def _get_grammar(self):
+        self._ensure_body()
+        return self.grammar
 
     def load_from_grammar(self, grammar):
         #!TODO Typed By
@@ -256,35 +259,38 @@ class Usage:
             u_name = grammar.usage.declaration.declaration.identification.declaredName
             a_children = grammar.usage.completion.body.body.children
 
-            if len(a_children) > 0:
-                children = a_children[0].children[0].children
+            for child in a_children:
+                children.append(child.children[0].children[0])
         else:
             # This is a definition
             u_name = grammar.definition.declaration.identification.declaredName
             a_children = grammar.definition.body.children
             if len(a_children) > 0:
-                children = a_children
+                children = a_children[0]
 
         if u_name is not None:
             self.name = u_name
 
         for child in children:
-            if child.children.__class__.__name__ == "AttributeUsage":
-                self.children.append(Attribute().load_from_grammar(child.children))
-            elif child.children.__class__.__name__ == "StructureUsageElement":
-                if child.children.children.__class__.__name__ == "PartUsage":
-                    self.children.append(
-                        Part().load_from_grammar(child.children.children)
-                    )
-                elif child.children.children.__class__.__name__ == "ItemUsage":
-                    self.children.append(
-                        Item().load_from_grammar(child.children.children)
-                    )
+            sc = child.children
+            if isinstance(sc, list):
+                if len(sc) == 1:
+                    sc = sc[0]
+
+            if sc.__class__.__name__ == "AttributeUsage":
+                self.children.append(Attribute().load_from_grammar(sc))
+            elif sc.__class__.__name__ == "ItemDefinition":
+                self.children.append(Item().load_from_grammar(sc))
+            elif sc.__class__.__name__ == "StructureUsageElement":
+                if sc.children.__class__.__name__ == "PartUsage":
+                    self.children.append(Part().load_from_grammar(sc.children))
+                elif sc.children.__class__.__name__ == "ItemUsage":
+                    self.children.append(Item().load_from_grammar(sc.children))
                 else:
                     print(child.children.children.__class__.__name__)
                     raise NotImplementedError
             else:
-                print(child.children.__class__.__name__)
+                print(sc.__class__.__name__)
                 raise NotImplementedError
 
         return self
@@ -293,12 +299,12 @@ class Usage:
         self._set_child(DefaultReference()._set_name(name).set_direction(direction))
         return self
 
-    def modify_directed_feature(self, direction, name):
-        child = self._get_child(name)
-        if child is not None:
-            pass
-        else:
-            raise AttributeError("Invalid Feature Name or Chain")
+    # def modify_directed_feature(self, direction, name):
+    #     child = self._get_child(name)
+    #     if child is not None:
+    #         pass
+    #     else:
+    #         raise AttributeError("Invalid Feature Name or Chain")
 
 
 class Attribute(Usage):
@@ -343,136 +349,139 @@ class Attribute(Usage):
                 "ownedRelatedElement": package,
                 "prefix": None,
             }
-            package = {
-                "name": "PackageBodyElement",
-                "ownedRelationship": [package],
-                "prefix": None,
-            }
         return package
 
     def set_value(self, value):
+        if not isinstance(value, u.quantity.Quantity):
+            value = value * u.one
         if isinstance(value, u.quantity.Quantity):
-            package_units = {
-                "name": "QualifiedName",
-                "name1": str(value.unit),
-                "names": [],
-            }
-            package_units = {
-                "name": "FeatureReferenceMember",
-                "memberElement": package_units,
-            }
-            package_units = {
-                "name": "FeatureReferenceExpression",
-                "ownedRelationship": [package_units],
-            }
-            package_units = {
-                "name": "BaseExpression",
-                "ownedRelationship": package_units,
-            }
-            package_units = {
-                "name": "PrimaryExpression",
-                "operand": [],
-                "base": package_units,
-                "operator": [],
-                "ownedRelationship": [],
-            }
-            package_units = {
-                "name": "ExtentExpression",
-                "operator": "",
-                "ownedRelationship": [],
-                "primary": package_units,
-            }
-            package_units = {
-                "name": "UnaryExpression",
-                "operand": [],
-                "operator": None,
-                "extent": package_units,
-            }
-            package_units = {
-                "name": "ExponentiationExpression",
-                "operand": [],
-                "operator": [],
-                "unary": package_units,
-            }
-            package_units = {
-                "name": "MultiplicativeExpression",
-                "operand": [],
-                "operator": [],
-                "exponential": package_units,
-            }
-            package_units = {
-                "name": "AdditiveExpression",
-                "operand": [],
-                "operator": [],
-                "multiplicitive": package_units,
-            }
-            package_units = {
-                "name": "RangeExpression",
-                "operand": [],
-                "operator": "",
-                "additive": package_units,
-            }
-            package_units = {
-                "name": "RelationalExpression",
-                "operand": [],
-                "operator": [],
-                "range": package_units,
-            }
-            package_units = {
-                "name": "ClassificationExpression",
-                "operand": [],
-                "operator": None,
-                "ownedRelationship": [],
-                "relational": package_units,
-            }
-            package_units = {
-                "name": "EqualityExpression",
-                "operand": [],
-                "operator": [],
-                "classification": package_units,
-            }
-            package_units = {
-                "name": "AndExpression",
-                "operand": [],
-                "operator": [],
-                "equality": package_units,
-            }
-            package_units = {
-                "name": "XorExpression",
-                "operand": [],
-                "operator": [],
-                "and": package_units,
-            }
-            package_units = {
-                "name": "OrExpression",
-                "xor": package_units,
-                "operand": [],
-                "operator": [],
-            }
-            package_units = {
-                "name": "ImpliesExpression",
-                "operand": [],
-                "operator": [],
-                "or": package_units,
-            }
-            package_units = {
-                "name": "NullCoalescingExpression",
-                "implies": package_units,
-                "operator": [],
-                "operand": [],
-            }
-            package_units = {
-                "name": "ConditionalExpression",
-                "operator": None,
-                "operand": [package_units],
-            }
-            package_units = {"name": "OwnedExpression", "expression": package_units}
-            package_units = {
-                "name": "SequenceExpression",
-                "operand": [],
-                "operator": "",
-                "ownedRelationship": package_units,
-            }
+            if str(value.unit) != "":
+                package_units = {
+                    "name": "QualifiedName",
+                    "name1": str(value.unit),
+                    "names": [],
+                }
+                package_units = {
+                    "name": "FeatureReferenceMember",
+                    "memberElement": package_units,
+                }
+                package_units = {
+                    "name": "FeatureReferenceExpression",
+                    "ownedRelationship": [package_units],
+                }
+                package_units = {
+                    "name": "BaseExpression",
+                    "ownedRelationship": package_units,
+                }
+                package_units = {
+                    "name": "PrimaryExpression",
+                    "operand": [],
+                    "base": package_units,
+                    "operator": [],
+                    "ownedRelationship": [],
+                }
+                package_units = {
+                    "name": "ExtentExpression",
+                    "operator": "",
+                    "ownedRelationship": [],
+                    "primary": package_units,
+                }
+                package_units = {
+                    "name": "UnaryExpression",
+                    "operand": [],
+                    "operator": None,
+                    "extent": package_units,
+                }
+                package_units = {
+                    "name": "ExponentiationExpression",
+                    "operand": [],
+                    "operator": [],
+                    "unary": package_units,
+                }
+                package_units = {
+                    "name": "MultiplicativeExpression",
+                    "operand": [],
+                    "operator": [],
+                    "exponential": package_units,
+                }
+                package_units = {
+                    "name": "AdditiveExpression",
+                    "operand": [],
+                    "operator": [],
+                    "multiplicitive": package_units,
+                }
+                package_units = {
+                    "name": "RangeExpression",
+                    "operand": [],
+                    "operator": "",
+                    "additive": package_units,
+                }
+                package_units = {
+                    "name": "RelationalExpression",
+                    "operand": [],
+                    "operator": [],
+                    "range": package_units,
+                }
+                package_units = {
+                    "name": "ClassificationExpression",
+                    "operand": [],
+                    "operator": None,
+                    "ownedRelationship": [],
+                    "relational": package_units,
+                }
+                package_units = {
+                    "name": "EqualityExpression",
+                    "operand": [],
+                    "operator": [],
+                    "classification": package_units,
+                }
+                package_units = {
+                    "name": "AndExpression",
+                    "operand": [],
+                    "operator": [],
+                    "equality": package_units,
+                }
+                package_units = {
+                    "name": "XorExpression",
+                    "operand": [],
+                    "operator": [],
+                    "and": package_units,
+                }
+                package_units = {
+                    "name": "OrExpression",
+                    "xor": package_units,
+                    "operand": [],
+                    "operator": [],
+                }
+                package_units = {
+                    "name": "ImpliesExpression",
+                    "operand": [],
+                    "operator": [],
+                    "or": package_units,
+                }
+                package_units = {
+                    "name": "NullCoalescingExpression",
+                    "implies": package_units,
+                    "operator": [],
+                    "operand": [],
+                }
+                package_units = {
+                    "name": "ConditionalExpression",
+                    "operator": None,
+                    "operand": [package_units],
+                }
+                package_units = {"name": "OwnedExpression", "expression": package_units}
+                package_units = {
+                    "name": "SequenceExpression",
+                    "operand": [],
+                    "operator": "",
+                    "ownedRelationship": package_units,
+                }
+                package_units = [package_units]
+                operator = ["["]
+            else:
+                package_units = []
+                operator = []
 
             package = {
                 "name": "BaseExpression",
@@ -483,9 +492,9 @@ class Attribute(Usage):
             }
             package = {
                 "name": "PrimaryExpression",
-                "operand": [package_units],
+                "operand": package_units,
                 "base": package,
-                "operator": ["["],
+                "operator": operator,
                 "ownedRelationship": [],
             }
             package = {
@@ -652,7 +661,7 @@ class DefaultReference(Usage):
         elif direction == "inout":
             r.direction.isInOut = True
         else:
-            raise NotImplementedError
+            raise ValueError
         self.grammar.prefix = r
         return self
 
@@ -710,27 +719,27 @@ class DefaultReference(Usage):
 
         return package
 
-    def dump(self, child=None):
-        package = self.usage_dump(child)
+    # def dump(self, child=None):
+    #     package = self.usage_dump(child)
 
-        if child is None:
-            package = {
-                "name": "PackageBodyElement",
-                "ownedRelationship": [package],
-                "prefix": None,
-            }
+    #     if child is None:
+    #         package = {
+    #             "name": "PackageBodyElement",
+    #             "ownedRelationship": [package],
+    #             "prefix": None,
+    #         }
 
-        # Add the typed by definition to the package output
-        if self.typedby is not None:
-            if child is None:
-                package["ownedRelationship"].insert(
-                    0, self.typedby.dump(child="PackageBody")
-                )
-            elif child == "PackageBody":
-                package = [self.typedby.dump(child="PackageBody"), package]
-            else:
-                package["ownedRelationship"].insert(
-                    0, self.typedby.dump(child=child)["ownedRelationship"][0]
-                )
+    #     # Add the typed by definition to the package output
+    #     if self.typedby is not None:
+    #         if child is None:
+    #             package["ownedRelationship"].insert(
+    #                 0, self.typedby.dump(child="PackageBody")
+    #             )
+    #         elif child == "PackageBody":
+    #             package = [self.typedby.dump(child="PackageBody"), package]
+    #         else:
+    #             package["ownedRelationship"].insert(
+    #                 0, self.typedby.dump(child=child)["ownedRelationship"][0]
+    #             )
 
-        return package
+    #     return package

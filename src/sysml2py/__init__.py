@@ -6,14 +6,14 @@ Created on Mon May 29 23:26:16 2023
 @author: christophercox
 """
 
-__all__ = ["load", "loads"]
+__all__ = ["load", "loads", "load_grammar"]
 __author__ = "Christopher Cox"
 
 from sysml2py.usage import Item, Attribute, Part, Port
 from sysml2py.definition import Model, Package
 
 
-def load_grammar(fp, formatting="json"):
+def load_grammar(fp):
     """SysML load from file pointer
 
     Deserialize ``fp`` (a ``.read()``-supporting file-like object containing
@@ -80,29 +80,21 @@ def load_grammar(fp, formatting="json"):
     import sysml2py
     from sysml2py.formatting import reformat
 
-    if not isinstance(s, str):
-        raise TypeError(f"the SysML object must be str, " f"not {s.__class__.__name__}")
-
-    try:
-        grammar = str((pkg_resources.files(sysml2py) / "grammar/SysML.tx"))
-    except:
-        try:
-            grammar = "./src/sysml2py/grammar/SysML.tx"
-        except:
-            grammar = "./grammar/SysML.tx"
+    # try:
+    grammar = str((pkg_resources.files(sysml2py) / "grammar/SysML.tx"))
+    # except:
+    #     try:
+    #         grammar = "./src/sysml2py/grammar/SysML.tx"
+    #     except:
+    #         grammar = "./grammar/SysML.tx"
     meta = metamodel_from_file(grammar)
     try:
         model = meta.model_from_str(s, debug=False)
     except TextXSyntaxError as e:
-        print(e)
-        import sys
+        print("TextX returned the following error: {}".format(e))
+        raise TextXSyntaxError("Invalid SysML")
 
-        sys.exit()
-
-    if formatting == "json":
-        return reformat(model)
-    else:
-        return model
+    return reformat(model)
 
 
 def load(fp):

@@ -36,23 +36,7 @@ class Model:
         from sysml2py import load_grammar
 
         # Try to load the grammar from the string
-        try:
-            definition = load_grammar(s)
-        except TextXSyntaxError:
-            import sys
-
-            print("Invalid SysML input, please correct the error.")
-            sys.exit()
-
-        # Ensure this is valid
-        if definition["name"] == "PackageBodyElement":
-            # This is a root element
-            definition = definition["ownedRelationship"]
-        else:
-            import sys
-
-            print("SysML does not match a base model.")
-            sys.exit()
+        definition = load_grammar(s)["ownedRelationship"]
 
         # Add each sub-element to children.
         member_grammar = []
@@ -233,6 +217,15 @@ class Package:
                             child.children[0].children.children.children
                         )
                     )
+                elif (
+                    child.children[0].children.children.children.__class__.__name__
+                    == "PartUsage"
+                ):
+                    self.children.append(
+                        Part().load_from_grammar(
+                            child.children[0].children.children.children
+                        )
+                    )
                 else:
                     print(child.children[0].children[0].__class__.__name__)
                     raise NotImplementedError
@@ -254,3 +247,8 @@ class Package:
 
         # self.children.append()
         return self
+
+    def _get_grammar(self):
+        # Force updates to grammar if something has changed.
+        self._ensure_body()
+        return self.grammar

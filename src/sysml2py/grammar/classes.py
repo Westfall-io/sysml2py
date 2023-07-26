@@ -16,7 +16,7 @@ def valid_definition(definition, name):
                 return True
             else:
                 print(definition["name"])
-                raise NotImplementedError
+                raise ValueError("The name of the element did not match.")
 
         else:
             raise AttributeError("This does not seem to be valid.")
@@ -47,18 +47,18 @@ def beautify(string):
 class RootNamespace:
     def __init__(self, definition):
         self.children = []
-        if "name" in definition:
-            if definition["name"] == "PackageBodyElement":
+        try:
+            if valid_definition(definition, "PackageBodyElement"):
                 # This is a SysML Element
                 self.load_package_body(definition["ownedRelationship"])
-            elif definition["name"] == "NamespaceBodyElement":
-                # This is a KerML Element
-                pass
-            else:
+        except ValueError:
+            try:
+                if valid_definition(definition, "NamespaceBodyElement"):
+                    # This is a KerML Element
+                    pass
+            except ValueError:
                 print(definition)
-                raise NotImplementedError("Not expecting any other root node names.")
-        else:
-            raise AttributeError("This does not seem to be valid.")
+                raise ValueError("Not expecting any other root node names.")
 
     def load_package_body(self, definition):
         for member in definition:
