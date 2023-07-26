@@ -128,7 +128,7 @@ def test_package_load_grammar():
        item Hydrogen : Fuel;
     }"""
     q = Model().load(text)
-    p.load_from_grammar(q._get_child('Rocket')._get_grammar())
+    p.load_from_grammar(q._get_child("Rocket")._get_grammar())
 
     assert p.dump() == q.dump()
 
@@ -325,7 +325,8 @@ def test_item_typedby_invalidusage_twodef():
     i2 = Item(definition=True)._set_name("Fruit")
     with pytest.raises(ValueError):
         i1._set_typed_by(i2)
-        
+
+
 def test_part_load_grammar():
     p = Part()
 
@@ -336,7 +337,7 @@ def test_part_load_grammar():
         }
     }"""
     q = Model().load(text)
-    p.load_from_grammar(q._get_child('Rocket.Tank')._get_grammar())
+    p.load_from_grammar(q._get_child("Rocket.Tank")._get_grammar())
 
     assert p.dump() == q.dump()
 

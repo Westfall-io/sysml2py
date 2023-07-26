@@ -238,7 +238,7 @@ class Package:
 
         # self.children.append()
         return self
-    
+
     def _get_grammar(self):
         # Force updates to grammar if something has changed.
         self._ensure_body()
