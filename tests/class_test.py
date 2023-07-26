@@ -336,8 +336,8 @@ def test_part_load_grammar():
             item Hydrogen : Fuel;
         }
     }"""
-    q = Model().load(text)
-    p.load_from_grammar(q._get_child("Rocket.Tank")._get_grammar())
+    q = Model().load(text)._get_child("Rocket.Tank")
+    p.load_from_grammar(q._get_grammar())
 
     assert p.dump() == q.dump()
 
@@ -529,6 +529,15 @@ def test_attribute_units():
     q = classtree(loads(text))
 
     assert a.dump() == q.dump()
+    
+def test_attribute_getunits():
+    import astropy.units as u
+    value = 100 * u.kg
+
+    a = Attribute()._set_name("mass")
+    a.set_value(value)
+
+    assert value == a.get_value()
 
 
 def test_attribute_nounits():
