@@ -1518,9 +1518,15 @@ class PrimaryExpression:
                 self.base = BaseExpression(definition["base"])
             else:
                 raise NotImplementedError
-
-            if len(definition["ownedRelationship"]) > 0:
-                raise NotImplementedError
+            
+            self.children1 = None
+            self.children2 = None
+            
+            if len(definition["ownedRelationship1"]) > 0:
+                self.children1 = FeatureChainMember(definition["ownedRelationship1"][0])
+                
+            if len(definition["ownedRelationship2"]) > 0:
+                self.children2 = FeatureChainMember(definition["ownedRelationship2"][0])
 
             self.operator = []
             self.operand = []
@@ -1534,6 +1540,8 @@ class PrimaryExpression:
 
     def dump(self):
         output = [self.base.dump()]
+        if self.children1 is not None:
+            output.append('.'+self.children1.dump())
         for k, v in enumerate(self.operator):
             if v == "#":
                 output.append("# ({})".format(self.operand[k].dump()))
@@ -1543,10 +1551,11 @@ class PrimaryExpression:
 
             if v == "." or v == ".?":
                 raise NotImplementedError
-        if len(output) == 1:
-            return str(output[0])
-        else:
-            return " ".join(output)
+                
+        if self.children1 is not None:
+            output.append('.'+self.children1.dump())
+            
+        return " ".join(output)
 
     def get_definition(self):
         output = {
@@ -1562,6 +1571,17 @@ class PrimaryExpression:
         for child in self.operator:
             output["operator"].append(child)
         return output
+    
+class FeatureChainMember:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            if definition['memberElement'] is not None:
+                self.children = QualifiedName(definition['memberElement'])
+            else:
+                self.children = OwnedFeatureChain(definition['ownedRelatedElement'])
+    
+    def dump(self):
+        return self.children.dump()
 
 
 class SequenceExpression:
