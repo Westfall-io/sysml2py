@@ -118,7 +118,8 @@ def test_package_typed_child():
     q = classtree(loads(text)).dump()
 
     assert p == q
-    
+
+
 def test_package_load_grammar():
     p = Package()
 
@@ -138,7 +139,8 @@ def test_model_cannot_dump_error():
     m = Model()
     with pytest.raises(ValueError, match="Base Model has no elements."):
         m.dump()
-    
+
+
 def test_model_load_error_not_package_def():
     text = """item def Fuel ;"""
     with pytest.raises(
@@ -153,28 +155,30 @@ def test_model_load_error_not_package_usage():
         ValueError, match="Base Model must be encapsulated by a package."
     ):
         Model().load(text)
-        
+
+
 def test_model_add_child():
     m = Model()
-    p1 = Package()._set_name('Rocket')
-    p2 = Package()._set_name('Payload')
+    p1 = Package()._set_name("Rocket")
+    p2 = Package()._set_name("Payload")
     m._set_child(p1)
     m._set_child(p2)
-    
-    text = '''package Rocket; 
-    package Payload;'''
+
+    text = """package Rocket; 
+    package Payload;"""
     q = classtree(loads(text))
     assert m.dump() == q.dump()
-    
+
+
 def test_model_get_child():
     m = Model()
-    p1 = Package()._set_name('Rocket')
-    p2 = Package()._set_name('Payload')
+    p1 = Package()._set_name("Rocket")
+    p2 = Package()._set_name("Payload")
     m._set_child(p1)
     m._set_child(p2)
-    m2 = m._get_child('Rocket')
-    
-    text = '''package Rocket;'''
+    m2 = m._get_child("Rocket")
+
+    text = """package Rocket;"""
     q = classtree(loads(text))
     assert m2.dump() == q.dump()
 
