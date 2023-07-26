@@ -124,15 +124,21 @@ def test_model_cannot_dump_error():
     m = Model()
     with pytest.raises(ValueError, match="Base Model has no elements."):
         m.dump()
-        
+
+
 def test_model_load_error_not_package_def():
     text = """item def Fuel ;"""
-    with pytest.raises(ValueError, match="Base Model must be encapsulated by a package."):
+    with pytest.raises(
+        ValueError, match="Base Model must be encapsulated by a package."
+    ):
         Model().load(text)
-        
+
+
 def test_model_load_error_not_package_usage():
     text = """item Fuel ;"""
-    with pytest.raises(ValueError, match="Base Model must be encapsulated by a package."):
+    with pytest.raises(
+        ValueError, match="Base Model must be encapsulated by a package."
+    ):
         Model().load(text)
 
 
@@ -438,6 +444,7 @@ def test_port_directed_error():
     o1 = Port()
     with pytest.raises(ValueError):
         o1.add_directed_feature("error", "Fuel")
+
 
 # This test doesn't work right now
 # def test_item_def_subchild():
