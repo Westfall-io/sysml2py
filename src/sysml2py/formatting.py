@@ -8,9 +8,6 @@ Created on Wed May 31 13:26:53 2023
 
 from sysml2py.grammar.classes import RootNamespace
 
-# from sysml2py import Part
-
-
 def remove_classes(model):
     """An example docstring for a class definition."""
     if type(model) == type(dict()):
@@ -39,39 +36,11 @@ def remove_classes(model):
 def reformat(model):
     """An example docstring for a class definition."""
     # Convert to dictionary format
-    try:
-        model_out = {"name": model.__class__.__name__}
-        model_out.update(remove_classes(model.__dict__))
-    except Exception as e:
-        print(e)
-        print("Error in printing")
+    model_out = {"name": model.__class__.__name__}
+    model_out.update(remove_classes(model.__dict__))
 
     return model_out
 
 
 def classtree(model):
     return RootNamespace(model)
-
-
-# def collapse(model):
-#     """Take a classtree and collapse it into our special classes that
-#     package all of the sub-grammar classes."""
-#     output = []
-#     if model.__class__.__name__ == "RootNamespace":
-#         for child in model.children[0].children:
-#             if child.__class__.__name__ == "UsageElement":
-#                 ue = child.children
-#                 if ue.__class__.__name__ == "OccurrenceUsageElement":
-#                     se = ue.children
-#                     if se.children.__class__.__name__ == "PartUsage":
-#                         output.append(Part().load_from_grammar(se.children))
-#                     else:
-#                         pass
-#                 else:
-#                     # OccurrenceUsageElement
-#                     pass
-#             else:
-#                 pass
-#     else:
-#         print("no")
-#     return output

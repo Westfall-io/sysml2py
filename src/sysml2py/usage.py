@@ -292,12 +292,12 @@ class Usage:
         self._set_child(DefaultReference()._set_name(name).set_direction(direction))
         return self
 
-    def modify_directed_feature(self, direction, name):
-        child = self._get_child(name)
-        if child is not None:
-            pass
-        else:
-            raise AttributeError("Invalid Feature Name or Chain")
+    # def modify_directed_feature(self, direction, name):
+    #     child = self._get_child(name)
+    #     if child is not None:
+    #         pass
+    #     else:
+    #         raise AttributeError("Invalid Feature Name or Chain")
 
 
 class Attribute(Usage):

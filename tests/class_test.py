@@ -127,10 +127,8 @@ def test_package_load_grammar():
        item def Fuel ;
        item Hydrogen : Fuel;
     }"""
-    q = loads(text)
+    q = classtree(loads(text))
     p.load_from_grammar(q)
-
-    q = classtree(q)
 
     assert p.dump() == q.dump()
 
