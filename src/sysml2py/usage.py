@@ -259,35 +259,44 @@ class Usage:
             u_name = grammar.usage.declaration.declaration.identification.declaredName
             a_children = grammar.usage.completion.body.body.children
 
-            if len(a_children) > 0:
-                children = a_children[0].children[0].children
+            for child in a_children:
+                children.append(child.children[0].children[0])
         else:
             # This is a definition
             u_name = grammar.definition.declaration.identification.declaredName
             a_children = grammar.definition.body.children
             if len(a_children) > 0:
-                children = a_children
+                children = a_children[0]
 
         if u_name is not None:
             self.name = u_name
 
         for child in children:
-            if child.children.__class__.__name__ == "AttributeUsage":
-                self.children.append(Attribute().load_from_grammar(child.children))
-            elif child.children.__class__.__name__ == "StructureUsageElement":
-                if child.children.children.__class__.__name__ == "PartUsage":
+            sc = child.children
+            if isinstance(sc, list):
+                if len(sc) == 1:
+                    sc = sc[0]
+                    
+            if sc.__class__.__name__ == "AttributeUsage":
+                self.children.append(Attribute().load_from_grammar(sc))
+            elif sc.__class__.__name__ == "ItemDefinition":
+                self.children.append(
+                    Item().load_from_grammar(sc)
+                )
+            elif sc.__class__.__name__ == "StructureUsageElement":
+                if sc.children.__class__.__name__ == "PartUsage":
                     self.children.append(
-                        Part().load_from_grammar(child.children.children)
+                        Part().load_from_grammar(sc.children)
                     )
-                elif child.children.children.__class__.__name__ == "ItemUsage":
+                elif sc.children.__class__.__name__ == "ItemUsage":
                     self.children.append(
-                        Item().load_from_grammar(child.children.children)
+                        Item().load_from_grammar(sc.children)
                     )
                 else:
                     print(child.children.children.__class__.__name__)
                     raise NotImplementedError
             else:
-                print(child.children.__class__.__name__)
+                print(sc.__class__.__name__)
                 raise NotImplementedError
 
         return self

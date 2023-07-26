@@ -217,6 +217,15 @@ class Package:
                             child.children[0].children.children.children
                         )
                     )
+                elif (
+                    child.children[0].children.children.children.__class__.__name__
+                    == "PartUsage"
+                ):
+                    self.children.append(
+                        Part().load_from_grammar(
+                            child.children[0].children.children.children
+                        )
+                    )
                 else:
                     print(child.children[0].children[0].__class__.__name__)
                     raise NotImplementedError
