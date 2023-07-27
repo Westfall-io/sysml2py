@@ -520,11 +520,11 @@ OccurrenceUsageMember :
 ;
 
 StructureUsageMember :
-	MemberPrefix ownedRelatedElement += StructureUsageElement
+	prefix=MemberPrefix ownedRelatedElement += StructureUsageElement
 ;
 
 BehaviorUsageMember :
-	MemberPrefix ownedRelatedElement += BehaviorUsageElement
+	prefix=MemberPrefix ownedRelatedElement += BehaviorUsageElement
 ;
 
 /* Usages */
@@ -661,22 +661,22 @@ StructureUsageElement :
 ;
 
 BehaviorUsageElement :
-	  ActionUsage
-	| CalculationUsage
-	| StateUsage
-	| ConstraintUsage
-	| RequirementUsage
-	| ConcernUsage
-	| CaseUsage
-	| AnalysisCaseUsage
-	| VerificationCaseUsage
-	| UseCaseUsage
-	| ViewpointUsage
-	| PerformActionUsage
-	| ExhibitStateUsage
-	| IncludeUseCaseUsage
-	| AssertConstraintUsage
-	| SatisfyRequirementUsage
+	  ownedRelationship = ActionUsage
+	| ownedRelationship = CalculationUsage
+	| ownedRelationship = StateUsage
+	| ownedRelationship = ConstraintUsage
+	| ownedRelationship = RequirementUsage
+	| ownedRelationship = ConcernUsage
+	| ownedRelationship = CaseUsage
+	| ownedRelationship = AnalysisCaseUsage
+	| ownedRelationship = VerificationCaseUsage
+	| ownedRelationship = UseCaseUsage
+	| ownedRelationship = ViewpointUsage
+	| ownedRelationship = PerformActionUsage
+	| ownedRelationship = ExhibitStateUsage
+	| ownedRelationship = IncludeUseCaseUsage
+	| ownedRelationship = AssertConstraintUsage
+	| ownedRelationship = SatisfyRequirementUsage
 ;
 
 VariantUsageElement :
@@ -1329,14 +1329,14 @@ ActionDefKeyword :
 ;
 
 ActionDefinition :
-	OccurrenceDefinitionPrefix ActionDefKeyword DefinitionDeclaration ActionBody
+	prefix=OccurrenceDefinitionPrefix ActionDefKeyword declaration=DefinitionDeclaration body=ActionBody
 ;
 
  ActionBody :
 	  ';'
 	  // Note: Using a syntactic predicate here seems to avoid a possible infinite loop
 	  // while incrementally parsing.
-	| '{' ActionBodyItem* '}'
+	| '{' items += ActionBodyItem* '}'
 ;
 
 
@@ -1385,7 +1385,7 @@ ActionUsageKeyword :
 ;
 
 ActionUsage :
-	OccurrenceUsagePrefix ActionUsageKeyword ActionUsageDeclaration ActionBody
+	prefix=OccurrenceUsagePrefix ActionUsageKeyword declaration=ActionUsageDeclaration body=ActionBody
 ;
 
 PerformActionUsage :
@@ -1399,7 +1399,7 @@ PerformActionUsage :
 ;
 
  ActionUsageDeclaration :
-	  UsageDeclaration? ValuePart?
+	  declaration=UsageDeclaration? valuepart=ValuePart?
 ;
 
 /* Action Nodes */

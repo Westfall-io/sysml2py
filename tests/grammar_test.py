@@ -737,28 +737,28 @@ def test_Training_Flow_Connection_Usage_Example():
     assert strip_ws(text) == strip_ws(b.dump())
 
 
-# def test_Training_Action_Definition_Example():
-#     text = '''package 'Action Definition Example' {
-#     	item def Scene;
-#     	item def Image;
-#     	item def Picture;
+def test_Training_Action_Definition_Example():
+    text = '''package 'Action Definition Example' {
+     	item def Scene;
+     	item def Image;
+     	item def Picture;
 
-#     	action def Focus { in scene : Scene; out image : Image; }
-#     	action def Shoot { in image: Image; out picture : Picture; }
+     	action def Focus { in scene : Scene; out image : Image; }
+     	action def Shoot { in image: Image; out picture : Picture; }
 
-#     	action def TakePicture { in scene : Scene; out picture : Picture;
-#     		bind focus.scene = scene;
+     	action def TakePicture { in scene : Scene; out picture : Picture;
+    		bind focus.scene = scene;
 
-#     		action focus: Focus { in scene; out image; }
+    		action focus: Focus { in scene; out image; }
 
-#     		flow from focus.image to shoot.image;
+    		flow from focus.image to shoot.image;
 
-#     		action shoot: Shoot { in image; out picture; }
+    		action shoot: Shoot { in image; out picture; }
 
-#     		bind shoot.picture = picture;
-#     	}
+    		bind shoot.picture = picture;
+     	}
 
-#     }'''
-#     a = loads(text)
-#     b = classtree(a)
-#     assert strip_ws(text) == strip_ws(b.dump())
+    }'''
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
