@@ -497,7 +497,7 @@ LiteralInfinity :
 /* NAMES */
 
 ReservedKeyword:
-  'about' | 'to' | 'connect' | 'connection' | 'from' | 'of'
+  'about' | 'to' | 'connect' | 'connection' | 'from' | 'of' | 'then'
 ;
 
 Name:

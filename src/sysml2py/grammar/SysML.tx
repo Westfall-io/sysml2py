@@ -520,11 +520,11 @@ OccurrenceUsageMember :
 ;
 
 StructureUsageMember :
-	MemberPrefix ownedRelatedElement += StructureUsageElement
+	prefix=MemberPrefix ownedRelatedElement += StructureUsageElement
 ;
 
 BehaviorUsageMember :
-	MemberPrefix ownedRelatedElement += BehaviorUsageElement
+	prefix=MemberPrefix ownedRelatedElement += BehaviorUsageElement
 ;
 
 /* Usages */
@@ -551,7 +551,7 @@ BehaviorUsageMember :
 ;
 
  UsagePrefix :
-	BasicUsagePrefix UsageExtensionKeyword*
+	prefix=BasicUsagePrefix usageKeyword += UsageExtensionKeyword*
 ;
 
  Usage :
@@ -661,22 +661,22 @@ StructureUsageElement :
 ;
 
 BehaviorUsageElement :
-	  ActionUsage
-	| CalculationUsage
-	| StateUsage
-	| ConstraintUsage
-	| RequirementUsage
-	| ConcernUsage
-	| CaseUsage
-	| AnalysisCaseUsage
-	| VerificationCaseUsage
-	| UseCaseUsage
-	| ViewpointUsage
-	| PerformActionUsage
-	| ExhibitStateUsage
-	| IncludeUseCaseUsage
-	| AssertConstraintUsage
-	| SatisfyRequirementUsage
+	  ownedRelationship = ActionUsage
+	| ownedRelationship = CalculationUsage
+	| ownedRelationship = StateUsage
+	| ownedRelationship = ConstraintUsage
+	| ownedRelationship = RequirementUsage
+	| ownedRelationship = ConcernUsage
+	| ownedRelationship = CaseUsage
+	| ownedRelationship = AnalysisCaseUsage
+	| ownedRelationship = VerificationCaseUsage
+	| ownedRelationship = UseCaseUsage
+	| ownedRelationship = ViewpointUsage
+	| ownedRelationship = PerformActionUsage
+	| ownedRelationship = ExhibitStateUsage
+	| ownedRelationship = IncludeUseCaseUsage
+	| ownedRelationship = AssertConstraintUsage
+	| ownedRelationship = SatisfyRequirementUsage
 ;
 
 VariantUsageElement :
@@ -820,7 +820,7 @@ OccurrenceUsageKeyword :
 	  prefix=BasicUsagePrefix
 	  ( isIndividual ?= 'individual' )?
 	  ( portionKind = PortionKind )?
-	  usageExtension=UsageExtensionKeyword*
+	  usageExtension+=UsageExtensionKeyword*
 ;
 
 OccurrenceUsage :
@@ -829,7 +829,7 @@ OccurrenceUsage :
 
 IndividualUsage :
 	prefix=BasicUsagePrefix isIndividual ?= 'individual'
-	UsageExtensionKeyword* usage=Usage
+	usageExtension+=UsageExtensionKeyword* usage=Usage
 ;
 
 PortionUsage :
@@ -858,7 +858,7 @@ EmptySuccessionMember :
 
 EmptySuccession :
 	'then' ownedRelationship += MultiplicitySourceEndMember
-	ownedRelationship += EmptyTargetEndMember
+	(ownedRelationship += EmptyTargetEndMember)?
 ;
 
 MultiplicitySourceEndMember :
@@ -1002,10 +1002,10 @@ SuccessionKeyword:
 ;
 
 Succession :
-	UsagePrefix ( SuccessionKeyword UsageDeclaration? )?
+	prefix=UsagePrefix ( SuccessionKeyword declaration=UsageDeclaration? )?
 	'first' ownedRelationship += ConnectorEndMember
 	'then' ownedRelationship += ConnectorEndMember
-	DefinitionBody
+	body=DefinitionBody
 ;
 
 /* Connection Definitions */
@@ -1122,8 +1122,8 @@ SuccessionFlowConnectionKeyword :
 ;
 
 SuccessionFlowConnectionUsage :
-	OccurrenceUsagePrefix SuccessionFlowConnectionKeyword
-	FlowConnectionDeclaration DefinitionBody
+	prefix=OccurrenceUsagePrefix SuccessionFlowConnectionKeyword
+	declaration=FlowConnectionDeclaration body=DefinitionBody
 ;
 
  FlowConnectionDeclaration :
@@ -1329,14 +1329,14 @@ ActionDefKeyword :
 ;
 
 ActionDefinition :
-	OccurrenceDefinitionPrefix ActionDefKeyword DefinitionDeclaration ActionBody
+	prefix=OccurrenceDefinitionPrefix ActionDefKeyword declaration=DefinitionDeclaration body=ActionBody
 ;
 
  ActionBody :
 	  ';'
 	  // Note: Using a syntactic predicate here seems to avoid a possible infinite loop
 	  // while incrementally parsing.
-	| '{' ActionBodyItem* '}'
+	| '{' items += ActionBodyItem* '}'
 ;
 
 
@@ -1349,7 +1349,6 @@ ActionBodyItem :
 	| ownedRelationship += AliasMember
 	| ownedRelationship += DefinitionMember
 	| ownedRelationship += VariantUsageMember
-	| ownedRelationship += NonOccurrenceUsageMember
 	| ( ownedRelationship += EmptySuccessionMember )?
 	  ownedRelationship += StructureUsageMember
 	| ownedRelationship += InitialNodeMember
@@ -1358,6 +1357,7 @@ ActionBodyItem :
 	  ownedRelationship += ActionBodyItemTarget
 	  ( ownedRelationship += TargetSuccessionMember )*
 	| ownedRelationship += GuardedSuccessionMember
+	| ownedRelationship += NonOccurrenceUsageMember
 ;
 
 
@@ -1385,7 +1385,7 @@ ActionUsageKeyword :
 ;
 
 ActionUsage :
-	OccurrenceUsagePrefix ActionUsageKeyword ActionUsageDeclaration ActionBody
+	prefix=OccurrenceUsagePrefix ActionUsageKeyword declaration=ActionUsageDeclaration body=ActionBody
 ;
 
 PerformActionUsage :
@@ -1399,7 +1399,7 @@ PerformActionUsage :
 ;
 
  ActionUsageDeclaration :
-	  UsageDeclaration? ValuePart?
+	  declaration=UsageDeclaration? valuepart=ValuePart?
 ;
 
 /* Action Nodes */
@@ -1674,17 +1674,19 @@ TargetSuccession :
 ;
 
 GuardedTargetSuccession :
-	ownedRelationship += EmptyParameterMember
+// if then
+	//ownedRelationship += EmptyParameterMember
 	ownedRelationship += GuardExpressionMember
 	'then' ownedRelationship += TransitionSuccessionMember
 ;
 
 DefaultTargetSuccession :
-	ownedRelationship += EmptyParameterMember
+	//ownedRelationship += EmptyParameterMember
 	'else' ownedRelationship += TransitionSuccessionMember
 ;
 
 GuardedSuccession :
+// first if then
 	( SuccessionKeyword UsageDeclaration )? 'first'
 	ownedRelationship += TransitionSourceMember
 	ownedRelationship += EmptyParameterMember
