@@ -1002,10 +1002,10 @@ SuccessionKeyword:
 ;
 
 Succession :
-	UsagePrefix ( SuccessionKeyword UsageDeclaration? )?
+	prefix=UsagePrefix ( SuccessionKeyword declaration=UsageDeclaration? )?
 	'first' ownedRelationship += ConnectorEndMember
 	'then' ownedRelationship += ConnectorEndMember
-	DefinitionBody
+	body=DefinitionBody
 ;
 
 /* Connection Definitions */
@@ -1122,8 +1122,8 @@ SuccessionFlowConnectionKeyword :
 ;
 
 SuccessionFlowConnectionUsage :
-	OccurrenceUsagePrefix SuccessionFlowConnectionKeyword
-	FlowConnectionDeclaration DefinitionBody
+	prefix=OccurrenceUsagePrefix SuccessionFlowConnectionKeyword
+	declaration=FlowConnectionDeclaration body=DefinitionBody
 ;
 
  FlowConnectionDeclaration :

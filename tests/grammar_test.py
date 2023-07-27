@@ -793,3 +793,63 @@ def test_Training_Action_Shorthand_Example():
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
+    
+def test_Training_Action_Succession_Example_1():
+    text = '''package 'Action Succession Example-1' {
+    	item def Scene;
+    	item def Image;
+    	item def Picture;
+    	
+    	action def Focus { in scene : Scene; out image : Image; }
+    	action def Shoot { in image: Image; out picture : Picture; }	
+    				
+    	action def TakePicture {
+    		in item scene : Scene;
+    		out item picture : Picture;
+    		
+    		bind focus.scene = scene;
+    		
+    		action focus: Focus { in scene; out image; }
+    		
+    		flow focus.image to shoot.image;
+    		
+    		first focus then shoot;
+    		
+    		action shoot: Shoot { in image; out picture; }
+    		
+    		bind shoot.picture = picture;
+    	}
+    	
+    }'''
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+    
+def test_Training_Action_Succession_Example_2():
+    text = '''package 'Action Definition Example' {
+    	item def Scene;
+    	item def Image;
+    	item def Picture;
+    	
+    	action def Focus { in scene : Scene; out image : Image; }
+    	action def Shoot { in image: Image; out picture : Picture; }	
+    				
+    	action def TakePicture {
+    		in item scene : Scene;
+    		out item picture : Picture;
+    		
+    		bind focus.scene = scene;
+    		
+    		action focus: Focus { in scene; out image; }
+    		
+    		succession flow focus.image to shoot.image;
+    		
+    		action shoot: Shoot { in image; out picture; }
+    		
+    		bind shoot.picture = picture;
+    	}
+    	
+    }'''
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
