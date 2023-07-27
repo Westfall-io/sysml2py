@@ -378,7 +378,8 @@ class Attribute(Usage):
                     "operand": [],
                     "base": package_units,
                     "operator": [],
-                    "ownedRelationship": [],
+                    "ownedRelationship1": [],
+                    "ownedRelationship2": [],
                 }
                 package_units = {
                     "name": "ExtentExpression",
@@ -495,7 +496,8 @@ class Attribute(Usage):
                 "operand": package_units,
                 "base": package,
                 "operator": operator,
-                "ownedRelationship": [],
+                "ownedRelationship1": [],
+                "ownedRelationship2": [],
             }
             package = {
                 "name": "ExtentExpression",

@@ -21,6 +21,7 @@ def valid_definition(definition, name):
         else:
             raise AttributeError("This does not seem to be valid.")
     else:
+        print("------------")
         print("\n\nDefinition: {}".format(definition))
         raise TypeError("This does not seem to be valid.")
 
@@ -135,6 +136,10 @@ class DefinitionElement:
                 self.children.append(
                     InterfaceDefinition(definition["ownedRelatedElement"])
                 )
+            elif de == "FlowConnectionDefinition":
+                self.children.append(
+                    FlowConnectionDefinition(definition["ownedRelatedElement"])
+                )
             else:
                 print(de)
                 raise NotImplementedError
@@ -152,6 +157,25 @@ class DefinitionElement:
         for item in self.children:
             output["ownedRelatedElement"] = item.get_definition()
         return output
+
+
+class FlowConnectionDefinition:
+    def __init__(self, definition):
+        self.prefix = None
+        self.keyword = "flow def"
+        if valid_definition(definition, self.__class__.__name__):
+            if definition["prefix"] is not None:
+                raise NotImplementedError
+
+            self.definition = Definition(definition["definition"])
+
+    def dump(self):
+        output = []
+        if self.prefix is not None:
+            output.append(self.prefix.dump())
+        output.append(self.keyword)
+        output.append(self.definition.dump())
+        return " ".join(output)
 
 
 class InterfaceDefinition:
@@ -979,6 +1003,8 @@ class NonOccurrenceUsageElement:
                 self.children = DefaultReferenceUsage(definition["ownedRelatedElement"])
             elif definition["ownedRelatedElement"]["name"] == "AttributeUsage":
                 self.children = AttributeUsage(definition["ownedRelatedElement"])
+            elif definition["ownedRelatedElement"]["name"] == "BindingConnector":
+                self.children = BindingConnector(definition["ownedRelatedElement"])
             else:
                 print(definition["ownedRelatedElement"]["name"])
                 raise NotImplementedError
@@ -990,6 +1016,49 @@ class NonOccurrenceUsageElement:
         output = {"name": self.__class__.__name__}
         output["ownedRelatedElement"] = self.children.get_definition()
         return output
+
+
+class BindingConnector:
+    def __init__(self, definition=None):
+        self.prefix = None
+        self.declaration = None
+        self.keyword = "bind"
+        self.children = []
+        if definition is not None:
+            if valid_definition(definition, self.__class__.__name__):
+                if definition["prefix"] is not None:
+                    # self.prefix = UsagePrefix(definition['prefix'])
+                    pass
+                if definition["declaration"] is not None:
+                    self.declaration = UsageDeclaration(definition["declaration"])
+
+                if len(definition["ownedRelationship"]) == 0:
+                    pass
+                elif len(definition["ownedRelationship"]) == 2:
+                    for child in definition["ownedRelationship"]:
+                        self.children.append(ConnectorEndMember(child))
+                else:
+                    raise NotImplementedError
+
+                self.body = DefinitionBody(definition["body"])
+
+    def dump(self):
+        output = []
+        if self.prefix is not None:
+            output.append(self.prefix.dump())
+        if self.declaration is not None:
+            output.append("binding")
+            output.append(self.declaration.dump())
+        output.append(self.keyword)
+
+        connectors = []
+        for child in self.children:
+            connectors.append(child.dump())
+        output.append(" = ".join(connectors))
+
+        output.append(self.body.dump())
+
+        return " ".join(output)
 
 
 class DefaultReferenceUsage:
@@ -1476,8 +1545,14 @@ class PrimaryExpression:
             else:
                 raise NotImplementedError
 
-            if len(definition["ownedRelationship"]) > 0:
-                raise NotImplementedError
+            self.children1 = None
+            self.children2 = None
+
+            if len(definition["ownedRelationship1"]) > 0:
+                self.children1 = FeatureChainMember(definition["ownedRelationship1"][0])
+
+            if len(definition["ownedRelationship2"]) > 0:
+                self.children2 = FeatureChainMember(definition["ownedRelationship2"][0])
 
             self.operator = []
             self.operand = []
@@ -1491,6 +1566,8 @@ class PrimaryExpression:
 
     def dump(self):
         output = [self.base.dump()]
+        if self.children1 is not None:
+            output.append("." + self.children1.dump())
         for k, v in enumerate(self.operator):
             if v == "#":
                 output.append("# ({})".format(self.operand[k].dump()))
@@ -1500,10 +1577,11 @@ class PrimaryExpression:
 
             if v == "." or v == ".?":
                 raise NotImplementedError
-        if len(output) == 1:
-            return str(output[0])
-        else:
-            return " ".join(output)
+
+        if self.children2 is not None:
+            output.append("." + self.children2.dump())
+
+        return "".join(output)
 
     def get_definition(self):
         output = {
@@ -1511,14 +1589,33 @@ class PrimaryExpression:
             "operator": [],
             "operand": [],
             "base": self.base.get_definition(),
-            "ownedRelationship": [],
+            "ownedRelationship1": [],
+            "ownedRelationship2": [],
         }
         for child in self.operand:
             output["operand"].append(child.get_definition())
 
         for child in self.operator:
             output["operator"].append(child)
+
+        if self.children1 is not None:
+            output["ownedRelationship1"].append(self.children1.get_definition())
+
+        if self.children2 is not None:
+            output["ownedRelationship2"].append(self.children2.get_definition())
         return output
+
+
+class FeatureChainMember:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            if definition["memberElement"] is not None:
+                self.children = QualifiedName(definition["memberElement"])
+            else:
+                self.children = OwnedFeatureChain(definition["ownedRelatedElement"])
+
+    def dump(self):
+        return self.children.dump()
 
 
 class SequenceExpression:
@@ -1639,6 +1736,8 @@ class StructureUsageElement:
                 self.children = PortUsage(definition["ownedRelatedElement"])
             elif definition["ownedRelatedElement"]["name"] == "InterfaceUsage":
                 self.children = InterfaceUsage(definition["ownedRelatedElement"])
+            elif definition["ownedRelatedElement"]["name"] == "FlowConnectionUsage":
+                self.children = FlowConnectionUsage(definition["ownedRelatedElement"])
             else:
                 raise NotImplementedError
 
@@ -1650,6 +1749,247 @@ class StructureUsageElement:
             "name": self.__class__.__name__,
             "ownedRelatedElement": self.children.get_definition(),
         }
+
+
+class FlowConnectionUsage:
+    def __init__(self, definition):
+        self.prefix = None
+        self.keyword = "flow"
+        if valid_definition(definition, self.__class__.__name__):
+            if definition["prefix"] is not None:
+                raise NotImplementedError
+            self.declaration = FlowConnectionDeclaration(definition["declaration"])
+            self.body = DefinitionBody(definition["body"])
+
+    def dump(self):
+        output = []
+        if self.prefix is not None:
+            output.append(self.prefix.dump())
+        output.append(self.keyword)
+        output.append(self.declaration.dump())
+        output.append(self.body.dump())
+        return " ".join(output)
+
+
+class FlowConnectionDeclaration:
+    def __init__(self, definition):
+        self.declaration = None
+        self.valuepart = None
+        self.children = [None, None, None]
+        if valid_definition(definition, self.__class__.__name__):
+            if definition["declaration"] is not None:
+                self.declaration = UsageDeclaration(definition["declaration"])
+            if definition["valuepart"] is not None:
+                self.declaration = ValuePart(definition["valuepart"])
+
+            if definition["ownedRelationship_of"] is not None:
+                self.children[0] = ItemFeatureMember(definition["ownedRelationship_of"])
+
+            if definition["ownedRelationship_from"] is not None:
+                self.children[1] = FlowEndMember(definition["ownedRelationship_from"])
+
+            if definition["ownedRelationship_to"] is not None:
+                self.children[2] = FlowEndMember(definition["ownedRelationship_to"])
+
+    def dump(self):
+        output = []
+        if self.declaration is not None:
+            output.append(self.declaration.dump())
+        if self.valuepart is not None:
+            output.append(self.valuepart.dump())
+
+        if self.children[0] is not None:
+            output.append("of")
+            output.append(self.children[0].dump())
+
+        if self.children[1] is not None:
+            if len(output) > 0:
+                output.append("from")
+            output.append(self.children[1].dump())
+            output.append("to")
+            output.append(self.children[2].dump())
+
+        return " ".join(output)
+
+
+class ItemFeatureMember:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.children = ItemFeature(definition["ownedRelatedElement"][0])
+
+    def dump(self):
+        return self.children.dump()
+
+
+class ItemFeature:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.children = PayloadFeature(definition["ownedRelatedElement"])
+
+    def dump(self):
+        return self.children.dump()
+
+
+class PayloadFeature:
+    def __init__(self, definition):
+        self.identification = None
+        self.valuepart = None
+        self.multiplicity1 = None
+        self.multiplicity2 = None
+        self.children = None
+        self.pfsp = None
+        if valid_definition(definition, self.__class__.__name__):
+            if definition["identification"] is not None:
+                self.identification = Identification(definition["identification"])
+
+            if definition["valuepart"] is not None:
+                self.identification = ValuePart(definition["valuepart"])
+
+            if definition["multiplicity1"] is not None:
+                self.multiplicity1 = OwnedMultiplicity(definition["multiplicity1"])
+
+            if definition["multiplicity2"] is not None:
+                self.multiplicity2 = OwnedMultiplicity(definition["multiplicity2"])
+
+            if definition["ownedRelationship"] is not None:
+                self.children = OwnedFeatureTyping(definition["ownedRelationship"])
+
+            if definition["pfsp"] is not None:
+                self.pfsp = PayloadFeatureSpecializationPart(definition["pfsp"])
+
+    def dump(self):
+        output = []
+        if self.pfsp is not None:
+            if self.identification is not None:
+                output.append(self.identification.dump())
+            output.append(self.pfsp.dump())
+            if self.valuepart is not None:
+                output.append(self.valuepart.dump())
+        elif self.valuepart is not None:
+            if self.identification is not None:
+                output.append(self.identification.dump())
+            output.append(self.valuepart.dump())
+        else:
+            if self.multiplicity1 is None:
+                output.append(self.children.dump())
+                if self.multiplicity2 is not None:
+                    output.append(self.multiplicity2.dump())
+            else:
+                output.append(self.multiplicity1.dump())
+                output.append(self.children.dump())
+        return "".join(output)
+
+
+class PayloadFeatureSpecializationPart:
+    def __init__(self, definition):
+        self.children = []
+        self.children2 = []
+        self.mp = None
+        if valid_definition(definition, self.__class__.__name__):
+            for child in definition["ownedRelationship"]:
+                self.children.append(FeatureSpecialization(child))
+
+            for child in definition["ownedRelationship2"]:
+                self.children2.append(FeatureSpecialization(child))
+
+            if definition["mp"] is not None:
+                self.mp = MultiplicityPart(definition["mp"])
+
+    def dump(self):
+        output = []
+        if self.mp is None:
+            for child in self.children:
+                output.append(child.dump())
+        else:
+            if len(self.children2) == 0:
+                output.append(self.mp.dump())
+                for child in self.children:
+                    output.append(child.dump())
+            else:
+                for child in self.children:
+                    output.append(child.dump())
+                output.append(self.mp.dump())
+                for child in self.children2:
+                    output.append(child.dump())
+        return "".join(output)
+
+
+class FlowEndMember:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.children = FlowEnd(definition["ownedRelatedElement"][0])
+
+    def dump(self):
+        return self.children.dump()
+
+
+class FlowEnd:
+    def __init__(self, definition):
+        self.children = []
+        if valid_definition(definition, self.__class__.__name__):
+            for child in definition["fes"]:
+                self.children.append(FlowEndSubsetting(child))
+
+            for child in definition["ffm"]:
+                self.children.append(FlowFeatureMember(child))
+
+    def dump(self):
+        return "".join([x.dump() for x in self.children])
+
+
+class FlowEndSubsetting:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            if definition["referencedFeature"] is not None:
+                self.children = QualifiedName(definition["referencedFeature"])
+            else:
+                self.children = FeatureChainPrefix(definition["ownedRelatedElement"])
+
+    def dump(self):
+        if self.children.__class__.__name__ == "QualifiedName":
+            return self.children.dump() + "."
+        else:
+            return self.children.dump()
+
+
+class FeatureChainPrefix:
+    def __init__(self, definition):
+        self.children = []
+        if valid_definition(definition, self.__class__.__name__):
+            for child in definition["ownedRelationship"]:
+                self.children.append(
+                    OwnedFeatureChaining(definition["ownedRelationship"])
+                )
+
+    def dump(self):
+        return "".join([x.dump() + "." for x in self.children])
+
+
+class FlowFeatureMember:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.children = FlowFeature(definition["ownedRelatedElement"][0])
+
+    def dump(self):
+        return self.children.dump()
+
+
+class FlowFeature:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.children = FlowRedefinition(definition["ownedRelationship"][0])
+
+    def dump(self):
+        return self.children.dump()
+
+
+class FlowRedefinition:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.children = QualifiedName(definition["redefinedFeature"])
+
+    def dump(self):
+        return self.children.dump()
 
 
 class InterfaceUsage:

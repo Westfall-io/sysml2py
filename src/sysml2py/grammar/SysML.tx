@@ -989,10 +989,10 @@ BindingKeyword :
 ;
 
 BindingConnector :
-	UsagePrefix ( BindingKeyword UsageDeclaration? )?
+	prefix=UsagePrefix ( BindingKeyword declaration=UsageDeclaration? )?
 	'bind' ownedRelationship += ConnectorEndMember
 	'=' ownedRelationship += ConnectorEndMember
-	DefinitionBody
+	body=DefinitionBody
 ;
 
 /* Successions */
@@ -1079,7 +1079,7 @@ FlowConnectionDefKeyword :
 ;
 
 FlowConnectionDefinition :
-	OccurrenceDefinitionPrefix FlowConnectionDefKeyword Definition
+	prefix=OccurrenceDefinitionPrefix FlowConnectionDefKeyword definition=Definition
 ;
 
 /* Messages */
@@ -1113,8 +1113,8 @@ MessageEvent :
 /* Flow Connection Usages */
 
 FlowConnectionUsage :
-	OccurrenceUsagePrefix FlowConnectionKeyword
-	FlowConnectionDeclaration DefinitionBody
+	prefix=OccurrenceUsagePrefix FlowConnectionKeyword
+	declaration=FlowConnectionDeclaration body=DefinitionBody
 ;
 
 SuccessionFlowConnectionKeyword :
@@ -1127,12 +1127,10 @@ SuccessionFlowConnectionUsage :
 ;
 
  FlowConnectionDeclaration :
-	  UsageDeclaration? ValuePart?
-      ( 'of'  ownedRelationship += ItemFeatureMember )?
-      ( 'from' ownedRelationship += FlowEndMember
-        'to' ownedRelationship += FlowEndMember )?
-    | ownedRelationship += FlowEndMember 'to'
-	  ownedRelationship += FlowEndMember
+	  ownedRelationship_from = FlowEndMember 'to' ownedRelationship_to = FlowEndMember
+    | declaration=UsageDeclaration? valuepart=ValuePart?
+       ( 'of'  ownedRelationship_of = ItemFeatureMember )?
+       ( 'from' ownedRelationship_from = FlowEndMember 'to' ownedRelationship_to = FlowEndMember )?
 ;
 
 /* Flow Members */
@@ -1142,19 +1140,19 @@ ItemFeatureMember :
 ;
 
 ItemFeature :
-	  PayloadFeature
+	  ownedRelatedElement = PayloadFeature
 ;
 
  PayloadFeature :
-	  Identification? PayloadFeatureSpecializationPart ValuePart?
-	| Identification? ValuePart
-    | ownedRelationship += OwnedFeatureTyping ( ownedRelationship += OwnedMultiplicity )?
-    | ownedRelationship += OwnedMultiplicity ownedRelationship += OwnedFeatureTyping
+	  identification=Identification? pfsp=PayloadFeatureSpecializationPart valuepart=ValuePart?
+	| identification=Identification? valuepart=ValuePart
+    | ownedRelationship = OwnedFeatureTyping ( multiplicity2 = OwnedMultiplicity )?
+    | multiplicity1 = OwnedMultiplicity ownedRelationship = OwnedFeatureTyping
 ;
 
  PayloadFeatureSpecializationPart :
-	  ( FeatureSpecialization )+ MultiplicityPart? FeatureSpecialization*
-	| MultiplicityPart FeatureSpecialization+
+	  (ownedRelationship+=FeatureSpecialization)+ mp=MultiplicityPart? ownedRelationship2+=FeatureSpecialization*
+	| mp=MultiplicityPart ownedRelationship+=FeatureSpecialization+
 ;
 
 FlowEndMember :
@@ -1162,8 +1160,8 @@ FlowEndMember :
 ;
 
 FlowEnd :
-	( ownedRelationship += FlowEndSubsetting )?
-	ownedRelationship += FlowFeatureMember
+	( fes += FlowEndSubsetting )?
+	ffm += FlowFeatureMember
 ;
 
 FlowEndSubsetting :

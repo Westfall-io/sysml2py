@@ -295,7 +295,7 @@ ExtentExpression :
 
 PrimaryExpression :
 	base=BaseExpression
-	(  '.' ownedRelationship += FeatureChainMember )?
+	(  '.' ownedRelationship1 += FeatureChainMember )?
 	(
     ( operator += '#' '(' operand += SequenceExpression ')'
       | operator += '[' operand += SequenceExpression ']'
@@ -304,7 +304,7 @@ PrimaryExpression :
       |  operator += '.' operand += BodyExpression
       |  operator += '.?' operand += BodyExpression
 	  )
-	  (  '.' ownedRelationship += FeatureChainMember )?
+	  (  '.' ownedRelationship2 += FeatureChainMember )?
 	)*
 ;
 
@@ -497,7 +497,7 @@ LiteralInfinity :
 /* NAMES */
 
 ReservedKeyword:
-  'about' | 'to' | 'connect' | 'connection'
+  'about' | 'to' | 'connect' | 'connection' | 'from' | 'of'
 ;
 
 Name:

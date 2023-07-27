@@ -13,7 +13,7 @@ from sysml2py.usage import Item, Attribute, Part, Port
 from sysml2py.definition import Model, Package
 
 
-def load_grammar(fp):
+def load_grammar(fp, debug=False):
     """SysML load from file pointer
 
     Deserialize ``fp`` (a ``.read()``-supporting file-like object containing
@@ -80,16 +80,11 @@ def load_grammar(fp):
     import sysml2py
     from sysml2py.formatting import reformat
 
-    # try:
     grammar = str((pkg_resources.files(sysml2py) / "grammar/SysML.tx"))
-    # except:
-    #     try:
-    #         grammar = "./src/sysml2py/grammar/SysML.tx"
-    #     except:
-    #         grammar = "./grammar/SysML.tx"
     meta = metamodel_from_file(grammar)
+
     try:
-        model = meta.model_from_str(s, debug=False)
+        model = meta.model_from_str(s, debug=debug)
     except TextXSyntaxError as e:
         print("TextX returned the following error: {}".format(e))
         raise TextXSyntaxError("Invalid SysML")

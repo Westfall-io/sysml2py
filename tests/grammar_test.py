@@ -589,3 +589,176 @@ def test_Training_Interfaces_Interface_Example():
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
+
+
+def test_Training_Binding_Connectors_Example_1():
+    text = """package 'Binding Connectors Example-1' {
+    	import 'Port Example'::*;
+
+    	part def Vehicle;
+    	part def FuelPump;
+    	part def FuelTank;
+
+    	part vehicle : Vehicle {
+    		part tank : FuelTankAssembly {
+    			port redefines fuelTankPort {
+    				out item redefines fuelSupply;
+    				in item redefines fuelReturn;
+    			}
+
+    			bind fuelTankPort.fuelSupply = pump.pumpOut;
+    			bind fuelTankPort.fuelReturn = tank.fuelIn;
+
+    			 part pump : FuelPump {
+    				out item pumpOut : Fuel;
+    				in item pumpIn : Fuel;
+    			}
+
+    			part tank : FuelTank {
+    				out item fuelOut : Fuel;
+    				in item fuelIn : Fuel;
+    			}
+    		}
+    	}
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+
+
+def test_Training_Binding_Connectors_Example_2():
+    text = """package 'Binding Connectors Example-2' {
+    	import 'Port Example'::*;
+
+    	part def Vehicle;
+    	part def FuelPump;
+    	part def FuelTank;
+
+    	part vehicle : Vehicle {
+    		part tank : FuelTankAssembly {
+    			port redefines fuelTankPort {
+    				out item redefines fuelSupply;
+    				in item redefines fuelReturn;
+    			}
+
+    			part pump : FuelPump {
+    				out item pumpOut : Fuel = fuelTankPort.fuelSupply;
+    				in item pumpIn : Fuel;
+    			}
+
+    			part tank : FuelTank {
+    				out item fuelOut : Fuel;
+    				in item fuelIn : Fuel = fuelTankPort.fuelReturn;
+    			}
+    		}
+    	}
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+
+
+def test_Training_Flow_Connection_Definition_Example():
+    text = """package 'Flow Connection Definition Example' {
+    	import 'Port Example'::*;
+    	
+    	part def Vehicle;
+    	
+    	flow def FuelFlow {
+    		ref :>> payload : Fuel;
+    		end port supplierPort : FuelOutPort;
+    		end port consumerPort : FuelInPort;
+    	}
+    	
+    	part vehicle : Vehicle {
+    		part tankAssy : FuelTankAssembly;
+    		part eng : Engine;
+    		
+    		flow : FuelFlow
+    		  from tankAssy.fuelTankPort.fuelSupply
+    			to eng.engineFuelPort.fuelSupply;
+    			
+    	} 
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+
+
+def test_Training_Flow_Connection_Interface_Example():
+    text = """package 'Flow Connection Interface Example' {
+    	import 'Port Example'::*;
+    	
+    	part def Vehicle;
+    	
+    	interface def FuelInterface {
+    		end supplierPort : FuelOutPort;
+    		end consumerPort : FuelInPort;
+    		
+    		flow supplierPort.fuelSupply to consumerPort.fuelSupply;			
+    		flow consumerPort.fuelReturn to supplierPort.fuelReturn;
+    	}
+    	
+    	part vehicle : Vehicle {	
+    		part tankAssy : FuelTankAssembly;		
+    		part eng : Engine;
+    		
+    		interface : FuelInterface connect 
+    			supplierPort ::> tankAssy.fuelTankPort to 
+    			consumerPort ::> eng.engineFuelPort;
+    	} 
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+
+
+def test_Training_Flow_Connection_Usage_Example():
+    text = """package 'Flow Connection Usage Example' {
+    	import 'Port Example'::*;
+    	
+    	part def Vehicle;
+    	
+    	part vehicle : Vehicle {
+    		part tankAssy : FuelTankAssembly;
+    		part eng : Engine;
+    		
+    		flow of Fuel
+    		  from tankAssy.fuelTankPort.fuelSupply
+    			to eng.engineFuelPort.fuelSupply;
+    			
+    		flow of Fuel
+    		  from eng.engineFuelPort.fuelReturn
+    			to tankAssy.fuelTankPort.fuelReturn;
+    	} 
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+
+
+# def test_Training_Action_Definition_Example():
+#     text = '''package 'Action Definition Example' {
+#     	item def Scene;
+#     	item def Image;
+#     	item def Picture;
+
+#     	action def Focus { in scene : Scene; out image : Image; }
+#     	action def Shoot { in image: Image; out picture : Picture; }
+
+#     	action def TakePicture { in scene : Scene; out picture : Picture;
+#     		bind focus.scene = scene;
+
+#     		action focus: Focus { in scene; out image; }
+
+#     		flow from focus.image to shoot.image;
+
+#     		action shoot: Shoot { in image; out picture; }
+
+#     		bind shoot.picture = picture;
+#     	}
+
+#     }'''
+#     a = loads(text)
+#     b = classtree(a)
+#     assert strip_ws(text) == strip_ws(b.dump())
