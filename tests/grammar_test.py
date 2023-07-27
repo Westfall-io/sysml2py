@@ -763,8 +763,9 @@ def test_Training_Action_Definition_Example():
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
 
+
 def test_Training_Action_Shorthand_Example():
-    text = '''package 'Action Shorthand Example' {
+    text = """package 'Action Shorthand Example' {
     	item def Scene;
     	item def Image;
     	item def Picture;
@@ -789,7 +790,7 @@ def test_Training_Action_Shorthand_Example():
     		}
     	}
     	
-    }'''
+    }"""
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())

@@ -221,52 +221,59 @@ class ActionBodyItem:
         output = []
         for child in self.children:
             output.append(child.dump())
-            if child.__class__.__name__ != 'EmptySuccessionMember':
-                output.append('\n')
+            if child.__class__.__name__ != "EmptySuccessionMember":
+                output.append("\n")
             else:
-                output.append(' ')
-        if output[-1] == '\n':
+                output.append(" ")
+        if output[-1] == "\n":
             output = output[:-1]
         return "".join(output)
+
 
 class EmptySuccessionMember:
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
             self.children = EmptySuccession(definition["ownedRelatedElement"][0])
-            
+
     def dump(self):
         return self.children.dump()
-    
+
+
 class EmptySuccession:
     def __init__(self, definition):
         self.children = []
         if valid_definition(definition, self.__class__.__name__):
             if len(definition["ownedRelationship"]) > 0:
-                self.children = MultiplicitySourceEndMember(definition["ownedRelationship"])
-            
+                self.children = MultiplicitySourceEndMember(
+                    definition["ownedRelationship"]
+                )
+
     def dump(self):
-        output = ['then']
+        output = ["then"]
         for child in self.children:
             output.append(child.dump())
         return " ".join(output)
-    
+
+
 class MultiplicitySourceEndMember:
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
             self.children = MultiplicitySourceEnd(definition["ownedRelatedElement"])
-            
+
     def dump(self):
         return self.children.dump()
-            
+
+
 class MultiplicitySourceEnd:
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
             for child in definition["ownedRelatedElement"]:
                 self.children = OwnedMultiplicity(child)
-            
+
     def dump(self):
         return " ".join([x.dump() for x in self.children])
-    
+
+
 class StructureUsageMember:
     def __init__(self, definition):
         self.prefix = None
@@ -1951,9 +1958,10 @@ class StructureUsageElement:
             "name": self.__class__.__name__,
             "ownedRelatedElement": self.children.get_definition(),
         }
-    
+
+
 class IndividualUsage:
-    #IndividualUsage :
+    # IndividualUsage :
     # 	prefix=BasicUsagePrefix isIndividual ?= 'individual'
     # 	UsageExtensionKeyword* usage=Usage
     # ;
@@ -1961,32 +1969,34 @@ class IndividualUsage:
         self.prefix = None
         self.children = []
         if valid_definition(definition, self.__class__.__name__):
-            if definition['prefix'] is not None:
-                self.prefix =BasicUsagePrefix(definition['prefix'])
-            self.isIndividual = definition['isIndividual']
-            for child in definition['usageExtension']:
+            if definition["prefix"] is not None:
+                self.prefix = BasicUsagePrefix(definition["prefix"])
+            self.isIndividual = definition["isIndividual"]
+            for child in definition["usageExtension"]:
                 self.children.append(UsageExtensionKeyword(child))
-            self.usage = Usage(definition['usage'])
-    
+            self.usage = Usage(definition["usage"])
+
     def dump(self):
         output = []
         if self.prefix is not None:
             output.append(self.prefix.dump())
         if self.isIndividual:
-            output.append('individual')
+            output.append("individual")
         for child in self.children:
             output.append(child.dump())
         output.append(self.usage.dump())
-            
+
         return " ".join(output)
-    
+
+
 class UsageExtensionKeyword:
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
             self.children = PrefixMetadataMember(definition["ownedRelationship"])
+
     def dump(self):
         return self.children.dump()
-        
+
 
 class FlowConnectionUsage:
     def __init__(self, definition):
