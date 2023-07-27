@@ -889,3 +889,21 @@ def test_Training_Action_Decomposition():
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
+
+#16. Conditional Succession
+#17. Control
+#18. Action Performance
+#19. Assignment Actions
+#20. Asynchronous Messaging
+#21. Opaque Actions
+#22. State Definitions
+#23. States
+#24. Transitions
+#25. State Exhibition
+#26. Occurrences
+#27. Individual
+#28. Expressions
+#29. Calculations
+#30. Constraints
+#31. Requirements
+
