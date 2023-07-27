@@ -661,24 +661,24 @@ def test_Training_Binding_Connectors_Example_2():
 def test_Training_Flow_Connection_Definition_Example():
     text = """package 'Flow Connection Definition Example' {
     	import 'Port Example'::*;
-    	
+
     	part def Vehicle;
-    	
+
     	flow def FuelFlow {
     		ref :>> payload : Fuel;
     		end port supplierPort : FuelOutPort;
     		end port consumerPort : FuelInPort;
     	}
-    	
+
     	part vehicle : Vehicle {
     		part tankAssy : FuelTankAssembly;
     		part eng : Engine;
-    		
+
     		flow : FuelFlow
     		  from tankAssy.fuelTankPort.fuelSupply
     			to eng.engineFuelPort.fuelSupply;
-    			
-    	} 
+
+    	}
     }"""
     a = loads(text)
     b = classtree(a)
@@ -688,25 +688,25 @@ def test_Training_Flow_Connection_Definition_Example():
 def test_Training_Flow_Connection_Interface_Example():
     text = """package 'Flow Connection Interface Example' {
     	import 'Port Example'::*;
-    	
+
     	part def Vehicle;
-    	
+
     	interface def FuelInterface {
     		end supplierPort : FuelOutPort;
     		end consumerPort : FuelInPort;
-    		
-    		flow supplierPort.fuelSupply to consumerPort.fuelSupply;			
+
+    		flow supplierPort.fuelSupply to consumerPort.fuelSupply;
     		flow consumerPort.fuelReturn to supplierPort.fuelReturn;
     	}
-    	
-    	part vehicle : Vehicle {	
-    		part tankAssy : FuelTankAssembly;		
+
+    	part vehicle : Vehicle {
+    		part tankAssy : FuelTankAssembly;
     		part eng : Engine;
-    		
-    		interface : FuelInterface connect 
-    			supplierPort ::> tankAssy.fuelTankPort to 
+
+    		interface : FuelInterface connect
+    			supplierPort ::> tankAssy.fuelTankPort to
     			consumerPort ::> eng.engineFuelPort;
-    	} 
+    	}
     }"""
     a = loads(text)
     b = classtree(a)
@@ -716,21 +716,21 @@ def test_Training_Flow_Connection_Interface_Example():
 def test_Training_Flow_Connection_Usage_Example():
     text = """package 'Flow Connection Usage Example' {
     	import 'Port Example'::*;
-    	
+
     	part def Vehicle;
-    	
+
     	part vehicle : Vehicle {
     		part tankAssy : FuelTankAssembly;
     		part eng : Engine;
-    		
+
     		flow of Fuel
     		  from tankAssy.fuelTankPort.fuelSupply
     			to eng.engineFuelPort.fuelSupply;
-    			
+
     		flow of Fuel
     		  from eng.engineFuelPort.fuelReturn
     			to tankAssy.fuelTankPort.fuelReturn;
-    	} 
+    	}
     }"""
     a = loads(text)
     b = classtree(a)
@@ -763,92 +763,93 @@ def test_Training_Action_Definition_Example():
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
 
+
 def test_Training_Action_Shorthand_Example():
-    text = '''package 'Action Shorthand Example' {
+    text = """package 'Action Shorthand Example' {
     	item def Scene;
     	item def Image;
     	item def Picture;
-    	
+
     	action def Focus { in scene : Scene; out image : Image; }
-    	action def Shoot { in image: Image; out picture : Picture; }	
-    				
+    	action def Shoot { in image: Image; out picture : Picture; }
+
     	action def TakePicture {
     		in item scene : Scene;
     		out item picture : Picture;
-    		
+
     		action focus: Focus {
     			in item scene = TakePicture::scene;
     			out item image;
     		}
-    		
+
     		flow focus.image to shoot.image;
-    		
+
     		then action shoot: Shoot {
     			in item;
     			out item picture = TakePicture::picture;
     		}
     	}
-    	
-    }'''
+
+    }"""
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
-    
+
 def test_Training_Action_Succession_Example_1():
     text = '''package 'Action Succession Example-1' {
     	item def Scene;
     	item def Image;
     	item def Picture;
-    	
+
     	action def Focus { in scene : Scene; out image : Image; }
-    	action def Shoot { in image: Image; out picture : Picture; }	
-    				
+    	action def Shoot { in image: Image; out picture : Picture; }
+
     	action def TakePicture {
     		in item scene : Scene;
     		out item picture : Picture;
-    		
+
     		bind focus.scene = scene;
-    		
+
     		action focus: Focus { in scene; out image; }
-    		
+
     		flow focus.image to shoot.image;
-    		
+
     		first focus then shoot;
-    		
+
     		action shoot: Shoot { in image; out picture; }
-    		
+
     		bind shoot.picture = picture;
     	}
-    	
+
     }'''
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
-    
+
 def test_Training_Action_Succession_Example_2():
     text = '''package 'Action Definition Example' {
     	item def Scene;
     	item def Image;
     	item def Picture;
-    	
+
     	action def Focus { in scene : Scene; out image : Image; }
-    	action def Shoot { in image: Image; out picture : Picture; }	
-    				
+    	action def Shoot { in image: Image; out picture : Picture; }
+
     	action def TakePicture {
     		in item scene : Scene;
     		out item picture : Picture;
-    		
+
     		bind focus.scene = scene;
-    		
+
     		action focus: Focus { in scene; out image; }
-    		
+
     		succession flow focus.image to shoot.image;
-    		
+
     		action shoot: Shoot { in image; out picture; }
-    		
+
     		bind shoot.picture = picture;
     	}
-    	
+
     }'''
     a = loads(text)
     b = classtree(a)
