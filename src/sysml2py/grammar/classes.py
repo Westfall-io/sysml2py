@@ -211,14 +211,62 @@ class ActionBodyItem:
                     self.children.append(BehaviorUsageMember(child))
                 elif child["name"] == "StructureUsageMember":
                     self.children.append(StructureUsageMember(child))
+                elif child["name"] == "EmptySuccessionMember":
+                    self.children.append(EmptySuccessionMember(child))
                 else:
                     print(child["name"])
                     raise NotImplementedError
 
     def dump(self):
-        return "\n".join([x.dump() for x in self.children])
+        output = []
+        for child in self.children:
+            output.append(child.dump())
+            if child.__class__.__name__ != 'EmptySuccessionMember':
+                output.append('\n')
+            else:
+                output.append(' ')
+        if output[-1] == '\n':
+            output = output[:-1]
+        return "".join(output)
 
-
+class EmptySuccessionMember:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.children = EmptySuccession(definition["ownedRelatedElement"][0])
+            
+    def dump(self):
+        return self.children.dump()
+    
+class EmptySuccession:
+    def __init__(self, definition):
+        self.children = []
+        if valid_definition(definition, self.__class__.__name__):
+            if len(definition["ownedRelationship"]) > 0:
+                self.children = MultiplicitySourceEndMember(definition["ownedRelationship"])
+            
+    def dump(self):
+        output = ['then']
+        for child in self.children:
+            output.append(child.dump())
+        return " ".join(output)
+    
+class MultiplicitySourceEndMember:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.children = MultiplicitySourceEnd(definition["ownedRelatedElement"])
+            
+    def dump(self):
+        return self.children.dump()
+            
+class MultiplicitySourceEnd:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            for child in definition["ownedRelatedElement"]:
+                self.children = OwnedMultiplicity(child)
+            
+    def dump(self):
+        return " ".join([x.dump() for x in self.children])
+    
 class StructureUsageMember:
     def __init__(self, definition):
         self.prefix = None
@@ -233,8 +281,10 @@ class StructureUsageMember:
         output = []
         if self.prefix is not None:
             output.append(self.prefix.dump())
+        o2 = []
         for child in self.children:
-            output.append(child.dump())
+            o2.append(child.dump())
+        output.append("\n".join(o2))
         return "".join(output)
 
 
@@ -1887,7 +1937,10 @@ class StructureUsageElement:
                 self.children = InterfaceUsage(definition["ownedRelatedElement"])
             elif definition["ownedRelatedElement"]["name"] == "FlowConnectionUsage":
                 self.children = FlowConnectionUsage(definition["ownedRelatedElement"])
+            elif definition["ownedRelatedElement"]["name"] == "IndividualUsage":
+                self.children = IndividualUsage(definition["ownedRelatedElement"])
             else:
+                print(definition["ownedRelatedElement"]["name"])
                 raise NotImplementedError
 
     def dump(self):
@@ -1898,7 +1951,42 @@ class StructureUsageElement:
             "name": self.__class__.__name__,
             "ownedRelatedElement": self.children.get_definition(),
         }
-
+    
+class IndividualUsage:
+    #IndividualUsage :
+    # 	prefix=BasicUsagePrefix isIndividual ?= 'individual'
+    # 	UsageExtensionKeyword* usage=Usage
+    # ;
+    def __init__(self, definition):
+        self.prefix = None
+        self.children = []
+        if valid_definition(definition, self.__class__.__name__):
+            if definition['prefix'] is not None:
+                self.prefix =BasicUsagePrefix(definition['prefix'])
+            self.isIndividual = definition['isIndividual']
+            for child in definition['usageExtension']:
+                self.children.append(UsageExtensionKeyword(child))
+            self.usage = Usage(definition['usage'])
+    
+    def dump(self):
+        output = []
+        if self.prefix is not None:
+            output.append(self.prefix.dump())
+        if self.isIndividual:
+            output.append('individual')
+        for child in self.children:
+            output.append(child.dump())
+        output.append(self.usage.dump())
+            
+        return " ".join(output)
+    
+class UsageExtensionKeyword:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.children = PrefixMetadataMember(definition["ownedRelationship"])
+    def dump(self):
+        return self.children.dump()
+        
 
 class FlowConnectionUsage:
     def __init__(self, definition):

@@ -551,7 +551,7 @@ BehaviorUsageMember :
 ;
 
  UsagePrefix :
-	BasicUsagePrefix UsageExtensionKeyword*
+	prefix=BasicUsagePrefix usageKeyword += UsageExtensionKeyword*
 ;
 
  Usage :
@@ -820,7 +820,7 @@ OccurrenceUsageKeyword :
 	  prefix=BasicUsagePrefix
 	  ( isIndividual ?= 'individual' )?
 	  ( portionKind = PortionKind )?
-	  usageExtension=UsageExtensionKeyword*
+	  usageExtension+=UsageExtensionKeyword*
 ;
 
 OccurrenceUsage :
@@ -829,7 +829,7 @@ OccurrenceUsage :
 
 IndividualUsage :
 	prefix=BasicUsagePrefix isIndividual ?= 'individual'
-	UsageExtensionKeyword* usage=Usage
+	usageExtension+=UsageExtensionKeyword* usage=Usage
 ;
 
 PortionUsage :
@@ -858,7 +858,7 @@ EmptySuccessionMember :
 
 EmptySuccession :
 	'then' ownedRelationship += MultiplicitySourceEndMember
-	ownedRelationship += EmptyTargetEndMember
+	(ownedRelationship += EmptyTargetEndMember)?
 ;
 
 MultiplicitySourceEndMember :
@@ -1349,7 +1349,6 @@ ActionBodyItem :
 	| ownedRelationship += AliasMember
 	| ownedRelationship += DefinitionMember
 	| ownedRelationship += VariantUsageMember
-	| ownedRelationship += NonOccurrenceUsageMember
 	| ( ownedRelationship += EmptySuccessionMember )?
 	  ownedRelationship += StructureUsageMember
 	| ownedRelationship += InitialNodeMember
@@ -1358,6 +1357,7 @@ ActionBodyItem :
 	  ownedRelationship += ActionBodyItemTarget
 	  ( ownedRelationship += TargetSuccessionMember )*
 	| ownedRelationship += GuardedSuccessionMember
+	| ownedRelationship += NonOccurrenceUsageMember
 ;
 
 
@@ -1674,17 +1674,19 @@ TargetSuccession :
 ;
 
 GuardedTargetSuccession :
-	ownedRelationship += EmptyParameterMember
+// if then
+	//ownedRelationship += EmptyParameterMember
 	ownedRelationship += GuardExpressionMember
 	'then' ownedRelationship += TransitionSuccessionMember
 ;
 
 DefaultTargetSuccession :
-	ownedRelationship += EmptyParameterMember
+	//ownedRelationship += EmptyParameterMember
 	'else' ownedRelationship += TransitionSuccessionMember
 ;
 
 GuardedSuccession :
+// first if then
 	( SuccessionKeyword UsageDeclaration )? 'first'
 	ownedRelationship += TransitionSourceMember
 	ownedRelationship += EmptyParameterMember
