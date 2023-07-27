@@ -161,7 +161,8 @@ class DefinitionElement:
         for item in self.children:
             output["ownedRelatedElement"] = item.get_definition()
         return output
-    
+
+
 class ActionDefinition:
     def __init__(self, definition):
         self.prefix = None
@@ -170,8 +171,8 @@ class ActionDefinition:
             if definition["prefix"] is not None:
                 raise NotImplementedError
 
-            self.declaration=DefinitionDeclaration(definition["declaration"])
-            self.body=ActionBody(definition["body"])
+            self.declaration = DefinitionDeclaration(definition["declaration"])
+            self.body = ActionBody(definition["body"])
 
     def dump(self):
         output = []
@@ -181,6 +182,7 @@ class ActionDefinition:
         output.append(self.declaration.dump())
         output.append(self.body.dump())
         return " ".join(output)
+
 
 class ActionBody:
     def __init__(self, definition):
@@ -193,7 +195,8 @@ class ActionBody:
         if len(self.children) == 0:
             return ";"
         else:
-            return "{\n"+"\n".join([x.dump() for x in self.children])+"\n}"
+            return "{\n" + "\n".join([x.dump() for x in self.children]) + "\n}"
+
 
 class ActionBodyItem:
     def __init__(self, definition):
@@ -211,19 +214,21 @@ class ActionBodyItem:
                 else:
                     print(child["name"])
                     raise NotImplementedError
+
     def dump(self):
         return "\n".join([x.dump() for x in self.children])
-    
+
+
 class StructureUsageMember:
     def __init__(self, definition):
         self.prefix = None
         self.children = []
         if valid_definition(definition, self.__class__.__name__):
             if definition["prefix"] is not None:
-                self.prefix = MemberPrefix(definition['prefix'])
+                self.prefix = MemberPrefix(definition["prefix"])
             for child in definition["ownedRelatedElement"]:
                 self.children.append(StructureUsageElement(child))
-            
+
     def dump(self):
         output = []
         if self.prefix is not None:
@@ -231,18 +236,19 @@ class StructureUsageMember:
         for child in self.children:
             output.append(child.dump())
         return "".join(output)
-    
+
+
 class BehaviorUsageMember:
     def __init__(self, definition):
         self.prefix = None
         self.children = []
         if valid_definition(definition, self.__class__.__name__):
-            if definition['prefix'] is not None:
-                self.prefix=MemberPrefix(definition['prefix'])
-                
-            for child in definition['ownedRelatedElement']:
+            if definition["prefix"] is not None:
+                self.prefix = MemberPrefix(definition["prefix"])
+
+            for child in definition["ownedRelatedElement"]:
                 self.children.append(BehaviorUsageElement(child))
-            
+
     def dump(self):
         output = []
         if self.prefix is not None:
@@ -251,28 +257,30 @@ class BehaviorUsageMember:
             output.append(child.dump())
         return " ".join(output)
 
+
 class BehaviorUsageElement:
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
-            if definition["ownedRelationship"]['name'] == 'ActionUsage':
+            if definition["ownedRelationship"]["name"] == "ActionUsage":
                 self.children = ActionUsage(definition["ownedRelationship"])
             else:
-                print(definition['ownedRelationship']['name'])
+                print(definition["ownedRelationship"]["name"])
                 raise NotImplementedError
-            
+
     def dump(self):
         return self.children.dump()
-    
+
+
 class ActionUsage:
     def __init__(self, definition):
         self.prefix = None
         if valid_definition(definition, self.__class__.__name__):
-            if definition['prefix'] is not None:
-                self.prefix = OccurrenceUsagePrefix(definition['prefix'])
-            self.keyword = 'action'
-            self.declaration = ActionUsageDeclaration(definition['declaration'])
-            self.body = ActionBody(definition['body'])
-            
+            if definition["prefix"] is not None:
+                self.prefix = OccurrenceUsagePrefix(definition["prefix"])
+            self.keyword = "action"
+            self.declaration = ActionUsageDeclaration(definition["declaration"])
+            self.body = ActionBody(definition["body"])
+
     def dump(self):
         output = []
         if self.prefix is not None:
@@ -281,19 +289,19 @@ class ActionUsage:
         output.append(self.declaration.dump())
         output.append(self.body.dump())
         return " ".join(output)
-    
+
+
 class ActionUsageDeclaration:
     def __init__(self, definition):
         self.declaration = None
         self.valuepart = None
         if valid_definition(definition, self.__class__.__name__):
-            if definition['declaration'] is not None:
-                self.declaration = UsageDeclaration(definition['declaration'])
-                
-            if definition['valuepart'] is not None:
-                self.valuepart = ValuePart(definition['valuepart'])
-            
-            
+            if definition["declaration"] is not None:
+                self.declaration = UsageDeclaration(definition["declaration"])
+
+            if definition["valuepart"] is not None:
+                self.valuepart = ValuePart(definition["valuepart"])
+
     def dump(self):
         output = []
         if self.declaration is not None:
@@ -301,7 +309,8 @@ class ActionUsageDeclaration:
         if self.valuepart is not None:
             output.append(self.valuepart.dump())
         return " ".join(output)
-    
+
+
 class FlowConnectionDefinition:
     def __init__(self, definition):
         self.prefix = None

@@ -738,7 +738,7 @@ def test_Training_Flow_Connection_Usage_Example():
 
 
 def test_Training_Action_Definition_Example():
-    text = '''package 'Action Definition Example' {
+    text = """package 'Action Definition Example' {
      	item def Scene;
      	item def Image;
      	item def Picture;
@@ -758,7 +758,7 @@ def test_Training_Action_Definition_Example():
     		bind shoot.picture = picture;
      	}
 
-    }'''
+    }"""
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
