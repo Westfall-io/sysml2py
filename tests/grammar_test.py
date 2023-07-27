@@ -657,8 +657,81 @@ def test_Training_Binding_Connectors_Example_2():
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
 
+def test_Training_Flow_Connection_Definition_Example():
+    text = """package 'Flow Connection Definition Example' {
+    	import 'Port Example'::*;
+    	
+    	part def Vehicle;
+    	
+    	flow def FuelFlow {
+    		ref :>> payload : Fuel;
+    		end port supplierPort : FuelOutPort;
+    		end port consumerPort : FuelInPort;
+    	}
+    	
+    	part vehicle : Vehicle {
+    		part tankAssy : FuelTankAssembly;
+    		part eng : Engine;
+    		
+    		flow : FuelFlow
+    		  from tankAssy.fuelTankPort.fuelSupply
+    			to eng.engineFuelPort.fuelSupply;
+    			
+    	} 
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
 
-# Flow connections
+def test_Training_Flow_Connection_Interface_Example():
+    text = """package 'Flow Connection Interface Example' {
+    	import 'Port Example'::*;
+    	
+    	part def Vehicle;
+    	
+    	interface def FuelInterface {
+    		end supplierPort : FuelOutPort;
+    		end consumerPort : FuelInPort;
+    		
+    		flow supplierPort.fuelSupply to consumerPort.fuelSupply;			
+    		flow consumerPort.fuelReturn to supplierPort.fuelReturn;
+    	}
+    	
+    	part vehicle : Vehicle {	
+    		part tankAssy : FuelTankAssembly;		
+    		part eng : Engine;
+    		
+    		interface : FuelInterface connect 
+    			supplierPort ::> tankAssy.fuelTankPort to 
+    			consumerPort ::> eng.engineFuelPort;
+    	} 
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+    
+def test_Training_Flow_Connection_Usage_Example():
+    text = """package 'Flow Connection Usage Example' {
+    	import 'Port Example'::*;
+    	
+    	part def Vehicle;
+    	
+    	part vehicle : Vehicle {
+    		part tankAssy : FuelTankAssembly;
+    		part eng : Engine;
+    		
+    		flow of Fuel
+    		  from tankAssy.fuelTankPort.fuelSupply
+    			to eng.engineFuelPort.fuelSupply;
+    			
+    		flow of Fuel
+    		  from eng.engineFuelPort.fuelReturn
+    			to tankAssy.fuelTankPort.fuelReturn;
+    	} 
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
 
 # def test_Training_Action_Definition_Example():
 #     text = '''package 'Action Definition Example' {
