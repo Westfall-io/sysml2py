@@ -1597,12 +1597,12 @@ class PrimaryExpression:
 
         for child in self.operator:
             output["operator"].append(child)
-            
+
         if self.children1 is not None:
-            output['ownedRelationship1'].append(self.children1.get_definition())
-        
+            output["ownedRelationship1"].append(self.children1.get_definition())
+
         if self.children2 is not None:
-            output['ownedRelationship2'].append(self.children2.get_definition())
+            output["ownedRelationship2"].append(self.children2.get_definition())
         return output
 
 
