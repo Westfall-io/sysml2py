@@ -857,8 +857,9 @@ def test_Training_Action_Succession_Example_2():
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
 
+
 def test_Training_Action_Decomposition():
-    text = '''package 'Action Decomposition' {
+    text = """package 'Action Decomposition' {
     	part def Scene;
     	part def Image;
     	part def Picture;
@@ -884,7 +885,7 @@ def test_Training_Action_Decomposition():
     		}
     	}
     	
-    }'''
+    }"""
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
