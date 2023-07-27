@@ -1955,7 +1955,10 @@ class OccurrenceUsageElement:
         if valid_definition(definition, "OccurrenceUsageElement"):
             if definition["ownedRelatedElement"]["name"] == "StructureUsageElement":
                 self.children = StructureUsageElement(definition["ownedRelatedElement"])
+            elif definition["ownedRelatedElement"]["name"] == "BehaviorUsageElement":
+                self.children = BehaviorUsageElement(definition["ownedRelatedElement"])
             else:
+                print(definition["ownedRelatedElement"]["name"])
                 raise NotImplementedError
 
     def dump(self):

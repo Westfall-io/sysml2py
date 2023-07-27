@@ -856,3 +856,54 @@ def test_Training_Action_Succession_Example_2():
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
+
+
+def test_Training_Action_Decomposition():
+    text = """package 'Action Decomposition' {
+    	part def Scene;
+    	part def Image;
+    	part def Picture;
+    	
+    	action def Focus { in scene : Scene; out image : Image; }
+    	action def Shoot { in image: Image; out picture : Picture; }	
+    	action def TakePicture { in scene : Scene; out picture : Picture; }
+    		
+    	action takePicture : TakePicture {
+    		in item scene;
+    		out item picture;
+    		
+    		action focus : Focus {
+    			in item scene = takePicture::scene; 
+    			out item image;
+    		}
+    		
+    		flow focus.image to shoot.image;
+
+    		action shoot : Shoot {
+    			in item; 
+    			out item picture = takePicture::picture;
+    		}
+    	}
+    	
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+
+
+# 16. Conditional Succession
+# 17. Control
+# 18. Action Performance
+# 19. Assignment Actions
+# 20. Asynchronous Messaging
+# 21. Opaque Actions
+# 22. State Definitions
+# 23. States
+# 24. Transitions
+# 25. State Exhibition
+# 26. Occurrences
+# 27. Individual
+# 28. Expressions
+# 29. Calculations
+# 30. Constraints
+# 31. Requirements
