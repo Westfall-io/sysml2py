@@ -751,7 +751,7 @@ def test_Training_Action_Definition_Example():
 
     		action focus: Focus { in scene; out image; }
 
-    		flow from focus.image to shoot.image;
+    		flow focus.image to shoot.image;
 
     		action shoot: Shoot { in image; out picture; }
 
