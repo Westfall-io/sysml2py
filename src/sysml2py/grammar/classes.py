@@ -1225,24 +1225,24 @@ class NonOccurrenceUsageElement:
         output["ownedRelatedElement"] = self.children.get_definition()
         return output
 
+
 class Succession:
     def __init__(self, definition):
         self.prefix = None
         self.declaration = None
-        self.keyword = 'succession'
+        self.keyword = "succession"
         self.children = []
         if valid_definition(definition, self.__class__.__name__):
-            if definition['prefix'] is not None:
+            if definition["prefix"] is not None:
                 raise NotImplementedError
 
-            if definition['declaration'] is not None:
-                self.declaration = UsageDeclaration(definition['declaration'])
+            if definition["declaration"] is not None:
+                self.declaration = UsageDeclaration(definition["declaration"])
 
-            for child in definition['ownedRelationship']:
+            for child in definition["ownedRelationship"]:
                 self.children.append(ConnectorEndMember(child))
 
-            self.body = DefinitionBody(definition['body'])
-
+            self.body = DefinitionBody(definition["body"])
 
     def dump(self):
         output = []
@@ -1253,14 +1253,14 @@ class Succession:
             output.append(self.keyword)
             output.append(self.declaration.dump())
 
-        output.append('first')
+        output.append("first")
         output.append(self.children[0].dump())
-        output.append('then')
+        output.append("then")
         output.append(self.children[1].dump())
 
         output.append(self.body.dump())
 
-        return ' '.join(output)
+        return " ".join(output)
 
 
 class BindingConnector:
@@ -1985,8 +1985,13 @@ class StructureUsageElement:
                 self.children = FlowConnectionUsage(definition["ownedRelatedElement"])
             elif definition["ownedRelatedElement"]["name"] == "IndividualUsage":
                 self.children = IndividualUsage(definition["ownedRelatedElement"])
-            elif definition["ownedRelatedElement"]["name"] == "SuccessionFlowConnectionUsage":
-                self.children = SuccessionFlowConnectionUsage(definition["ownedRelatedElement"])
+            elif (
+                definition["ownedRelatedElement"]["name"]
+                == "SuccessionFlowConnectionUsage"
+            ):
+                self.children = SuccessionFlowConnectionUsage(
+                    definition["ownedRelatedElement"]
+                )
             else:
                 print(definition["ownedRelatedElement"]["name"])
                 raise NotImplementedError
@@ -2000,21 +2005,22 @@ class StructureUsageElement:
             "ownedRelatedElement": self.children.get_definition(),
         }
 
+
 class SuccessionFlowConnectionUsage:
     def __init__(self, definition):
-        self.keyword = 'succession flow'
+        self.keyword = "succession flow"
         self.prefix = None
         self.declaration = None
         self.body = None
         if valid_definition(definition, self.__class__.__name__):
-            if definition['prefix'] is not None:
-                self.prefix = OccurrenceUsagePrefix(definition['prefix'])
+            if definition["prefix"] is not None:
+                self.prefix = OccurrenceUsagePrefix(definition["prefix"])
 
-            if definition['declaration'] is not None:
-                self.declaration = FlowConnectionDeclaration(definition['declaration'])
+            if definition["declaration"] is not None:
+                self.declaration = FlowConnectionDeclaration(definition["declaration"])
 
-            if definition['body'] is not None:
-                self.body = DefinitionBody(definition['body'])
+            if definition["body"] is not None:
+                self.body = DefinitionBody(definition["body"])
 
     def dump(self):
         output = []
@@ -2029,6 +2035,7 @@ class SuccessionFlowConnectionUsage:
         if self.body is not None:
             output.append(self.body.dump())
         return " ".join(output)
+
 
 class IndividualUsage:
     def __init__(self, definition):
