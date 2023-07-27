@@ -657,6 +657,7 @@ def test_Training_Binding_Connectors_Example_2():
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
 
+
 def test_Training_Flow_Connection_Definition_Example():
     text = """package 'Flow Connection Definition Example' {
     	import 'Port Example'::*;
@@ -682,6 +683,7 @@ def test_Training_Flow_Connection_Definition_Example():
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
+
 
 def test_Training_Flow_Connection_Interface_Example():
     text = """package 'Flow Connection Interface Example' {
@@ -709,7 +711,8 @@ def test_Training_Flow_Connection_Interface_Example():
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
-    
+
+
 def test_Training_Flow_Connection_Usage_Example():
     text = """package 'Flow Connection Usage Example' {
     	import 'Port Example'::*;
@@ -732,6 +735,7 @@ def test_Training_Flow_Connection_Usage_Example():
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
+
 
 # def test_Training_Action_Definition_Example():
 #     text = '''package 'Action Definition Example' {

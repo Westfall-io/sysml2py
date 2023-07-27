@@ -82,7 +82,7 @@ def load_grammar(fp, debug=False):
 
     grammar = str((pkg_resources.files(sysml2py) / "grammar/SysML.tx"))
     meta = metamodel_from_file(grammar)
-    
+
     try:
         model = meta.model_from_str(s, debug=debug)
     except TextXSyntaxError as e:
