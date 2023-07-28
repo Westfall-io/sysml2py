@@ -386,7 +386,7 @@ DefinedByKeyword :
 ;
 
  Subsettings :
-	SubsetsKeyword ownedRelationship += OwnedSubsetting ( ',' ownedRelationship += OwnedSubsetting )*
+	SubsetsKeyword ownedRelationship += OwnedSubsetting[',']
 ;
 
 /* Subsets :
@@ -405,12 +405,18 @@ ReferencesKeyword :
 	'::>' | 'references'
 ;
 
+/*
+Removing original redefinitions, because it requires two OwnedRedefinition
  Redefinitions :
-	redefines=Redefines ( ',' ownedRelationship += OwnedRedefinition )*
+	redefines=Redefines ownedRelationship += OwnedRedefinition[',']
 ;
 
  Redefines :
 	RedefinesKeyword ownedRelationship += OwnedRedefinition
+;*/
+
+Redefinitions :
+ redefines=RedefinesKeyword ownedRelationship += OwnedRedefinition[',']
 ;
 
 RedefinesKeyword :
@@ -438,8 +444,8 @@ OwnedReferenceSubsetting :
 ;
 
 OwnedRedefinition :
-	  ownedRelatedElement += OwnedFeatureChain
-	| redefinedFeature = QualifiedName
+  redefinedFeature = QualifiedName
+  | ownedRelatedElement += OwnedFeatureChain
 ;
 
 /* Multiplicity */
@@ -1170,8 +1176,7 @@ FlowEndSubsetting :
 ;
 
 FeatureChainPrefix :
-	( ownedRelationship += OwnedFeatureChaining '.' )+
-	ownedRelationship += OwnedFeatureChaining '.'
+	ownedRelationship += OwnedFeatureChaining['.']
 ;
 
 FlowFeatureMember :
@@ -2394,7 +2399,10 @@ RenderingUsage :
 
 /* EXPRESSIONS */
 
+BaseExpression :
+  be=[KerMLExpressions.BaseExpression]
+;
 
 ExpressionBody :
-	CalculationBody
+	body=CalculationBody
 ;

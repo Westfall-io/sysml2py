@@ -904,6 +904,76 @@ def test_Training_Action_Decomposition():
 # 26. Occurrences
 # 27. Individual
 # 28. Expressions
+def test_Training_Expressions_Car_Mass_Rollup_Example():
+    text = '''package 'Car Mass Rollup Example 1' {
+    	import ScalarValues::*;
+    	import MassRollup1::*;
+    	
+    	part def CarPart :> MassedThing {			
+    		attribute serialNumber: String;
+    	}
+    	
+    	part car: CarPart :> compositeThing {	
+    		attribute vin :>> serialNumber;
+    		
+    		part carParts: CarPart[*] :>> subcomponents;
+    		
+    		part engine :> simpleThing, carParts;
+    		
+    		part transmission :> simpleThing, carParts;
+    	}
+    	
+    	import SI::kg;
+    	part c :> car {
+    		attribute :>> simpleMass = 1000[kg];
+    		part :>> engine {
+    			attribute :>> simpleMass = 100[kg];
+    		}
+    		
+    		part redefines transmission {
+    			attribute :>> simpleMass = 50[kg];
+    		}	
+    	}
+    }'''
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+    
+def test_Training_Expressions_Car_Mass_Rollup_Example_2():
+    text = '''package 'Car Mass Rollup 1' {
+    	import ScalarValues::*;
+    	import MassRollup2::*;
+    	
+    	part def CarPart :> MassedThing {			
+    		attribute serialNumber: String;
+    	}
+    	
+    	part car: CarPart :> compositeThing {	
+    		attribute vin :>> serialNumber;
+    		
+    		part carParts: CarPart[*] :>> subcomponents;
+    		
+    		part engine :> carParts;
+    		
+    		part transmission :> carParts;
+    	}
+    	
+    	import SI::kg;
+    	part c :> car {
+    		attribute :>> simpleMass = 1000[kg];
+    		part :>> engine {
+    			attribute :>> simpleMass = 100[kg];
+    		}
+    		
+    		part redefines transmission {
+    			attribute :>> simpleMass = 50[kg];
+    		}	
+    	}
+    }'''
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+    
 # 29. Calculations
 # 30. Constraints
 # 31. Requirements

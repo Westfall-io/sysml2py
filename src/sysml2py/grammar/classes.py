@@ -1499,13 +1499,15 @@ class FeatureValue:
                 self.elements.append(OwnedExpression(element))
 
     def dump(self):
-        output = ["="]
+        output = []
         if self.isDefault:
             output.append("default")
-        if self.isEqual:
-            output.append("=")
-        elif self.isInitial:
-            output.append(":=")
+            if self.isEqual:
+                output.append("=")
+            elif self.isInitial:
+                output.append(":=")
+        else:
+            output.append('=')
         for child in self.elements:
             output.append(child.dump())
         return " ".join(output)
@@ -1776,18 +1778,29 @@ class RangeExpression:
 class AdditiveExpression:
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
-            if definition["multiplicitive"] is not None:
-                self.multiplicitive = MultiplicativeExpression(
-                    definition["multiplicitive"]
-                )
-            else:
-                raise NotImplementedError
-
-            if not (definition["operand"] == [] and definition["operator"] == []):
-                raise NotImplementedError
+            # This is the left hand statement
+            self.left_hand = MultiplicativeExpression(
+                definition["multiplicitive"]
+            )
+            self.operator = []
+            if len(definition['operator']) > 0:
+                for child in definition['operator']:
+                    self.operator.append(child)
+                for child in definition['operand']:
+                    self.right_hand.append(MultiplicativeExpression(
+                        definition["operand"]
+                    ))
+                
 
     def dump(self):
-        return self.multiplicitive.dump()
+        if self.operator is None:
+            return self.left_hand.dump()
+        else:
+            output = [self.left_hand.dump()]
+            for k,v in enumerate(self.operator):
+                output.append(v)
+                output.append(self.right_hand[k].dump())
+            return " ".join(output)
 
     def get_definition(self):
         output = {
@@ -2014,11 +2027,17 @@ class BaseExpression:
                 self.relationship = LiteralString(definition["ownedRelationship"])
             elif definition["ownedRelationship"]["name"] == "LiteralReal":
                 self.relationship = LiteralReal(definition["ownedRelationship"])
+            elif definition["ownedRelationship"]["name"] == "SequenceExpression":
+                self.relationship = SequenceExpression(definition['ownedRelationship'])
             else:
+                print(definition["ownedRelationship"]["name"])
                 raise NotImplementedError
 
     def dump(self):
-        return self.relationship.dump()
+        if self.relationship.__class__.__name__ != 'SequenceExpression':
+            return self.relationship.dump()
+        else:
+            return '('+self.relationship.dump()+')'
 
     def get_definition(self):
         output = {
@@ -2968,7 +2987,7 @@ class Usage:
             self.completion = UsageCompletion()
 
     def dump(self):
-        return "".join([self.declaration.dump(), self.completion.dump()])
+        return " ".join([self.declaration.dump(), self.completion.dump()])
 
     def get_definition(self):
         output = {}
@@ -3266,19 +3285,7 @@ class FeatureSpecialization:
 
 class Redefinitions:
     def __init__(self, definition):
-        if valid_definition(definition, "Redefinitions"):
-            if len(definition["ownedRelationship"]) > 0:
-                raise NotImplementedError
-
-            self.children = Redefines(definition["redefines"])
-
-    def dump(self):
-        return self.children.dump()
-
-
-class Redefines:
-    def __init__(self, definition):
-        if valid_definition(definition, "Redefines"):
+        if valid_definition(definition, self.__class__.__name__):
             self.keyword = " :>>"
             self.children = []
             for relationship in definition["ownedRelationship"]:
@@ -3866,8 +3873,8 @@ class ImportedNamespace:
 
 class QualifiedName:
     def __init__(self, definition):
+        self.names = []
         if valid_definition(definition, self.__class__.__name__):
-            self.names = [definition["name1"]]
             for name in definition["names"]:
                 self.names.append(name)
 
@@ -3876,8 +3883,7 @@ class QualifiedName:
 
     def get_definition(self):
         output = {"name": self.__class__.__name__}
-        output["name1"] = self.names[0]
-        output["names"] = self.names[1:]
+        output["names"] = self.names
         return output
 
 

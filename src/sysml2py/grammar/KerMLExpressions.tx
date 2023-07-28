@@ -247,8 +247,8 @@ RangeExpression :
 // Arithmetic Expressions
 
 AdditiveExpression :
-	multiplicitive=MultiplicativeExpression (
-		operator = AdditiveOperator operand += MultiplicativeExpression )*
+	multiplicitive=MultiplicativeExpression
+  ( operator += AdditiveOperator operand += MultiplicativeExpression )*
 ;
 
 AdditiveOperator :
@@ -497,7 +497,7 @@ LiteralInfinity :
 /* NAMES */
 
 ReservedKeyword:
-  'about' | 'to' | 'connect' | 'connection' | 'from' | 'of' | 'then'
+  'about' | /^to$/ | 'connect' | 'connection' | 'from' | 'of' | 'then'
 ;
 
 Name:
@@ -509,7 +509,8 @@ Qualification :
 ;
 
 QualifiedName:
-	name1=Name ( '::' names+=Name )*
+	//name1=Name ( '::' names+=Name )*
+  names+=Name['::']
 ;
 
 /* TERMINALS */
