@@ -301,40 +301,43 @@ class BehaviorUsageMember:
         for child in self.children:
             output.append(child.dump())
         return " ".join(output)
-    
+
+
 class AssertConstraintUsage:
     def __init__(self, definition):
         self.prefix = None
-        self.keyword = 'assert'
-        self.keyword_constraint = 'constraint'
+        self.keyword = "assert"
+        self.keyword_constraint = "constraint"
         self.children = []
         self.fsp = None
         self.declaration = None
         if valid_definition(definition, self.__class__.__name__):
-            if definition['prefix'] is not None:
-                self.prefix = OccurrenceUsagePrefix(definition['prefix'])
-                
-            self.isNegated = definition['isNegated']
-            if len(definition['ownedRelationship']) > 0:
-                if definition['featurespecializationpart'] is not None:
-                    self.fsp = FeatureSpecializationPart(definition['featurespecializationpart'])
-                for child in definition['ownedRelationship']:
+            if definition["prefix"] is not None:
+                self.prefix = OccurrenceUsagePrefix(definition["prefix"])
+
+            self.isNegated = definition["isNegated"]
+            if len(definition["ownedRelationship"]) > 0:
+                if definition["featurespecializationpart"] is not None:
+                    self.fsp = FeatureSpecializationPart(
+                        definition["featurespecializationpart"]
+                    )
+                for child in definition["ownedRelationship"]:
                     self.children.append(OwnedReferenceSubsetting(child))
             else:
-                if definition['declaration'] is not None:
-                    self.declaration = UsageDeclaration(definition['declaration'])
-            
-            self.body = CalculationBody(definition['body'])
-        
+                if definition["declaration"] is not None:
+                    self.declaration = UsageDeclaration(definition["declaration"])
+
+            self.body = CalculationBody(definition["body"])
+
     def dump(self):
         output = []
         if self.prefix is not None:
             output.append(self.prefix.dump())
-            
+
         output.append(self.keyword)
         if self.isNegated:
-            output.append('not')
-        
+            output.append("not")
+
         if len(self.children) == 0:
             output.append(self.keyword_constraint)
             if self.declaration is not None:
@@ -344,34 +347,36 @@ class AssertConstraintUsage:
                 output.append(child.dump())
             if self.fsp is not None:
                 output.append(self.fsp.dump())
-        
+
         output.append(self.body.dump())
-            
+
         return " ".join(output)
+
 
 class CalculationBody:
     def __init__(self, definition):
         self.children = []
         if valid_definition(definition, self.__class__.__name__):
-            for child in definition['part']:
+            for child in definition["part"]:
                 self.children.append(CalculationBodyPart(child))
-                
+
     def dump(self):
         if len(self.children) == 0:
             return ";"
         else:
-            return "{\n"+"\n".join([x.dump() for x in self.children])+"\n}"
-        
+            return "{\n" + "\n".join([x.dump() for x in self.children]) + "\n}"
+
+
 class CalculationBodyPart:
     def __init__(self, definition):
         self.children = []
         self.rem = []
         if valid_definition(definition, self.__class__.__name__):
-            for child in definition['item']:
+            for child in definition["item"]:
                 self.children.append(CalculationBodyItem(child))
-            for child in definition['ownedRelationship']:
+            for child in definition["ownedRelationship"]:
                 self.rem.append(ResultExpressionMember(child))
-                
+
     def dump(self):
         output = []
         for child in self.children:
@@ -379,31 +384,33 @@ class CalculationBodyPart:
         for child in self.rem:
             output.append(child.dump())
         return "".join(output)
-    
+
+
 class CalculationBodyItem:
     def __init__(self, definition):
         self.children = []
         if valid_definition(definition, self.__class__.__name__):
-            if definition['item'] is not None:
-                self.children.append(ActionBodyItem(definition['item']))
+            if definition["item"] is not None:
+                self.children.append(ActionBodyItem(definition["item"]))
             else:
-                for child in definition['ownedRelationship']:
+                for child in definition["ownedRelationship"]:
                     self.children.append(ReturnParameterMember(child))
-                    
+
     def dump(self):
         return "".join([x.dump() for x in self.children])
-    
+
+
 class ReturnParameterMember:
     def __init__(self, definition):
         self.prefix = None
-        self.keyword = 'return'
+        self.keyword = "return"
         self.children = []
         if valid_definition(definition, self.__class__.__name__):
-            if definition['prefix'] is not None:
-                self.prefix = MemberPrefix(definition['prefix'])
-            for child in definition['ownedRelatedElement']:
+            if definition["prefix"] is not None:
+                self.prefix = MemberPrefix(definition["prefix"])
+            for child in definition["ownedRelatedElement"]:
                 self.children.append(UsageElement(child))
-                    
+
     def dump(self):
         output = []
         if self.prefix is not None:
@@ -412,17 +419,18 @@ class ReturnParameterMember:
         for child in self.children:
             output.append(child.dump())
         return "".join(output)
-            
+
+
 class ResultExpressionMember:
     def __init__(self, definition):
         self.prefix = None
         self.children = []
         if valid_definition(definition, self.__class__.__name__):
-            if definition['prefix'] is not None:
-                self.prefix = MemberPrefix(definition['prefix'])
-            for child in definition['ownedRelatedElement']:
+            if definition["prefix"] is not None:
+                self.prefix = MemberPrefix(definition["prefix"])
+            for child in definition["ownedRelatedElement"]:
                 self.children.append(OwnedExpression(child))
-                    
+
     def dump(self):
         output = []
         if self.prefix is not None:
@@ -430,13 +438,14 @@ class ResultExpressionMember:
         for child in self.children:
             output.append(child.dump())
         return "".join(output)
-    
-    
+
 
 class BehaviorUsageElement:
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
-            self.children = globals()[definition["ownedRelationship"]["name"]](definition["ownedRelationship"])
+            self.children = globals()[definition["ownedRelationship"]["name"]](
+                definition["ownedRelationship"]
+            )
 
     def dump(self):
         return self.children.dump()
