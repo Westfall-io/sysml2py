@@ -1915,27 +1915,27 @@ CalculationDefinition :
 ;
 
  CalculationBody :
-	';' | '{' CalculationBodyPart '}'
+	';' | '{' part+=CalculationBodyPart '}'
 ;
 
  CalculationBodyPart :
- CalculationBodyItem*
+ item += CalculationBodyItem*
 	( ownedRelationship += ResultExpressionMember )?
 ;
 
  CalculationBodyItem :
-	  ActionBodyItem
+	  item = ActionBodyItem
 	| ownedRelationship += ReturnParameterMember
 ;
 
 ReturnParameterMember :
-	MemberPrefix 'return'
+	prefix=MemberPrefix 'return'
 	ownedRelatedElement += UsageElement
 ;
 
 
 ResultExpressionMember :
-	MemberPrefix ownedRelatedElement += OwnedExpression
+	prefix=MemberPrefix ownedRelatedElement += OwnedExpression
 ;
 
 /* Calculation Usages */
@@ -1979,11 +1979,11 @@ ConstraintUsage :
 ;
 
 AssertConstraintUsage :
-	OccurrenceUsagePrefix 'assert' ( isNegated ?= 'not' )?
-    ( ownedRelationship += OwnedReferenceSubsetting FeatureSpecializationPart?
-    | ConstraintUsageKeyword UsageDeclaration?
+	prefix=OccurrenceUsagePrefix 'assert' ( isNegated ?= 'not' )?
+    ( ownedRelationship += OwnedReferenceSubsetting featurespecializationpart=FeatureSpecializationPart?
+    | ConstraintUsageKeyword declaration=UsageDeclaration?
     )
-    CalculationBody
+    body=CalculationBody
 ;
 
 /* REQUIREMENTS */
