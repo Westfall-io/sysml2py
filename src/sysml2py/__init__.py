@@ -12,25 +12,30 @@ __author__ = "Christopher Cox"
 from sysml2py.usage import Item, Attribute, Part, Port
 from sysml2py.definition import Model, Package
 
+
 def enforce_grammar():
     import re
+
     comments_strip_rule = r"(?:(?:(?<!\\)(\/\/.*\n))|(?:\/\*(?:.|\n)*?\*\/))"
-    regex_rule = "\n[ ]*([\w]*)[ ]*:((?:(?:\'[^']*\')|(?:[^;']*))*;)"
-    
+    regex_rule = "\n[ ]*([\w]*)[ ]*:((?:(?:'[^']*')|(?:[^;']*))*;)"
+
     g_list = []
-    rule_files = ['KerMLExpressions', 'KerML', 'SysML']
+    rule_files = ["KerMLExpressions", "KerML", "SysML"]
     for file in rule_files:
-        with open("grammar/"+file+".tx", 'r') as f:
-            g_list = re.findall(regex_rule, re.sub(comments_strip_rule, '', f.read())) + g_list
-    
+        with open("grammar/" + file + ".tx", "r") as f:
+            g_list = (
+                re.findall(regex_rule, re.sub(comments_strip_rule, "", f.read()))
+                + g_list
+            )
+
     # Make a new list and only add it if it's not already there
     rules = []
     [rules.append(x) for x in g_list if x[0] not in [x[0] for x in rules]]
     grammar = "\n\n".join([":".join(x) for x in rules])
-    with open('grammar/SysML_compiled.tx', 'w') as f:
+    with open("grammar/SysML_compiled.tx", "w") as f:
         f.write(grammar)
     return grammar
-    
+
 
 def load_grammar(fp, debug=False, enforce=False):
     """SysML load from file pointer
@@ -93,16 +98,18 @@ def load_grammar(fp, debug=False, enforce=False):
         )
 
     from sysml2py.formatting import reformat
-    
+
     if enforce:
         # This can only be run in development mode.
         from textx import metamodel_from_str, TextXSyntaxError
+
         grammar = enforce_grammar()
         meta = metamodel_from_str(grammar)
     else:
         import importlib.resources as pkg_resources
         import sysml2py
         from textx import metamodel_from_file, TextXSyntaxError
+
         grammar = str((pkg_resources.files(sysml2py) / "grammar/SysML_compiled.tx"))
         meta = metamodel_from_file(grammar)
 
