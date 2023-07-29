@@ -578,7 +578,7 @@ BehaviorUsageMember :
 
 FeatureValue :
 	( '=' | isDefault ?= 'default' ( isEqual ?= '=' | isInitial ?= ':=' )? )
-	ownedRelatedElement += OwnedExpression
+	ownedRelatedElement = OwnedExpression
 ;
 
 FeatureValueExpression :

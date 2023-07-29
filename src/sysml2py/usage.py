@@ -595,7 +595,7 @@ class Attribute(Usage):
                 "isDefault": False,
                 "isEqual": False,
                 "isInitial": False,
-                "ownedRelatedElement": [package],
+                "ownedRelatedElement": package,
             }
             package = {"name": "ValuePart", "ownedRelationship": [package]}
             self.grammar.usage.completion.valuepart = ValuePart(package)

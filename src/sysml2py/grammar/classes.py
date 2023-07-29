@@ -1380,9 +1380,7 @@ class FeatureValue:
             self.isDefault = definition["isDefault"]
             self.isInitial = definition["isInitial"]
             self.isEqual = definition["isEqual"]
-            self.elements = []
-            for element in definition["ownedRelatedElement"]:
-                self.elements.append(OwnedExpression(element))
+            self.element =OwnedExpression(definition["ownedRelatedElement"])
 
     def dump(self):
         output = ["="]
@@ -1392,14 +1390,12 @@ class FeatureValue:
             output.append("=")
         elif self.isInitial:
             output.append(":=")
-        for child in self.elements:
-            output.append(child.dump())
+        output.append(self.element.dump())
         return " ".join(output)
 
     def get_definition(self):
-        output = {"name": self.__class__.__name__, "ownedRelatedElement": []}
-        for child in self.elements:
-            output["ownedRelatedElement"].append(child.get_definition())
+        output = {"name": self.__class__.__name__}
+        output["ownedRelatedElement"] = self.element.get_definition()
         output["isEqual"] = self.isEqual
         output["isInitial"] = self.isInitial
         output["isDefault"] = self.isDefault
