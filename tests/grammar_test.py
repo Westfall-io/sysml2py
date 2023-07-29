@@ -905,7 +905,7 @@ def test_Training_Action_Decomposition():
 # 27. Individual
 # 28. Expressions
 def test_Training_Expressions_Car_Mass_Rollup_Example():
-    text = '''package 'Car Mass Rollup Example 1' {
+    text = """package 'Car Mass Rollup Example 1' {
     	import ScalarValues::*;
     	import MassRollup1::*;
     	
@@ -934,13 +934,14 @@ def test_Training_Expressions_Car_Mass_Rollup_Example():
     			attribute :>> simpleMass = 50[kg];
     		}	
     	}
-    }'''
+    }"""
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
-    
+
+
 def test_Training_Expressions_Car_Mass_Rollup_Example_2():
-    text = '''package 'Car Mass Rollup 1' {
+    text = """package 'Car Mass Rollup 1' {
     	import ScalarValues::*;
     	import MassRollup2::*;
     	
@@ -969,11 +970,12 @@ def test_Training_Expressions_Car_Mass_Rollup_Example_2():
     			attribute :>> simpleMass = 50[kg];
     		}	
     	}
-    }'''
+    }"""
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
-    
+
+
 # 29. Calculations
 # 30. Constraints
 # 31. Requirements

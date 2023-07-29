@@ -1782,25 +1782,22 @@ class AdditiveExpression:
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
             # This is the left hand statement
-            self.left_hand = MultiplicativeExpression(
-                definition["multiplicitive"]
-            )
+            self.left_hand = MultiplicativeExpression(definition["multiplicitive"])
             self.operator = []
-            if len(definition['operator']) > 0:
-                for child in definition['operator']:
+            if len(definition["operator"]) > 0:
+                for child in definition["operator"]:
                     self.operator.append(child)
-                for child in definition['operand']:
-                    self.right_hand.append(MultiplicativeExpression(
-                        definition["operand"]
-                    ))
-
+                for child in definition["operand"]:
+                    self.right_hand.append(
+                        MultiplicativeExpression(definition["operand"])
+                    )
 
     def dump(self):
         if self.operator is None:
             return self.left_hand.dump()
         else:
             output = [self.left_hand.dump()]
-            for k,v in enumerate(self.operator):
+            for k, v in enumerate(self.operator):
                 output.append(v)
                 output.append(self.right_hand[k].dump())
             return " ".join(output)
@@ -2031,16 +2028,16 @@ class BaseExpression:
             elif definition["ownedRelationship"]["name"] == "LiteralReal":
                 self.relationship = LiteralReal(definition["ownedRelationship"])
             elif definition["ownedRelationship"]["name"] == "SequenceExpression":
-                self.relationship = SequenceExpression(definition['ownedRelationship'])
+                self.relationship = SequenceExpression(definition["ownedRelationship"])
             else:
                 print(definition["ownedRelationship"]["name"])
                 raise NotImplementedError
 
     def dump(self):
-        if self.relationship.__class__.__name__ != 'SequenceExpression':
+        if self.relationship.__class__.__name__ != "SequenceExpression":
             return self.relationship.dump()
         else:
-            return '('+self.relationship.dump()+')'
+            return "(" + self.relationship.dump() + ")"
 
     def get_definition(self):
         output = {
