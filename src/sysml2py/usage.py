@@ -595,7 +595,7 @@ class Attribute(Usage):
                 "isDefault": False,
                 "isEqual": False,
                 "isInitial": False,
-                "ownedRelatedElement": [package],
+                "ownedRelatedElement": package,
             }
             package = {"name": "ValuePart", "ownedRelationship": [package]}
             self.grammar.usage.completion.valuepart = ValuePart(package)
@@ -606,8 +606,7 @@ class Attribute(Usage):
     def get_value(self):
         realpart = (
             self.grammar.usage.completion.valuepart.relationships[0]
-            .elements[0]
-            .expression.operands[0]
+            .element.expression.operands[0]
             .implies.orexpression.xor.andexpression.equality.classification.relational.range.additive.multiplicitive.exponential.unary.extent.primary
         )
         real = float(realpart.base.relationship.dump())

@@ -1,55 +1,17 @@
-import KerML
-import KerMLExpressions
-/*****************************************************************************
- * SysML 2 Pilot Implementation
- * Copyright (c) 2018-2023 Model Driven Solutions, Inc.
- * Copyright (c) 2018 IncQuery Labs Ltd.
- * Copyright (c) 2019 Maplesoft (Waterloo Maple, Inc.)
- * Copyright (c) 2019 Mgnite Inc.
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *
- * @license LGPL-3.0-or-later <http://spdx.org/licenses/LGPL-3.0-or-later>
- *
- * Contributors:
- *  Ed Seidewitz, MDS
- *  Zoltan Kiss, IncQuery
- *  Balazs Grill, IncQuery
- *  Hisashi Miyashita, Maplesoft/Mgnite
- *
- *****************************************************************************/
-
-/* ROOT NAMESPACE */
-
-RootNamespace :
+RootNamespace:
 	 PackageBodyElement*
 ;
 
-/* BASIC ELEMENTS */
-
- Identification :
+Identification:
 	  '<' declaredShortName = Name '>' ( declaredName = Name )?
 	| declaredName = Name
 ;
 
- RelationshipBody :
+RelationshipBody:
 	';' | '{' ( ownedRelationship += OwnedAnnotation )* '}'
 ;
 
-/* DEPENDENCIES */
-
-Dependency :
+Dependency:
 	( ownedRelationship += PrefixMetadataAnnotation )*
 	'dependency' ( Identification? 'from' )?
     client += QualifiedName ( ',' client += QualifiedName )* 'to'
@@ -57,31 +19,26 @@ Dependency :
     RelationshipBody
 ;
 
-/* ANNOTATIONS */
-
-Annotation :
+Annotation:
 	annotatedElement = QualifiedName
 ;
 
-OwnedAnnotation :
+OwnedAnnotation:
 	ownedRelatedElement += AnnotatingElement
 ;
 
-AnnotatingMember :
+AnnotatingMember:
 	ownedRelatedElement += AnnotatingElement
 ;
 
-AnnotatingElement :
+AnnotatingElement:
 	  ownedRelatedElement = CommentSysML
 	| ownedRelatedElement = Documentation
 	| ownedRelatedElement = TextualRepresentation
 	| ownedRelatedElement = MetadataUsage
 ;
 
-/* Comments */
-
-CommentSysML :
-// Comment is reserved in TextX
+CommentSysML:
 	( 'comment' identification=Identification?
 	  ('about' ownedRelationship += Annotation
 	     ( ',' ownedRelationship += Annotation )* )?
@@ -89,51 +46,46 @@ CommentSysML :
 	body = REGULAR_COMMENT
 ;
 
-Documentation :
+Documentation:
 	'doc' identification=Identification? body=REGULAR_COMMENT
 ;
 
-/* Textual Representation */
-
-TextualRepresentation :
+TextualRepresentation:
     ( 'rep' Identification? )?
     'language' language = STRING_VALUE
     body = REGULAR_COMMENT
 ;
 
-/* Metadata */
-
-MetadataKeyword :
+MetadataKeyword:
 	'metadata'
 ;
 
-MetadataDefKeyword :
+MetadataDefKeyword:
 	MetadataKeyword 'def'
 ;
 
-MetadataUsageKeyword :
+MetadataUsageKeyword:
 	MetadataKeyword | '@'
 ;
 
-MetadataDefinition :
+MetadataDefinition:
 	( isAbstract ?= 'abstract')? MetadataDefKeyword
 	Definition
 ;
 
-PrefixMetadataAnnotation :
+PrefixMetadataAnnotation:
 	'#' ownedRelatedElement += PrefixMetadataUsage
 ;
 
-PrefixMetadataMember :
+PrefixMetadataMember:
 	'#' ownedRelatedElement += PrefixMetadataUsage
 ;
 
-PrefixMetadataUsage :
+PrefixMetadataUsage:
 	ownedRelationship += MetadataTyping
-//	( ownedRelationship += MetadataBodyUsageMember )*
 ;
 
-MetadataUsage :
+MetadataUsage:
 	MetadataUsageKeyword MetadataUsageDeclaration
 	( 'about' ownedRelationship += Annotation
 		( ',' ownedRelationship += Annotation )*
@@ -141,15 +93,15 @@ MetadataUsage :
 	MetadataBody
 ;
 
- MetadataUsageDeclaration :
+MetadataUsageDeclaration:
 	( Identification? DefinedByKeyword )? ownedRelationship += MetadataTyping
 ;
 
-MetadataTyping :
+MetadataTyping:
 	type = QualifiedName
 ;
 
- MetadataBody :
+MetadataBody:
 	  ';'
 	| '{' ( ownedRelationship += DefinitionMember
 		  | ownedRelationship += MetadataBodyUsageMember
@@ -159,138 +111,125 @@ MetadataTyping :
 	  '}'
 ;
 
-MetadataBodyUsageMember :
+MetadataBodyUsageMember:
 	ownedRelatedElement += MetadataBodyUsage
 ;
 
-MetadataBodyUsage :
+MetadataBodyUsage:
 	'ref'? ( ':>>' | 'redefines' )? ownedRelationship += OwnedRedefinition
 	FeatureSpecializationPart? ValuePart?
 	body=MetadataBody
 ;
 
-/* PACKAGES */
-
-/* Packages */
-
-Package :
+Package:
 	( ownedRelationship += PrefixMetadataMember )*
 	declaration=PackageDeclaration body=PackageBody
 ;
 
-LibraryPackage :
+LibraryPackage:
 	( isStandard ?= 'standard' )? 'library'
 	( ownedRelationship += PrefixMetadataMember )*
 	PackageDeclaration PackageBody
 ;
 
-PackageDeclaration :
+PackageDeclaration:
 	'package' identification = Identification?
 ;
 
- PackageBody :
+PackageBody:
 	 ';'
-	| '{' ( // Note: PackageBodyElement is expanded here to avoid
-			// infinite loops in the incremental parser.
-		    ownedRelationship += PackageMember
+	| '{' ( 					    ownedRelationship += PackageMember
 		  | ownedRelationship += ElementFilterMember
 		  | ownedRelationship += AliasMember
 		  | ownedRelationship += Import )*
 	  '}'
 ;
 
-/* Package Bodies */
-
- PackageBodyElement :
+PackageBodyElement:
 	  ownedRelationship += PackageMember
 	| ownedRelationship += ElementFilterMember
 	| ownedRelationship += AliasMember
 	| ownedRelationship += Import
 ;
 
- MemberPrefix :
+MemberPrefix:
     ( visibility = VisibilityIndicator )?
 ;
 
-PackageMember :
+PackageMember:
 	prefix = MemberPrefix
 	( ownedRelatedElement = DefinitionElement | ownedRelatedElement = UsageElement)
 ;
 
-ElementFilterMember :
+ElementFilterMember:
 	prefix = MemberPrefix
 	'filter' ownedRelatedElement += OwnedExpression ';'
 ;
 
-AliasMember :
+AliasMember:
 	prefix = MemberPrefix
 	'alias' ( '<' memberShortName = Name '>' )? ( memberName = Name )?
 	'for' memberElement = QualifiedName
 	body = RelationshipBody
 ;
 
-ImportPrefix :
+ImportPrefix:
 	( visibility = VisibilityIndicator )?
 	'import' ( isImportAll ?= 'all' )?
 ;
 
-Import :
+Import:
 	(ownedRelationship = NamespaceImport | ownedRelationship = MembershipImport)
 	body = RelationshipBody
 ;
 
-NamespaceImport :
+NamespaceImport:
 	prefix = ImportPrefix
 	( namespace = ImportedNamespace | ownedRelatedElement += FilterPackage )
 ;
 
-MembershipImport :
+MembershipImport:
 	prefix = ImportPrefix membership=ImportedMembership
 ;
 
-ImportedNamespace :
-  // !TODO: Figure out why this breaks
-  namespace = QualifiedName  !'::**' '::*'
+ImportedNamespace:
+    namespace = QualifiedName  !'::**' '::*'
 ;
 
-ImportedMembership :
+ImportedMembership:
 	importedMembership = QualifiedName ( '::' isRecursive ?= '**' )?
 ;
 
-
-
-FilterPackage :
+FilterPackage:
 	ownedRelationship += FilterPackageImport
 	( ownedRelationship += FilterPackageMember )+
 ;
 
-FilterPackageImport :
+FilterPackageImport:
 	 FilterPackageMembershipImport | FilterPackageNamespaceImport
 ;
 
-FilterPackageMembershipImport :
+FilterPackageMembershipImport:
 	ImportedMembership
 ;
 
-FilterPackageNamespaceImport :
+FilterPackageNamespaceImport:
 	ImportedNamespace
 ;
 
-FilterPackageMember :
+FilterPackageMember:
 	visibility = FilterPackageMemberVisibility ownedRelatedElement += OwnedExpression ']'
 ;
 
- FilterPackageMemberVisibility :
+FilterPackageMemberVisibility:
 	private = '['
 ;
 
- VisibilityIndicator :
+VisibilityIndicator:
 	public = 'public' | private = 'private'| protected = 'protected'
 ;
 
-/* Package Elements */
-
-DefinitionElement :
+DefinitionElement:
 	  ownedRelatedElement = Package
 	| ownedRelatedElement = LibraryPackage
 	| ownedRelatedElement = AnnotatingElement
@@ -323,43 +262,35 @@ DefinitionElement :
 	| ownedRelatedElement = ExtendedDefinition
 ;
 
-UsageElement :
+UsageElement:
 	  ownedRelatedElement = NonOccurrenceUsageElement
 	| ownedRelatedElement = OccurrenceUsageElement
 ;
 
-/* CLASSIFIERS */
-
-/* Superclassing */
-
- SubclassificationPart :
+SubclassificationPart:
 	SpecializesKeyword ownedRelationship += OwnedSubclassification
 	( ',' ownedRelationship += OwnedSubclassification )*
 ;
 
-SpecializesKeyword :
+SpecializesKeyword:
 	':>' | 'specializes'
 ;
 
-OwnedSubclassification :
+OwnedSubclassification:
 	superclassifier = QualifiedName
 ;
 
-/* FEATURES */
-
-/* Features */
-
- FeatureDeclaration :
+FeatureDeclaration:
 	  identification=Identification specialization=FeatureSpecializationPart?
 	| specialization=FeatureSpecializationPart
 ;
 
- FeatureSpecializationPart :
+FeatureSpecializationPart:
 	  ( specialization+=FeatureSpecialization )+ multiplicity=MultiplicityPart? specialization2+=FeatureSpecialization*
 	| multiplicity2=MultiplicityPart specialization+=FeatureSpecialization*
 ;
 
- MultiplicityPart :
+MultiplicityPart:
 	  ownedRelationship += OwnedMultiplicity
 	| ( ownedRelationship += OwnedMultiplicity )?
 
@@ -369,135 +300,112 @@ OwnedSubclassification :
 
 ;
 
- FeatureSpecialization :
+FeatureSpecialization:
 	ownedRelationship=Typings | ownedRelationship=Subsettings | ownedRelationship=References | ownedRelationship=Redefinitions
 ;
 
- Typings :
+Typings:
 	typedby=TypedBy ( ',' ownedRelationship += FeatureTyping )*
 ;
 
- TypedBy :
+TypedBy:
 	DefinedByKeyword ownedRelationship += FeatureTyping
 ;
 
-DefinedByKeyword :
+DefinedByKeyword:
 	':' | 'defined' 'by'
 ;
 
- Subsettings :
-	SubsetsKeyword ownedRelationship += OwnedSubsetting[',']
+Subsettings:
+	SubsetsKeyword ownedRelationship += OwnedSubsetting ( ',' ownedRelationship += OwnedSubsetting )*
 ;
 
-/* Subsets :
-	SubsetsKeyword ownedRelationship += OwnedSubsetting
-;*/
-
-SubsetsKeyword :
+SubsetsKeyword:
 	':>' | 'subsets'
 ;
 
- References :
+References:
 	ReferencesKeyword ownedRelationship += OwnedReferenceSubsetting
 ;
 
-ReferencesKeyword :
+ReferencesKeyword:
 	'::>' | 'references'
 ;
 
-/*
-Removing original redefinitions, because it requires two OwnedRedefinition
- Redefinitions :
-	redefines=Redefines ownedRelationship += OwnedRedefinition[',']
+Redefinitions:
+	redefines=Redefines ( ',' ownedRelationship += OwnedRedefinition )*
 ;
 
- Redefines :
+Redefines:
 	RedefinesKeyword ownedRelationship += OwnedRedefinition
-;*/
-
-Redefinitions :
- redefines=RedefinesKeyword ownedRelationship += OwnedRedefinition[',']
 ;
 
-RedefinesKeyword :
+RedefinesKeyword:
 	':>>' | 'redefines'
 ;
 
-/* Feature Typing, Subsetting and Redefinition */
-
-FeatureTyping :
+FeatureTyping:
 	ownedRelationship = OwnedFeatureTyping | ownedRelationship = ConjugatedPortTyping
 ;
 
-// OwnedFeatureTyping inherited from Expression syntax.
-
-OwnedSubsetting :
+OwnedSubsetting:
 	  ownedRelatedElement += OwnedFeatureChain
 	| subsettedFeature = QualifiedName
 ;
 
-OwnedReferenceSubsetting :
+OwnedReferenceSubsetting:
 	  ownedRelatedElement += OwnedFeatureChain
 	| referencedFeature = QualifiedName
-  // Always check for feature chain first.
-
+  
 ;
 
-OwnedRedefinition :
-  redefinedFeature = QualifiedName
-  | ownedRelatedElement += OwnedFeatureChain
+OwnedRedefinition:
+	  ownedRelatedElement += OwnedFeatureChain
+	| redefinedFeature = QualifiedName
 ;
 
-/* Multiplicity */
-
-OwnedMultiplicity :
+OwnedMultiplicity:
 	ownedRelatedElement += MultiplicityRange
 ;
 
-MultiplicityRange :
-	// TODO: Allow general expressions for bounds. (Causes LL parsing issues.)
-	'[' ownedRelationship += MultiplicityExpressionMember
+MultiplicityRange:
+		'[' ownedRelationship += MultiplicityExpressionMember
 	      ( '..' ownedRelationship += MultiplicityExpressionMember )? ']'
 ;
 
-
-MultiplicityRelatedElement :
+MultiplicityRelatedElement:
     (ownedRelatedElement = LiteralExpression | ownedRelatedElement = FeatureReferenceExpression)
 ;
 
-MultiplicityExpressionMember :
+MultiplicityExpressionMember:
     ownedRelatedElement += MultiplicityRelatedElement
 ;
 
-/* DEFINITION AND USAGE */
-
-/* Definitions */
-
- BasicDefinitionPrefix :
+BasicDefinitionPrefix:
 	isAbstract ?= 'abstract' | isVariation ?= 'variation'
 ;
 
- DefinitionExtensionKeyword :
+DefinitionExtensionKeyword:
 	ownedRelationship += PrefixMetadataMember
 ;
 
- DefinitionPrefix :
+DefinitionPrefix:
 	prefix=BasicDefinitionPrefix? keyword+=DefinitionExtensionKeyword*
 ;
 
- Definition :
+Definition:
 	declaration=DefinitionDeclaration body=DefinitionBody
 ;
 
- DefinitionDeclaration :
+DefinitionDeclaration:
 	identification=Identification? subclassificationpart=SubclassificationPart?
 ;
 
- DefinitionBody :
+DefinitionBody:
 	';' | '{' ownedRelatedElement+=DefinitionBodyItem* '}'
 ;
 
- DefinitionBodyItem :
+DefinitionBodyItem:
 	  ownedRelationship += DefinitionMember
 	| ownedRelationship += VariantUsageMember
 	| ownedRelationship += NonOccurrenceUsageMember
@@ -507,39 +415,37 @@ MultiplicityExpressionMember :
 	| ownedRelationship += Import
 ;
 
-DefinitionMember :
+DefinitionMember:
 	prefix = MemberPrefix
 	ownedRelatedElement += DefinitionElement
 ;
 
-VariantUsageMember :
+VariantUsageMember:
 	MemberPrefix 'variant'
 	ownedRelatedElement += VariantUsageElement
 ;
 
-NonOccurrenceUsageMember :
+NonOccurrenceUsageMember:
 	prefix=MemberPrefix ownedRelatedElement += NonOccurrenceUsageElement
 ;
 
-OccurrenceUsageMember :
+OccurrenceUsageMember:
 	prefix=MemberPrefix ownedRelatedElement += OccurrenceUsageElement
 ;
 
-StructureUsageMember :
+StructureUsageMember:
 	prefix=MemberPrefix ownedRelatedElement += StructureUsageElement
 ;
 
-BehaviorUsageMember :
+BehaviorUsageMember:
 	prefix=MemberPrefix ownedRelatedElement += BehaviorUsageElement
 ;
 
-/* Usages */
-
- FeatureDirection :
+FeatureDirection:
 	in = 'in ' | out = 'out' | inout = 'inout'
 ;
 
- RefPrefix :
+RefPrefix:
 	( direction = FeatureDirection )?
 	( isAbstract ?= 'abstract' | isVariation ?= 'variation')?
 	( isReadOnly ?= 'readonly' )?
@@ -547,94 +453,90 @@ BehaviorUsageMember :
 	( isEnd ?= 'end' )?
 ;
 
- BasicUsagePrefix :
+BasicUsagePrefix:
 	prefix=RefPrefix
 	( isReference ?= 'ref' )?
 ;
 
- UsageExtensionKeyword :
+UsageExtensionKeyword:
 	ownedRelationship += PrefixMetadataMember
 ;
 
- UsagePrefix :
+UsagePrefix:
 	prefix=BasicUsagePrefix usageKeyword += UsageExtensionKeyword*
 ;
 
- Usage :
+Usage:
 	declaration=UsageDeclaration? completion=UsageCompletion
 ;
 
- UsageDeclaration :
+UsageDeclaration:
 	  declaration=FeatureDeclaration
 ;
 
- UsageCompletion :
+UsageCompletion:
 	valuepart=ValuePart? body=UsageBody
 ;
 
- UsageBody :
+UsageBody:
 	body=DefinitionBody
 ;
 
- ValuePart :
+ValuePart:
 	  ownedRelationship += FeatureValue
 	| ownedRelationship += FeatureValueExpression
 	  ownedRelationship += EmptyAssignmentActionMember
 ;
 
-FeatureValue :
+FeatureValue:
 	( '=' | isDefault ?= 'default' ( isEqual ?= '=' | isInitial ?= ':=' )? )
 	ownedRelatedElement = OwnedExpression
 ;
 
-FeatureValueExpression :
+FeatureValueExpression:
 	isInitial ?= ':='
 	ownedRelatedElement += OwnedExpression
 ;
 
-EmptyAssignmentActionMember :
+EmptyAssignmentActionMember:
 	ownedRelatedElement += EmptyAssignmentAction
 ;
 
-EmptyAssignmentAction :
+EmptyAssignmentAction:
 	ownedRelationship += EmptyTargetMember
 	ownedRelationship += EmptyParameterMember
 ;
 
-EmptyTargetMember :
+EmptyTargetMember:
 	ownedRelatedElement += EmptyTargetParameter
 ;
 
-EmptyTargetParameter :
+EmptyTargetParameter:
 	ownedRelationship += TargetFeatureMember
 ;
 
-/* Reference Usages */
-
-ReferenceKeyword :
+ReferenceKeyword:
 	'ref'
 ;
 
-ReferenceUsageKeyword :
+ReferenceUsageKeyword:
 	ReferenceKeyword
 ;
 
-DefaultReferenceUsage :
+DefaultReferenceUsage:
 	prefix=RefPrefix declaration=UsageDeclaration valuepart=ValuePart? body=UsageBody
 ;
 
-ReferenceUsage :
+ReferenceUsage:
 	RefPrefix ReferenceUsageKeyword Usage
 ;
 
-VariantReference :
+VariantReference:
 	ownedRelationship += OwnedReferenceSubsetting
 	FeatureSpecialization* UsageBody
 ;
 
-/* Body Elements */
-
-NonOccurrenceUsageElement :
+NonOccurrenceUsageElement:
 	  ownedRelatedElement = DefaultReferenceUsage
 	| ownedRelatedElement = ReferenceUsage
 	| ownedRelatedElement = AttributeUsage
@@ -644,11 +546,11 @@ NonOccurrenceUsageElement :
 	| ownedRelatedElement = ExtendedUsage
 ;
 
-OccurrenceUsageElement :
+OccurrenceUsageElement:
 	ownedRelatedElement = StructureUsageElement | ownedRelatedElement = BehaviorUsageElement
 ;
 
-StructureUsageElement :
+StructureUsageElement:
 	  ownedRelatedElement = OccurrenceUsage
 	| ownedRelatedElement = IndividualUsage
 	| ownedRelatedElement = PortionUsage
@@ -666,7 +568,7 @@ StructureUsageElement :
 	| ownedRelatedElement = SuccessionFlowConnectionUsage
 ;
 
-BehaviorUsageElement :
+BehaviorUsageElement:
 	  ownedRelationship = ActionUsage
 	| ownedRelationship = CalculationUsage
 	| ownedRelationship = StateUsage
@@ -685,7 +587,7 @@ BehaviorUsageElement :
 	| ownedRelationship = SatisfyRequirementUsage
 ;
 
-VariantUsageElement :
+VariantUsageElement:
 	  VariantReference
 	| ReferenceUsage
 	| AttributeUsage
@@ -709,58 +611,53 @@ VariantUsageElement :
 	| BehaviorUsageElement
 ;
 
-/* EXTENSION */
-
-ExtendedDefinition :
+ExtendedDefinition:
 	BasicDefinitionPrefix? DefinitionExtensionKeyword+ 'def' Definition
 ;
 
-ExtendedUsage :
+ExtendedUsage:
 	BasicUsagePrefix UsageExtensionKeyword+ Usage
 ;
 
-/* ATTRIBUTES */
-
-AttributeKeyword :
+AttributeKeyword:
 	'attribute'
 ;
 
-AttributeDefKeyword :
+AttributeDefKeyword:
 	AttributeKeyword 'def'
 ;
 
-AttributeUsageKeyword :
+AttributeUsageKeyword:
 	AttributeKeyword
 ;
 
-AttributeDefinition :
+AttributeDefinition:
 	prefix=DefinitionPrefix AttributeDefKeyword definition=Definition
 ;
 
-AttributeUsage :
+AttributeUsage:
 	prefix=UsagePrefix AttributeUsageKeyword usage=Usage
 ;
 
-/* ENUMERATIONS */
-
-EnumerationKeyword :
+EnumerationKeyword:
 	'enum'
 ;
-EnumerationDefKeyword :
+
+EnumerationDefKeyword:
 	EnumerationKeyword 'def'
 ;
 
-EnumerationUsageKeyword :
+EnumerationUsageKeyword:
 	EnumerationKeyword
 ;
 
-EnumerationDefinition :
+EnumerationDefinition:
 	EnumerationDefKeyword
   declaration=DefinitionDeclaration
   body=EnumerationBody
 ;
 
- EnumerationBody :
+EnumerationBody:
 	  ';'
 	| '{' ( ownedRelationship += AnnotatingMember
 		  | ownedRelationship += EnumerationUsageMember
@@ -768,277 +665,242 @@ EnumerationDefinition :
 	  '}'
 ;
 
-EnumerationUsageMember :
+EnumerationUsageMember:
 	prefix=MemberPrefix ownedRelatedElement += EnumeratedValue
 ;
 
-EnumeratedValue :
+EnumeratedValue:
 	keyword=EnumerationUsageKeyword? usage=Usage
 ;
 
-EnumerationUsage :
+EnumerationUsage:
 	prefix=UsagePrefix EnumerationUsageKeyword usage=Usage
 ;
 
-/* OCCURRENCES */
-
-/* Occurrence Definitions */
-
-OccurrenceKeyword :
+OccurrenceKeyword:
 	'occurrence'
 ;
 
-OccurrenceDefKeyword :
+OccurrenceDefKeyword:
 	OccurrenceKeyword 'def'
 ;
 
- OccurrenceDefinitionPrefix :
+OccurrenceDefinitionPrefix:
 	prefix=BasicDefinitionPrefix?
 	( isIndividual ?= 'individual' ownedRelationship += LifeClassMembership )?
 	keyword=DefinitionExtensionKeyword*
 ;
 
-OccurrenceDefinition :
+OccurrenceDefinition:
 	OccurrenceDefinitionPrefix OccurrenceDefKeyword Definition
 ;
 
-IndividualDefinition :
+IndividualDefinition:
 	BasicDefinitionPrefix? isIndividual ?= 'individual'
 	DefinitionExtensionKeyword* 'def' Definition
 	ownedRelationship += LifeClassMembership
 ;
 
-LifeClassMembership :
+LifeClassMembership:
 	ownedRelatedElement += LifeClass
 ;
 
-LifeClass ://This doesn't work.
-	'lifeclass'
+LifeClass:	'lifeclass'
 ;
 
-/* Occurrence Usages */
-
-OccurrenceUsageKeyword :
+OccurrenceUsageKeyword:
 	OccurrenceKeyword
 ;
 
- OccurrenceUsagePrefix :
+OccurrenceUsagePrefix:
 	  prefix=BasicUsagePrefix
 	  ( isIndividual ?= 'individual' )?
 	  ( portionKind = PortionKind )?
 	  usageExtension+=UsageExtensionKeyword*
 ;
 
-OccurrenceUsage :
+OccurrenceUsage:
 	prefix=OccurrenceUsagePrefix OccurrenceUsageKeyword usage=Usage
 ;
 
-IndividualUsage :
+IndividualUsage:
 	prefix=BasicUsagePrefix isIndividual ?= 'individual'
 	usageExtension+=UsageExtensionKeyword* usage=Usage
 ;
 
-PortionUsage :
+PortionUsage:
 	BasicUsagePrefix ( isIndividual ?= 'individual' )?
 	portionKind = PortionKind
 	UsageExtensionKeyword* Usage
 ;
 
- PortionKind :
-	// Literal keywords identified explicitly so they can be found by syntax highlighting script
-	snapshot = 'snapshot' | timeslice = 'timeslice'
+PortionKind:
+		snapshot = 'snapshot' | timeslice = 'timeslice'
 ;
 
-EventOccurrenceUsage :
+EventOccurrenceUsage:
 	 OccurrenceUsagePrefix 'event'
 	( ownedRelationship += OwnedReferenceSubsetting FeatureSpecializationPart?
    	| OccurrenceUsageKeyword UsageDeclaration? )
     UsageCompletion
 ;
 
-/* Occurrence Succession */
-
-EmptySuccessionMember :
+EmptySuccessionMember:
 	ownedRelatedElement += EmptySuccession
 ;
 
-EmptySuccession :
+EmptySuccession:
 	'then' ownedRelationship += MultiplicitySourceEndMember
 	(ownedRelationship += EmptyTargetEndMember)?
 ;
 
-MultiplicitySourceEndMember :
+MultiplicitySourceEndMember:
 	ownedRelatedElement += MultiplicitySourceEnd
 ;
 
-MultiplicitySourceEnd :
+MultiplicitySourceEnd:
 	 ( ownedRelationship += OwnedMultiplicity )?
 ;
 
-EmptyTargetEndMember :
+EmptyTargetEndMember:
 	ownedRelatedElement += EmptyTargetEnd
 ;
 
-EmptyTargetEnd ://This doesn't work.
-	'emptytargetend'
+EmptyTargetEnd:	'emptytargetend'
 ;
 
-/* ITEMS */
-
-ItemKeyword :
+ItemKeyword:
 	'item'
 ;
 
-ItemDefKeyword :
+ItemDefKeyword:
 	ItemKeyword 'def'
 ;
 
-ItemUsageKeyword :
+ItemUsageKeyword:
 	ItemKeyword
 ;
 
-ItemDefinition :
+ItemDefinition:
 	prefix=OccurrenceDefinitionPrefix ItemDefKeyword definition=Definition
 ;
 
-ItemUsage :
+ItemUsage:
 	prefix=OccurrenceUsagePrefix ItemUsageKeyword usage=Usage
 ;
 
-/* PARTS */
-
-PartKeyword :
+PartKeyword:
 	'part'
 ;
 
-PartDefKeyword :
+PartDefKeyword:
 	PartKeyword 'def'
 ;
 
-PartUsageKeyword :
+PartUsageKeyword:
 	PartKeyword
 ;
 
-PartDefinition :
+PartDefinition:
 	prefix = OccurrenceDefinitionPrefix PartDefKeyword definition = Definition
 ;
 
-PartUsage :
+PartUsage:
 	prefix=OccurrenceUsagePrefix PartUsageKeyword usage=Usage
 ;
 
-/* PORTS */
-
-/* Port Definitions */
-
-PortKeyword :
+PortKeyword:
 	'port'
 ;
 
-PortDefKeyword :
+PortDefKeyword:
 	PortKeyword 'def'
 ;
 
-PortDefinition :
+PortDefinition:
 	prefix=DefinitionPrefix PortDefKeyword definition=Definition
-	//(ownedRelationship += ConjugatedPortDefinitionMember)
-;
+	;
 
-ConjugatedPortDefinitionMember :
+ConjugatedPortDefinitionMember:
 	ownedRelatedElement += ConjugatedPortDefinition
 ;
 
-ConjugatedPortDefinition :
+ConjugatedPortDefinition:
 	ownedRelationship += PortConjugation
 ;
 
-PortConjugation ://This doesn't work.
-	'portconjugation'
+PortConjugation:	'portconjugation'
 ;
 
-ConjugatedPortTyping :
+ConjugatedPortTyping:
 	conjugatedPortDefinition = ConjugatedQualifiedName
 ;
 
-ConjugatedQualifiedName :
+ConjugatedQualifiedName:
 	'~' QualifiedName
 ;
 
-/* Port Usages */
-
-PortUsageKeyword :
+PortUsageKeyword:
 	PortKeyword
 ;
 
-PortUsage :
+PortUsage:
 	prefix=OccurrenceUsagePrefix PortUsageKeyword usage=Usage
 ;
 
-/* CONNECTIONS */
-
-/* Connectors */
-
-ConnectorEndMember :
+ConnectorEndMember:
 	ownedRelatedElement += ConnectorEnd
 ;
 
-ConnectorEnd :
+ConnectorEnd:
 	( declaredName = Name ReferencesKeyword )?
 	ownedRelationship += OwnedReferenceSubsetting
 	( ownedRelationship += OwnedMultiplicity )?
 ;
 
-/* Binding Connectors */
-
-BindingKeyword :
+BindingKeyword:
 	'binding'
 ;
 
-BindingConnector :
+BindingConnector:
 	prefix=UsagePrefix ( BindingKeyword declaration=UsageDeclaration? )?
 	'bind' ownedRelationship += ConnectorEndMember
 	'=' ownedRelationship += ConnectorEndMember
 	body=DefinitionBody
 ;
 
-/* Successions */
-
 SuccessionKeyword:
 	'succession'
 ;
 
-Succession :
+Succession:
 	prefix=UsagePrefix ( SuccessionKeyword declaration=UsageDeclaration? )?
 	'first' ownedRelationship += ConnectorEndMember
 	'then' ownedRelationship += ConnectorEndMember
 	body=DefinitionBody
 ;
 
-/* Connection Definitions */
-
-ConnectionKeyword :
+ConnectionKeyword:
 	'connection'
 ;
 
-ConnectionDefKeyword :
+ConnectionDefKeyword:
 	ConnectionKeyword 'def'
 ;
 
-ConnectionDefinition :
+ConnectionDefinition:
 	prefix=OccurrenceDefinitionPrefix ConnectionDefKeyword definition=Definition
 ;
 
-/* Connection Usages */
-
-ConnectorKeyword :
+ConnectorKeyword:
 	'connect'
 ;
 
-ConnectionUsageKeyword :
+ConnectionUsageKeyword:
 	ConnectionKeyword
 ;
 
-ConnectionUsage :
+ConnectionUsage:
 	prefix=OccurrenceUsagePrefix
 	(
     ConnectionUsageKeyword declaration=UsageDeclaration? ( ConnectorKeyword part=ConnectorPart )?
@@ -1048,57 +910,49 @@ ConnectionUsage :
   body=UsageBody
 ;
 
- ConnectorPart :
+ConnectorPart:
 	part=BinaryConnectorPart | part=NaryConnectorPart
 ;
 
- BinaryConnectorPart :
+BinaryConnectorPart:
 	ownedRelationship += ConnectorEndMember 'to'
 	ownedRelationship += ConnectorEndMember
 ;
 
- NaryConnectorPart :
+NaryConnectorPart:
 	'(' ownedRelationship += ConnectorEndMember ','
 	    ownedRelationship += ConnectorEndMember
 	    ( ',' ownedRelationship += ConnectorEndMember )* ')'
 ;
 
-EmptySourceEndMember :
+EmptySourceEndMember:
 	ownedRelatedElement += EmptySourceEnd
 ;
 
-EmptySourceEnd ://This doesn't work.
-	'emptysourceend'
+EmptySourceEnd:	'emptysourceend'
 ;
 
-/* FLOW CONNECTIONS */
-
-
-/* Flow Connection Definitions */
-
-FlowConnectionKeyword :
+FlowConnectionKeyword:
 	'flow'
 ;
 
-FlowConnectionDefKeyword :
+FlowConnectionDefKeyword:
 	FlowConnectionKeyword 'def'
 ;
 
-FlowConnectionDefinition :
+FlowConnectionDefinition:
 	prefix=OccurrenceDefinitionPrefix FlowConnectionDefKeyword definition=Definition
 ;
 
-/* Messages */
-
-MessageKeyword :
+MessageKeyword:
 	'message'
 ;
 
-Message :
+Message:
 	OccurrenceUsagePrefix MessageKeyword MessageDeclaration DefinitionBody
 ;
 
- MessageDeclaration :
+MessageDeclaration:
 	  UsageDeclaration? ValuePart?
       ( 'of' ownedRelationship += ItemFeatureMember )?
       ( 'from' ownedRelationship += MessageEventMember
@@ -1108,110 +962,103 @@ Message :
 	  ownedRelationship += MessageEventMember
 ;
 
-MessageEventMember :
+MessageEventMember:
 	ownedRelatedElement += MessageEvent
 ;
 
-MessageEvent :
+MessageEvent:
 	ownedRelationship += OwnedReferenceSubsetting
 ;
 
-/* Flow Connection Usages */
-
-FlowConnectionUsage :
+FlowConnectionUsage:
 	prefix=OccurrenceUsagePrefix FlowConnectionKeyword
 	declaration=FlowConnectionDeclaration body=DefinitionBody
 ;
 
-SuccessionFlowConnectionKeyword :
+SuccessionFlowConnectionKeyword:
 	SuccessionKeyword FlowConnectionKeyword
 ;
 
-SuccessionFlowConnectionUsage :
+SuccessionFlowConnectionUsage:
 	prefix=OccurrenceUsagePrefix SuccessionFlowConnectionKeyword
 	declaration=FlowConnectionDeclaration body=DefinitionBody
 ;
 
- FlowConnectionDeclaration :
+FlowConnectionDeclaration:
 	  ownedRelationship_from = FlowEndMember 'to' ownedRelationship_to = FlowEndMember
     | declaration=UsageDeclaration? valuepart=ValuePart?
        ( 'of'  ownedRelationship_of = ItemFeatureMember )?
        ( 'from' ownedRelationship_from = FlowEndMember 'to' ownedRelationship_to = FlowEndMember )?
 ;
 
-/* Flow Members */
-
-ItemFeatureMember :
+ItemFeatureMember:
 	ownedRelatedElement += ItemFeature
 ;
 
-ItemFeature :
+ItemFeature:
 	  ownedRelatedElement = PayloadFeature
 ;
 
- PayloadFeature :
+PayloadFeature:
 	  identification=Identification? pfsp=PayloadFeatureSpecializationPart valuepart=ValuePart?
 	| identification=Identification? valuepart=ValuePart
     | ownedRelationship = OwnedFeatureTyping ( multiplicity2 = OwnedMultiplicity )?
     | multiplicity1 = OwnedMultiplicity ownedRelationship = OwnedFeatureTyping
 ;
 
- PayloadFeatureSpecializationPart :
+PayloadFeatureSpecializationPart:
 	  (ownedRelationship+=FeatureSpecialization)+ mp=MultiplicityPart? ownedRelationship2+=FeatureSpecialization*
 	| mp=MultiplicityPart ownedRelationship+=FeatureSpecialization+
 ;
 
-FlowEndMember :
+FlowEndMember:
 	ownedRelatedElement += FlowEnd
 ;
 
-FlowEnd :
+FlowEnd:
 	( fes += FlowEndSubsetting )?
 	ffm += FlowFeatureMember
 ;
 
-FlowEndSubsetting :
+FlowEndSubsetting:
 	  referencedFeature = QualifiedName '.'
 	| ownedRelatedElement += FeatureChainPrefix
 ;
 
-FeatureChainPrefix :
-	ownedRelationship += OwnedFeatureChaining['.']
+FeatureChainPrefix:
+	( ownedRelationship += OwnedFeatureChaining '.' )+
+	ownedRelationship += OwnedFeatureChaining '.'
 ;
 
-FlowFeatureMember :
+FlowFeatureMember:
 	ownedRelatedElement += FlowFeature
 ;
 
-FlowFeature :
+FlowFeature:
 	ownedRelationship += FlowRedefinition
 ;
 
-FlowRedefinition :
+FlowRedefinition:
 	redefinedFeature = QualifiedName
 ;
 
-/* INTERFACES */
-
-/* Interface Definitions */
-
-InterfaceKeyword :
+InterfaceKeyword:
 	'interface'
 ;
 
-InterfaceDefKeyword :
+InterfaceDefKeyword:
 	InterfaceKeyword 'def'
 ;
 
-InterfaceDefinition :
+InterfaceDefinition:
 	prefix=OccurrenceDefinitionPrefix InterfaceDefKeyword declaration=DefinitionDeclaration body=InterfaceBody
 ;
 
- InterfaceBody :
+InterfaceBody:
 	';' | '{' item+=InterfaceBodyItem* '}'
 ;
 
- InterfaceBodyItem :
+InterfaceBodyItem:
 	  ownedRelationship += DefinitionMember
 	| ownedRelationship += VariantUsageMember
 	| ownedRelationship += InterfaceNonOccurrenceUsageMember
@@ -1221,11 +1068,11 @@ InterfaceDefinition :
 	| ownedRelationship += Import
 ;
 
-InterfaceNonOccurrenceUsageMember :
+InterfaceNonOccurrenceUsageMember:
 	MemberPrefix ownedRelatedElement += InterfaceNonOccurrenceUsageElement
 ;
 
-InterfaceNonOccurrenceUsageElement :
+InterfaceNonOccurrenceUsageElement:
 	  ReferenceUsage
 	| AttributeUsage
 	| EnumerationUsage
@@ -1233,123 +1080,108 @@ InterfaceNonOccurrenceUsageElement :
 	| Succession
 ;
 
-InterfaceOccurrenceUsageMember :
+InterfaceOccurrenceUsageMember:
 	prefix=MemberPrefix ownedRelatedElement += InterfaceOccurrenceUsageElement
 ;
 
-InterfaceOccurrenceUsageElement :
+InterfaceOccurrenceUsageElement:
 	element=DefaultInterfaceEnd | element=StructureUsageElement | element=BehaviorUsageElement
 ;
 
-DefaultInterfaceEnd :
+DefaultInterfaceEnd:
 	( direction = FeatureDirection )?
 	( isAbstract ?= 'abstract' | isVariation ?= 'variation')?
 	isEnd ?= 'end' usage=Usage
 ;
 
-/* Interface Usages */
-
-InterfaceUsageKeyword :
+InterfaceUsageKeyword:
 	InterfaceKeyword
 ;
 
-InterfaceUsage :
+InterfaceUsage:
 	prefix=OccurrenceUsagePrefix InterfaceUsageKeyword declaration=InterfaceUsageDeclaration body=InterfaceBody
 ;
 
- InterfaceUsageDeclaration :
+InterfaceUsageDeclaration:
 	declaration=UsageDeclaration? ( ConnectorKeyword part1=InterfacePart )? | part2=InterfacePart
 ;
 
- InterfacePart :
+InterfacePart:
 	binarypart=BinaryInterfacePart | narypart=NaryInterfacePart
 ;
 
- BinaryInterfacePart :
+BinaryInterfacePart:
 	ownedRelationship += InterfaceEndMember 'to'
 	ownedRelationship += InterfaceEndMember
 ;
 
- NaryInterfacePart :
+NaryInterfacePart:
 	'(' ownedRelationship += InterfaceEndMember ','
 	    ownedRelationship += InterfaceEndMember
 	    ( ',' ownedRelationship += InterfaceEndMember )* ')'
 ;
 
-InterfaceEndMember :
+InterfaceEndMember:
 	ownedRelatedElement = InterfaceEnd
 ;
 
-InterfaceEnd :
+InterfaceEnd:
 	( declaredName = Name ReferencesKeyword )?
 	ownedRelationship += OwnedReferenceSubsetting
 	( ownedRelationship += OwnedMultiplicity )?
 ;
 
-/* ALLOCATIONS */
-
-/* Allocation Definitions */
-
-AllocationKeyword :
+AllocationKeyword:
 	'allocation'
 ;
 
-AllocationDefKeyword :
+AllocationDefKeyword:
 	AllocationKeyword 'def'
 ;
 
-AllocationDefinition :
+AllocationDefinition:
 	OccurrenceDefinitionPrefix AllocationDefKeyword Definition
 ;
 
-/* AllocationUsage Usages */
-
-AllocationUsageKeyword :
+AllocationUsageKeyword:
 	AllocationKeyword
 ;
 
-AllocateKeyword :
+AllocateKeyword:
 	'allocate'
 ;
 
-AllocationUsage :
+AllocationUsage:
 	OccurrenceUsagePrefix AllocationUsageDeclaration UsageBody
 ;
 
- AllocationUsageDeclaration :
+AllocationUsageDeclaration:
 	    AllocationUsageKeyword UsageDeclaration? ( AllocateKeyword ConnectorPart )?
 	  | AllocateKeyword ConnectorPart
 ;
 
-/* ACTION */
-
-/* Action Definitions */
-
-ActionKeyword :
+ActionKeyword:
 	'action'
 ;
 
-ActionDefKeyword :
+ActionDefKeyword:
 	ActionKeyword 'def'
 ;
 
-ActionDefinition :
+ActionDefinition:
 	prefix=OccurrenceDefinitionPrefix ActionDefKeyword declaration=DefinitionDeclaration body=ActionBody
 ;
 
- ActionBody :
+ActionBody:
 	  ';'
-	  // Note: Using a syntactic predicate here seems to avoid a possible infinite loop
-	  // while incrementally parsing.
-	| '{' items += ActionBodyItem* '}'
+	  	  	| '{' items += ActionBodyItem* '}'
 ;
 
-
-ActionBodyItemTarget :
+ActionBodyItemTarget:
     ( BehaviorUsageMember | ActionNodeMember )
 ;
 
-ActionBodyItem :
+ActionBodyItem:
 	  ownedRelationship += Import
 	| ownedRelationship += AliasMember
 	| ownedRelationship += DefinitionMember
@@ -1365,129 +1197,123 @@ ActionBodyItem :
 	| ownedRelationship += NonOccurrenceUsageMember
 ;
 
-
-InitialNodeMember :
+InitialNodeMember:
 	MemberPrefix 'first' memberElement = QualifiedName
 	RelationshipBody
 ;
 
-ActionNodeMember :
+ActionNodeMember:
 	MemberPrefix ownedRelatedElement += ActionNode
 ;
 
-TargetSuccessionMember :
+TargetSuccessionMember:
 	MemberPrefix ownedRelatedElement += ActionTargetSuccession
 ;
 
-GuardedSuccessionMember :
+GuardedSuccessionMember:
 	ownedRelatedElement += GuardedSuccession
 ;
 
-/* Action Usages */
-
-ActionUsageKeyword :
+ActionUsageKeyword:
 	ActionKeyword
 ;
 
-ActionUsage :
+ActionUsage:
 	prefix=OccurrenceUsagePrefix ActionUsageKeyword declaration=ActionUsageDeclaration body=ActionBody
 ;
 
-PerformActionUsage :
+PerformActionUsage:
 	OccurrenceUsagePrefix 'perform' PerformActionUsageDeclaration ActionBody
 ;
 
- PerformActionUsageDeclaration :
+PerformActionUsageDeclaration:
    	( ownedRelationship += OwnedReferenceSubsetting FeatureSpecializationPart?
    	| ActionUsageKeyword UsageDeclaration? )
     ValuePart?
 ;
 
- ActionUsageDeclaration :
+ActionUsageDeclaration:
 	  declaration=UsageDeclaration? valuepart=ValuePart?
 ;
 
-/* Action Nodes */
-
-ActionNode :
+ActionNode:
 	  SendNode | AcceptNode | AssignmentNode
 	| IfNode | WhileLoopNode | ForLoopNode
 	| ControlNode
 ;
 
- ActionNodeUsageDeclaration :
+ActionNodeUsageDeclaration:
 	ActionUsageKeyword UsageDeclaration?
 ;
 
- ActionNodePrefix :
+ActionNodePrefix:
 	OccurrenceUsagePrefix ActionNodeUsageDeclaration?
 ;
 
-AcceptNode :
+AcceptNode:
 	OccurrenceUsagePrefix AcceptNodeDeclaration ActionBody
 ;
 
- AcceptNodeDeclaration :
+AcceptNodeDeclaration:
 	ActionNodeUsageDeclaration? 'accept' AcceptParameterPart
 ;
 
- AcceptParameterPart :
+AcceptParameterPart:
 	ownedRelationship += PayloadParameterMember
 	( 'via' ownedRelationship += NodeParameterMember
 	| ownedRelationship += EmptyParameterMember
 	)
 ;
 
-PayloadParameterMember :
+PayloadParameterMember:
 	ownedRelatedElement += PayloadParameter
 ;
 
-PayloadParameter :
+PayloadParameter:
 	  PayloadFeature
 	| Identification? PayloadFeatureSpecializationPart? TriggerValuePart
 ;
 
- TriggerValuePart :
+TriggerValuePart:
 	ownedRelationship += TriggerFeatureValue
 ;
 
-TriggerFeatureValue :
+TriggerFeatureValue:
 	ownedRelatedElement += TriggerExpression
 ;
 
-TriggerExpression :
+TriggerExpression:
 	  kind = TimeTriggerKind
 	  ownedRelationship += OwnedExpressionMember
 	| kind = ChangeTriggerKind
 	  ownedRelationship += ChangeExpressionMember
 ;
 
-TimeTriggerKind :
+TimeTriggerKind:
 	'at' | 'after'
 ;
 
-ChangeTriggerKind :
+ChangeTriggerKind:
 	'when'
 ;
 
-ChangeExpressionMember :
+ChangeExpressionMember:
 	ownedRelatedElement += ChangeExpression
 ;
 
-ChangeExpression :
+ChangeExpression:
 	ownedRelationship += ChangeResultExpressionMember
 ;
 
-ChangeResultExpressionMember :
+ChangeResultExpressionMember:
 	ownedRelatedElement += OwnedExpression
 ;
 
-
-SendNode :
+SendNode:
 	OccurrenceUsagePrefix SendNodeDeclaration ActionBody
 ;
 
- SendNodeDeclaration :
+SendNodeDeclaration:
 	ActionNodeUsageDeclaration? 'send' ownedRelationship += NodeParameterMember
 	( 'via' ownedRelationship += NodeParameterMember
 	| ownedRelationship += EmptyParameterMember
@@ -1497,55 +1323,55 @@ SendNode :
 	)
 ;
 
-NodeParameterMember :
+NodeParameterMember:
 	ownedRelatedElement += NodeParameter
 ;
 
-NodeParameter :
+NodeParameter:
 	 ownedRelationship += FeatureBinding
 ;
 
-FeatureBinding :
+FeatureBinding:
 	ownedRelatedElement += OwnedExpression
 ;
 
-AssignmentNode :
+AssignmentNode:
 	OccurrenceUsagePrefix AssignmentNodeDeclaration ActionBody
 ;
 
- AssignmentNodeDeclaration :
+AssignmentNodeDeclaration:
 	ActionNodeUsageDeclaration? 'assign'
 	ownedRelationship += AssignmentTargetMember
 	ownedRelationship += FeatureChainMember ':='
 	ownedRelationship += NodeParameterMember
 ;
 
-AssignmentTargetMember :
+AssignmentTargetMember:
 	ownedRelatedElement += TargetParameter
 ;
 
-TargetParameter :
+TargetParameter:
 	( ownedRelationship += TargetBinding '.' )?
 	ownedRelationship += TargetFeatureMember
 ;
 
-TargetFeatureMember :
+TargetFeatureMember:
 	ownedRelatedElement += TargetFeature
 ;
 
-TargetFeature :
+TargetFeature:
 	ownedRelationship += TargetAccessedFeatureMember
 ;
 
-TargetAccessedFeatureMember :
+TargetAccessedFeatureMember:
 	ownedRelatedElement += EmptyUsage
 ;
 
-TargetBinding :
+TargetBinding:
 	ownedRelatedElement += TargetExpression
 ;
 
-TargetExpression :
+TargetExpression:
 	BaseExpression
 	( (  '.'
 	  ownedRelationship += FeatureChainMember
@@ -1566,36 +1392,34 @@ TargetExpression :
 	)*
 ;
 
-ExpressionParameterMember :
+ExpressionParameterMember:
 	ownedRelatedElement += OwnedExpression
 ;
 
-
-IfNodeElseMember :
+IfNodeElseMember:
     ( ActionBodyParameterMember | IfNodeParameterMember )
 ;
 
-IfNode :
+IfNode:
 	ActionNodePrefix
 	'if' ownedRelationship += ExpressionParameterMember
 	ownedRelationship += ActionBodyParameterMember
 	( 'else' ownedRelationship += IfNodeElseMember )?
 ;
 
-
-ActionBodyParameterMember :
+ActionBodyParameterMember:
 	ownedRelatedElement += ActionBodyParameter
 ;
 
-ActionBodyParameter :
+ActionBodyParameter:
 	 ( ActionUsageKeyword UsageDeclaration? )? '{' ActionBodyItem* '}'
 ;
 
-IfNodeParameterMember :
+IfNodeParameterMember:
 	ownedRelatedElement += IfNode
 ;
 
-WhileLoopNode :
+WhileLoopNode:
 	ActionNodePrefix
 	( 'while' ownedRelationship += ExpressionParameterMember
 	| 'loop' ownedRelationship += EmptyParameterMember
@@ -1604,94 +1428,85 @@ WhileLoopNode :
 	( 'until' ownedRelationship += ExpressionParameterMember ';' )?
 ;
 
-ForLoopNode :
+ForLoopNode:
 	ActionNodePrefix
 	'for' ownedRelationship += ForVariableDeclarationMember
 	'in' ownedRelationship += NodeParameterMember
 	ownedRelationship += ActionBodyParameterMember
 ;
 
-
-ForVariableDeclarationMember :
+ForVariableDeclarationMember:
 	ownedRelatedElement += ForVariableDeclaration
 ;
 
-
-ForVariableDeclaration :
+ForVariableDeclaration:
 	UsageDeclaration
 ;
 
-ControlNode :
+ControlNode:
 	  MergeNode
 	| DecisionNode
 	| JoinNode
 	| ForkNode
 ;
 
- ControlNodePrefix :
+ControlNodePrefix:
 	  RefPrefix
 	  ( isIndividual ?= 'individual' )?
 	  ( portionKind = PortionKind )?
 ;
 
-MergeNode :
+MergeNode:
 	ControlNodePrefix 'merge' UsageDeclaration?
 	ActionNodeBody
 ;
 
-DecisionNode :
+DecisionNode:
 	ControlNodePrefix 'decide' UsageDeclaration?
 	ActionNodeBody
 ;
 
-JoinNode :
+JoinNode:
 	ControlNodePrefix 'join' UsageDeclaration?
 	ActionNodeBody
 ;
 
-ForkNode :
+ForkNode:
 	ControlNodePrefix 'fork' UsageDeclaration?
 	ActionNodeBody
 ;
 
- ActionNodeBody :
+ActionNodeBody:
 	';' | '{' ( ownedRelationship += AnnotatingMember )* '}'
 ;
 
-EmptyParameterMember :
+EmptyParameterMember:
 	ownedRelatedElement += EmptyUsage
 ;
 
-EmptyUsage ://This doesn't work.
-	'emptyusage'
+EmptyUsage:	'emptyusage'
 ;
 
-/* Action Succession */
-
-ActionTargetSuccession :
+ActionTargetSuccession:
 	( TargetSuccession | GuardedTargetSuccession | DefaultTargetSuccession )
 	UsageBody
 ;
 
-TargetSuccession :
+TargetSuccession:
 	'then' ownedRelationship += MultiplicitySourceEndMember
 	ownedRelationship += ConnectorEndMember
 ;
 
-GuardedTargetSuccession :
-// if then
-	//ownedRelationship += EmptyParameterMember
-	ownedRelationship += GuardExpressionMember
+GuardedTargetSuccession:
+		ownedRelationship += GuardExpressionMember
 	'then' ownedRelationship += TransitionSuccessionMember
 ;
 
-DefaultTargetSuccession :
-	//ownedRelationship += EmptyParameterMember
-	'else' ownedRelationship += TransitionSuccessionMember
+DefaultTargetSuccession:
+		'else' ownedRelationship += TransitionSuccessionMember
 ;
 
-GuardedSuccession :
-// first if then
+GuardedSuccession:
 	( SuccessionKeyword UsageDeclaration )? 'first'
 	ownedRelationship += TransitionSourceMember
 	ownedRelationship += EmptyParameterMember
@@ -1700,33 +1515,27 @@ GuardedSuccession :
 	UsageBody
 ;
 
-/* STATES */
-
-/* State Definitions */
-
-StateKeyword :
+StateKeyword:
 	'state'
 ;
 
-StateDefKeyword :
+StateDefKeyword:
 	StateKeyword 'def'
 ;
 
-StateDefinition :
+StateDefinition:
 	OccurrenceDefinitionPrefix StateDefKeyword DefinitionDeclaration StateDefBody
 ;
 
- StateDefBody :
+StateDefBody:
 	';' | ( isParallel ?= 'parallel' )? '{' StateBodyPart '}'
 ;
 
- StateBodyPart :
-	// Note: Using a syntactic predicate here seems to avoid a possible infinite loop
-	// while incrementally parsing.
- StateBodyItem*
+StateBodyPart:
+		 StateBodyItem*
 ;
 
- StateBodyItem :
+StateBodyItem:
 	  ownedRelationship += Import
 	| ownedRelationship += AliasMember
 	| ownedRelationship += DefinitionMember
@@ -1744,75 +1553,72 @@ StateDefinition :
 	| ownedRelationship += ExitActionMember
 ;
 
-EntryActionMember :
+EntryActionMember:
 	MemberPrefix kind = EntryActionKind ownedRelatedElement += StateActionUsage
 ;
 
-EntryActionKind :
+EntryActionKind:
 	'entry'
 ;
 
-DoActionMember :
+DoActionMember:
 	MemberPrefix kind = DoActionKind ownedRelatedElement += StateActionUsage
 ;
 
-DoActionKind :
+DoActionKind:
 	'do'
 ;
 
-ExitActionMember :
+ExitActionMember:
 	MemberPrefix kind = ExitActionKind ownedRelatedElement += StateActionUsage
 ;
 
-ExitActionKind :
+ExitActionKind:
 	'exit'
 ;
 
-EntryTransitionMember :
+EntryTransitionMember:
 	MemberPrefix
 	( ownedRelatedElement += GuardedTargetSuccession
 	| 'then' ownedRelatedElement += TransitionSuccession
 	) ';'
 ;
 
-StateActionUsage :
+StateActionUsage:
 	EmptyActionUsage ';' | PerformedActionUsage ActionBody
 ;
 
-EmptyActionUsage ://This doesn't work.
-	'emptyactionusage'
+EmptyActionUsage:	'emptyactionusage'
 ;
 
-PerformedActionUsage :
+PerformedActionUsage:
 	   PerformActionUsageDeclaration
 	|  AcceptNodeDeclaration
 	|  SendNodeDeclaration
 	|  AssignmentNodeDeclaration
 ;
 
-TransitionUsageMember :
+TransitionUsageMember:
 	MemberPrefix ownedRelatedElement += TransitionUsage
 ;
 
-TargetTransitionUsageMember :
+TargetTransitionUsageMember:
 	MemberPrefix ownedRelatedElement += TargetTransitionUsage
 ;
 
-/* State Usages */
-
-StateUsageKeyword :
+StateUsageKeyword:
 	StateKeyword
 ;
 
-StateUsage :
+StateUsage:
 	OccurrenceUsagePrefix StateUsageKeyword ActionUsageDeclaration StateUsageBody
 ;
 
- StateUsageBody :
+StateUsageBody:
 	';' | ( isParallel ?= 'parallel' )? '{' StateBodyPart '}'
 ;
 
-ExhibitStateUsage :
+ExhibitStateUsage:
     OccurrenceUsagePrefix 'exhibit'
     ( ownedRelationship += OwnedReferenceSubsetting FeatureSpecializationPart?
     | StateUsageKeyword UsageDeclaration?
@@ -1820,13 +1626,11 @@ ExhibitStateUsage :
     ValuePart? StateUsageBody
 ;
 
-/* Transition Usages */
-
-TransitionUsageKeyword :
+TransitionUsageKeyword:
 	'transition'
 ;
 
-TransitionUsage :
+TransitionUsage:
 	TransitionUsageKeyword ( UsageDeclaration? 'first' )?
 	ownedRelationship += TransitionSourceMember
 	ownedRelationship += EmptyParameterMember
@@ -1838,7 +1642,7 @@ TransitionUsage :
 	ActionBody
 ;
 
-TargetTransitionUsage :
+TargetTransitionUsage:
 	ownedRelationship += EmptyParameterMember
 	( TransitionUsageKeyword
 	  ( ownedRelationship += EmptyParameterMember
@@ -1856,162 +1660,145 @@ TargetTransitionUsage :
 	ActionBody
 ;
 
-TransitionSourceMember :
+TransitionSourceMember:
 	  ownedRelatedElement += OwnedFeatureChain
 	| memberElement = QualifiedName
 ;
 
-TriggerActionMember :
+TriggerActionMember:
 	kind = TriggerFeatureKind ownedRelatedElement += TriggerAction
 ;
 
- TriggerFeatureKind :
+TriggerFeatureKind:
 	trigger = 'accept'
 ;
 
-TriggerAction :
+TriggerAction:
 	AcceptParameterPart
 ;
 
-GuardExpressionMember :
+GuardExpressionMember:
 	kind = GuardFeatureKind ownedRelatedElement += OwnedExpression
 ;
 
- GuardFeatureKind :
+GuardFeatureKind:
 	guard = 'if'
 ;
 
-EffectBehaviorMember :
+EffectBehaviorMember:
 	kind = EffectFeatureKind ownedRelatedElement += EffectBehaviorUsage
 ;
 
- EffectFeatureKind :
+EffectFeatureKind:
 	effect = 'do'
 ;
 
-EffectBehaviorUsage :
+EffectBehaviorUsage:
 	  EmptyActionUsage | PerformedActionUsage ( '{' ActionBodyItem* '}' )?
 ;
 
-TransitionSuccessionMember :
+TransitionSuccessionMember:
 	ownedRelatedElement += TransitionSuccession
 ;
 
-TransitionSuccession :
+TransitionSuccession:
 	ownedRelationship += EmptySourceEndMember
 	ownedRelationship += ConnectorEndMember
 ;
 
-/* CALCULATIONS */
-
-/* Calculation Definitions */
-
-CalculationKeyword :
+CalculationKeyword:
 	'calc'
 ;
 
-CalculationDefKeyword :
+CalculationDefKeyword:
 	CalculationKeyword 'def'
 ;
 
-CalculationDefinition :
+CalculationDefinition:
 	OccurrenceDefinitionPrefix CalculationDefKeyword DefinitionDeclaration
 	CalculationBody
 ;
 
- CalculationBody :
-	';' | '{' part+=CalculationBodyPart '}'
+CalculationBody:
+	';' | '{' CalculationBodyPart '}'
 ;
 
- CalculationBodyPart :
- item += CalculationBodyItem*
+CalculationBodyPart:
+ CalculationBodyItem*
 	( ownedRelationship += ResultExpressionMember )?
 ;
 
- CalculationBodyItem :
-	  item = ActionBodyItem
+CalculationBodyItem:
+	  ActionBodyItem
 	| ownedRelationship += ReturnParameterMember
 ;
 
-ReturnParameterMember :
-	prefix=MemberPrefix 'return'
+ReturnParameterMember:
+	MemberPrefix 'return'
 	ownedRelatedElement += UsageElement
 ;
 
-
-ResultExpressionMember :
-	prefix=MemberPrefix ownedRelatedElement += OwnedExpression
+ResultExpressionMember:
+	MemberPrefix ownedRelatedElement += OwnedExpression
 ;
 
-/* Calculation Usages */
-
-CalculationUsageKeyword :
+CalculationUsageKeyword:
 	CalculationKeyword
 ;
 
-CalculationUsage :
+CalculationUsage:
 	OccurrenceUsagePrefix CalculationUsageKeyword CalculationUsageDeclaration CalculationBody
 ;
 
- CalculationUsageDeclaration :
+CalculationUsageDeclaration:
 	  UsageDeclaration? ValuePart?
 ;
 
-/* CONSTRAINTS */
-
-/* Constraint Definitions */
-
-ConstraintKeyword :
+ConstraintKeyword:
 	'constraint'
 ;
 
-ConstraintDefKeyword :
+ConstraintDefKeyword:
 	ConstraintKeyword 'def'
 ;
 
-ConstraintDefinition :
+ConstraintDefinition:
 	OccurrenceDefinitionPrefix ConstraintDefKeyword DefinitionDeclaration CalculationBody
 ;
 
-/* Constraint Usages */
-
-ConstraintUsageKeyword :
+ConstraintUsageKeyword:
 	ConstraintKeyword
 ;
 
-ConstraintUsage :
+ConstraintUsage:
 	OccurrenceUsagePrefix ConstraintUsageKeyword CalculationUsageDeclaration CalculationBody
 ;
 
-AssertConstraintUsage :
-	prefix=OccurrenceUsagePrefix 'assert' ( isNegated ?= 'not' )?
-    ( ownedRelationship += OwnedReferenceSubsetting featurespecializationpart=FeatureSpecializationPart?
-    | ConstraintUsageKeyword declaration=UsageDeclaration?
+AssertConstraintUsage:
+	OccurrenceUsagePrefix 'assert' ( isNegated ?= 'not' )?
+    ( ownedRelationship += OwnedReferenceSubsetting FeatureSpecializationPart?
+    | ConstraintUsageKeyword UsageDeclaration?
     )
-    body=CalculationBody
+    CalculationBody
 ;
 
-/* REQUIREMENTS */
-
-/* Requirement Definitions */
-
-RequirementKeyword :
+RequirementKeyword:
 	'requirement'
 ;
 
-RequirementDefKeyword :
+RequirementDefKeyword:
 	RequirementKeyword 'def'
 ;
 
-RequirementDefinition :
+RequirementDefinition:
 	OccurrenceDefinitionPrefix RequirementDefKeyword DefinitionDeclaration RequirementBody
 ;
 
- RequirementBody :
+RequirementBody:
 	  ';' | '{' RequirementBodyItem* '}'
 ;
 
- RequirementBodyItem :
+RequirementBodyItem:
 	  DefinitionBodyItem
 	| ownedRelationship += SubjectMember
 	| ownedRelationship += RequirementConstraintMember
@@ -2021,75 +1808,73 @@ RequirementDefinition :
 	| ownedRelationship += StakeholderMember
 ;
 
-SubjectMember :
+SubjectMember:
 	MemberPrefix ownedRelatedElement += SubjectUsage
 ;
 
-SubjectUsage :
+SubjectUsage:
 	'subject' UsageExtensionKeyword* Usage
 ;
 
-RequirementConstraintMember :
+RequirementConstraintMember:
 	MemberPrefix kind = RequirementConstraintKind
 	ownedRelatedElement += RequirementConstraintUsage
 ;
 
- RequirementConstraintKind :
+RequirementConstraintKind:
 	assumption = 'assume' | requirement = 'require'
 ;
 
-RequirementConstraintUsage :
+RequirementConstraintUsage:
       ownedRelationship += OwnedReferenceSubsetting FeatureSpecialization*
       RequirementBody
     | ( UsageExtensionKeyword* ConstraintUsageKeyword | UsageExtensionKeyword+ )
       CalculationUsageDeclaration CalculationBody
 ;
 
-FramedConcernMember :
+FramedConcernMember:
 	MemberPrefix kind = FramedConcernKind
 	ownedRelatedElement += FramedConcernUsage
 ;
 
- FramedConcernKind :
+FramedConcernKind:
 	requirement = 'frame'
 ;
 
-FramedConcernUsage :
+FramedConcernUsage:
       ownedRelationship += OwnedReferenceSubsetting FeatureSpecialization*
       RequirementBody
     | ( UsageExtensionKeyword* ConcernUsageKeyword | UsageExtensionKeyword+ )
       CalculationUsageDeclaration CalculationBody
 ;
 
-ActorMember :
+ActorMember:
 	MemberPrefix
 	ownedRelatedElement += ActorUsage
 ;
 
-ActorUsage :
+ActorUsage:
       'actor' UsageExtensionKeyword* Usage
 ;
 
-StakeholderMember :
+StakeholderMember:
 	MemberPrefix
 	ownedRelatedElement += StakeholderUsage
 ;
 
-StakeholderUsage :
+StakeholderUsage:
       'stakeholder' UsageExtensionKeyword* Usage
 ;
 
-/* Requirement Usages */
-
-RequirementUsageKeyword :
+RequirementUsageKeyword:
 	RequirementKeyword
 ;
 
-RequirementUsage :
+RequirementUsage:
 	OccurrenceUsagePrefix RequirementUsageKeyword CalculationUsageDeclaration RequirementBody
 ;
 
-SatisfyRequirementUsage :
+SatisfyRequirementUsage:
 	OccurrenceUsagePrefix 'assert'? ( isNegated ?= 'not' )? 'satisfy'
 	( ownedRelationship += OwnedReferenceSubsetting FeatureSpecializationPart?
     | RequirementUsageKeyword UsageDeclaration?
@@ -2099,70 +1884,62 @@ SatisfyRequirementUsage :
      RequirementBody
 ;
 
-SatisfactionSubjectMember :
+SatisfactionSubjectMember:
 	ownedRelatedElement += SatisfactionParameter
 ;
 
-SatisfactionParameter :
+SatisfactionParameter:
 	ownedRelationship += SatisfactionFeatureValue
 ;
 
-SatisfactionFeatureValue :
+SatisfactionFeatureValue:
 	ownedRelatedElement += SatisfactionReferenceExpression
 ;
 
-SatisfactionReferenceExpression :
+SatisfactionReferenceExpression:
 	ownedRelationship += FeatureChainMember
 ;
 
-/* CONCERNS */
-
-/* Concern Definitions */
-
-ConcernKeyword :
+ConcernKeyword:
 	'concern'
 ;
 
-ConcernDefKeyword :
+ConcernDefKeyword:
 	ConcernKeyword 'def'
 ;
 
-ConcernDefinition :
+ConcernDefinition:
 	OccurrenceDefinitionPrefix ConcernDefKeyword DefinitionDeclaration RequirementBody
 ;
 
-ConcernUsageKeyword :
+ConcernUsageKeyword:
 	ConcernKeyword
 ;
 
-ConcernUsage :
+ConcernUsage:
 	OccurrenceUsagePrefix ConcernUsageKeyword CalculationUsageDeclaration RequirementBody
 ;
 
-/* CASES */
-
-/* Case Definitions */
-
-CaseKeyword :
+CaseKeyword:
 	'case'
 ;
 
-CaseDefKeyword :
+CaseDefKeyword:
 	CaseKeyword 'def'
 ;
 
-CaseDefinition :
+CaseDefinition:
 	OccurrenceDefinitionPrefix CaseDefKeyword DefinitionDeclaration CaseBody
 ;
 
- CaseBody :
+CaseBody:
 	    ';'
 	  | '{' CaseBodyItem*
 	        ( ownedRelationship += ResultExpressionMember )?
 	    '}'
 ;
 
- CaseBodyItem :
+CaseBodyItem:
 	  CalculationBodyItem
 	| ownedRelationship += SubjectMember
 	| ownedRelationship += ActorMember
@@ -2170,107 +1947,99 @@ CaseDefinition :
 
 ;
 
-ObjectiveMember :
+ObjectiveMember:
 	MemberPrefix 'objective' ownedRelatedElement += ObjectiveRequirementUsage
 ;
 
-ObjectiveRequirementUsage :
+ObjectiveRequirementUsage:
 	UsageExtensionKeyword* CalculationUsageDeclaration RequirementBody
 ;
 
-/* Case Usages */
-
-CaseUsageKeyword :
+CaseUsageKeyword:
 	CaseKeyword
 ;
 
-CaseUsage :
+CaseUsage:
 	OccurrenceUsagePrefix CaseUsageKeyword CalculationUsageDeclaration CaseBody
 ;
 
-/* ANALYSIS CASES */
-
-AnalysisCaseKeyword :
+AnalysisCaseKeyword:
 	'analysis'
 ;
 
-AnalysisCaseDefKeyword :
+AnalysisCaseDefKeyword:
 	AnalysisCaseKeyword 'def'
 ;
 
-AnalysisCaseUsageKeyword :
+AnalysisCaseUsageKeyword:
 	AnalysisCaseKeyword
 ;
 
-AnalysisCaseDefinition :
+AnalysisCaseDefinition:
 	OccurrenceDefinitionPrefix AnalysisCaseDefKeyword DefinitionDeclaration CaseBody
 ;
 
-AnalysisCaseUsage :
+AnalysisCaseUsage:
 	OccurrenceUsagePrefix AnalysisCaseUsageKeyword CalculationUsageDeclaration CaseBody
 ;
 
-/* VERIFICATION CASES */
-
-VerificationCaseKeyword :
+VerificationCaseKeyword:
 	'verification'
 ;
 
-VerificationCaseDefKeyword :
+VerificationCaseDefKeyword:
 	VerificationCaseKeyword 'def'
 ;
 
-VerificationCaseUsageKeyword :
+VerificationCaseUsageKeyword:
 	VerificationCaseKeyword
 ;
 
-VerificationCaseDefinition :
+VerificationCaseDefinition:
 	OccurrenceDefinitionPrefix VerificationCaseDefKeyword DefinitionDeclaration CaseBody
 ;
 
-VerificationCaseUsage :
+VerificationCaseUsage:
 	OccurrenceUsagePrefix VerificationCaseUsageKeyword CalculationUsageDeclaration CaseBody
 ;
 
-RequirementVerificationMember :
+RequirementVerificationMember:
 	MemberPrefix kind = RequirementVerificationKind
 	ownedRelatedElement += RequirementVerificationUsage
 ;
 
- RequirementVerificationKind :
+RequirementVerificationKind:
 	requirement = 'verify'
 ;
 
-RequirementVerificationUsage :
+RequirementVerificationUsage:
       ownedRelationship += OwnedReferenceSubsetting FeatureSpecialization*
       RequirementBody
     | ( UsageExtensionKeyword* RequirementUsageKeyword | UsageExtensionKeyword+ )
       CalculationUsageDeclaration RequirementBody
 ;
 
-/* USE CASES */
-
-UseCaseKeyword :
+UseCaseKeyword:
 	'use' 'case'
 ;
 
-UseCaseDefKeyword :
+UseCaseDefKeyword:
 	UseCaseKeyword 'def'
 ;
 
-UseCaseUsageKeyword :
+UseCaseUsageKeyword:
 	UseCaseKeyword
 ;
 
-UseCaseDefinition :
+UseCaseDefinition:
 	OccurrenceDefinitionPrefix UseCaseDefKeyword DefinitionDeclaration CaseBody
 ;
 
-UseCaseUsage :
+UseCaseUsage:
 	OccurrenceUsagePrefix UseCaseUsageKeyword CalculationUsageDeclaration CaseBody
 ;
 
-IncludeUseCaseUsage :
+IncludeUseCaseUsage:
 	OccurrenceUsagePrefix 'include'
    	( ownedRelationship += OwnedReferenceSubsetting FeatureSpecializationPart?
    	| UseCaseUsageKeyword UsageDeclaration? )
@@ -2278,74 +2047,68 @@ IncludeUseCaseUsage :
 	CaseBody
 ;
 
-/* VIEWS */
-
-/* View Definitions */
-
-ViewKeyword :
+ViewKeyword:
 	'view'
 ;
 
-ViewDefKeyword :
+ViewDefKeyword:
 	ViewKeyword 'def'
 ;
 
-ViewDefinition :
+ViewDefinition:
 	OccurrenceDefinitionPrefix ViewDefKeyword DefinitionDeclaration ViewDefinitionBody
 ;
 
- ViewDefinitionBody :
+ViewDefinitionBody:
 	  ';'
 	| '{' ViewDefinitionBodyItem* '}'
 ;
 
- ViewDefinitionBodyItem :
+ViewDefinitionBodyItem:
 	  DefinitionBodyItem
 	| ownedRelationship += ElementFilterMember
 	| ownedRelationship += ViewRenderingMember
 ;
 
-ViewRenderingMember :
+ViewRenderingMember:
 	MemberPrefix 'render'
 	ownedRelatedElement += ViewRenderingUsage
 ;
 
-ViewRenderingUsage :
+ViewRenderingUsage:
 	 ownedRelationship += OwnedReferenceSubsetting FeatureSpecialization* UsageBody
 ;
 
-/* View Usages */
-
-ViewUsageKeyword :
+ViewUsageKeyword:
 	ViewKeyword
 ;
 
-ViewUsage :
+ViewUsage:
 	OccurrenceUsagePrefix ViewUsageKeyword UsageDeclaration? ValuePart? ViewBody
 ;
 
- ViewBody :
+ViewBody:
 	';' | '{' ViewBodyItem* '}'
 ;
 
- ViewBodyItem :
+ViewBodyItem:
 	  DefinitionBodyItem
 	| ownedRelationship += ElementFilterMember
 	| ownedRelationship += Expose
 	| ownedRelationship += ViewRenderingMember
 ;
 
-Expose :
+Expose:
 	( MembershipExpose | NamespaceExpose )
 	RelationshipBody
 ;
 
-MembershipExpose :
+MembershipExpose:
 	( visibility = VisibilityIndicator )?
 	'expose' ImportedMembership
 ;
 
-NamespaceExpose :
+NamespaceExpose:
 	( visibility = VisibilityIndicator )?
 	'expose'
 	( ImportedNamespace
@@ -2353,56 +2116,1129 @@ NamespaceExpose :
 	)
 ;
 
-/* VIEWPOINTS */
-
-ViewpointKeyword :
+ViewpointKeyword:
 	'viewpoint'
 ;
 
-ViewpointDefKeyword :
+ViewpointDefKeyword:
 	ViewpointKeyword 'def'
 ;
 
-ViewpointUsageKeyword :
+ViewpointUsageKeyword:
 	ViewpointKeyword
 ;
 
-ViewpointDefinition :
+ViewpointDefinition:
 	OccurrenceDefinitionPrefix ViewpointDefKeyword DefinitionDeclaration RequirementBody
 ;
 
-ViewpointUsage :
+ViewpointUsage:
 	OccurrenceUsagePrefix ViewpointUsageKeyword CalculationUsageDeclaration RequirementBody
 ;
 
-/* RENDERINGS */
-
-RenderingKeyword :
+RenderingKeyword:
 	'rendering'
 ;
 
-RenderingDefKeyword :
+RenderingDefKeyword:
 	RenderingKeyword 'def'
 ;
 
-RenderingDefinition :
+RenderingDefinition:
 	OccurrenceDefinitionPrefix RenderingDefKeyword Definition
 ;
 
-RenderingUsageKeyword :
+RenderingUsageKeyword:
 	RenderingKeyword
 ;
 
-RenderingUsage :
+RenderingUsage:
 	OccurrenceUsagePrefix RenderingUsageKeyword Usage
 ;
 
-/* EXPRESSIONS */
-
-BaseExpression :
-  be=[KerMLExpressions.BaseExpression]
+ExpressionBody:
+	CalculationBody
 ;
 
-ExpressionBody :
-	body=CalculationBody
+RelationshipOwnedElement:
+      ownedRelatedElement += OwnedRelatedElement
+    | ownedRelationship += OwnedAnnotation
 ;
+
+OwnedRelatedElement:
+    NonFeatureElement | FeatureElement
+;
+
+CommentKerML:
+	( 'comment' Identification?
+	  ('about' ownedRelationship += Annotation
+	     ( ',' ownedRelationship += Annotation )* )?
+	)?
+	body = REGULAR_COMMENT
+;
+
+Namespace:
+	( ownedRelationship += PrefixMetadataMember )*
+	NamespaceDeclaration NamespaceBody
+;
+
+NamespaceDeclaration:
+	'namespace' Identification?
+;
+
+NamespaceBody:
+	  ';'
+	| '{' ( 					    ownedRelationship += NamespaceMember
+	      | ownedRelationship += AliasMember
+	      | ownedRelationship += Import )*
+	  '}'
+;
+
+NamespaceBodyElement:
+	  ownedRelationship += NamespaceMember
+	| ownedRelationship += AliasMember
+	| ownedRelationship += Import
+;
+
+NamespaceMember:
+	  NonFeatureMember | NamespaceFeatureMember
+;
+
+NonFeatureMember:
+	MemberPrefix ownedRelatedElement += MemberElement
+;
+
+NamespaceFeatureMember:
+	MemberPrefix ownedRelatedElement += FeatureElement
+;
+
+MemberElement:
+	AnnotatingElement | NonFeatureElement
+;
+
+NonFeatureElement:
+	  Dependency
+	| Namespace
+	| Package
+	| LibraryPackage
+	| Multiplicity
+	| Type
+	| Classifier
+	| Class
+	| Structure
+	| Metaclass
+	| DataType
+	| Association
+	| AssociationStructure
+	| Interaction
+	| Behavior
+	| Function
+	| Predicate
+	| Specialization
+	| Conjugation
+	| FeatureTyping
+	| Subclassification
+	| Disjoining
+	| FeatureInverting
+	| Subsetting
+	| Redefinition
+	| TypeFeaturing
+;
+
+FeatureElement:
+	  Feature
+	| Step
+	| Expression
+	| BooleanExpression
+	| Invariant
+	| Connector
+	| BindingConnector
+	| Succession
+	| ItemFlow
+	| SuccessionItemFlow
+;
+
+TypePrefix:
+	( isAbstract ?= 'abstract' )?
+	( ownedRelationship += PrefixMetadataMember )*
+;
+
+Type:
+    TypePrefix 'type'
+    TypeDeclaration TypeBody
+;
+
+TypeDeclaration:
+    ( isSufficient ?= 'all' )? Identification?
+    ( ownedRelationship += OwnedMultiplicity )?
+    ( SpecializationPart | ConjugationPart )+
+    TypeRelationshipPart*
+;
+
+SpecializationPart:
+      ( ':>' | 'specializes' ) ownedRelationship += OwnedSpecialization
+      ( ',' ownedRelationship += OwnedSpecialization )*
+;
+
+ConjugationPart:
+	( '~' | 'conjugates' ) ownedRelationship += OwnedConjugation
+;
+
+TypeRelationshipPart:
+	DisjoiningPart | UnioningPart | IntersectingPart | DifferencingPart
+;
+
+DisjoiningPart:
+	'disjoint' 'from' ownedRelationship += OwnedDisjoining
+	( ',' ownedRelationship += OwnedDisjoining )*
+;
+
+UnioningPart:
+	'unions' ownedRelationship += Unioning
+	( ',' ownedRelationship += Unioning )*
+;
+
+IntersectingPart:
+	'intersects' ownedRelationship += Intersecting
+	( ',' ownedRelationship += Intersecting )*
+;
+
+DifferencingPart:
+	'differences' ownedRelationship += Differencing
+	( ',' ownedRelationship += Differencing )*
+;
+
+TypeBody:
+	 ';'
+	| '{' ( ownedRelationship += NonFeatureMember
+		  | ownedRelationship += FeatureMember
+		  | ownedRelationship += AliasMember
+		  | ownedRelationship += Import
+	      )*
+	  '}'
+;
+
+FeatureMember:
+	TypeFeatureMember | OwnedFeatureMember
+;
+
+TypeFeatureMember:
+	MemberPrefix 'member' ownedRelatedElement += FeatureElement
+;
+
+OwnedFeatureMember:
+	MemberPrefix ownedRelatedElement += FeatureElement
+;
+
+Specialization:
+    ( 'specialization' Identification? )?
+    'subtype'
+	( specific = QualifiedName
+	| ownedRelatedElement += OwnedFeatureChain )
+    ( ':>' | 'specializes')
+	( general = QualifiedName
+	| ownedRelatedElement += OwnedFeatureChain )
+	RelationshipBody
+;
+
+OwnedSpecialization:
+	  general = QualifiedName
+	| ownedRelatedElement += OwnedFeatureChain
+;
+
+Conjugation:
+	( 'conjugation' Identification? )?
+    'conjugate'
+    ( conjugatedType = QualifiedName
+	| ownedRelatedElement += OwnedFeatureChain )
+    ( '~' | 'conjugates')
+    ( originalType = QualifiedName
+	| ownedRelatedElement += OwnedFeatureChain )
+	RelationshipBody
+;
+
+OwnedConjugation:
+	  originalType = QualifiedName
+	| ownedRelatedElement += OwnedFeatureChain
+;
+
+Disjoining:
+	( 'disjoining' Identification? )?
+	'disjoint'
+	( typeDisjoined = QualifiedName
+	| ownedRelatedElement += OwnedFeatureChain )
+	'from'
+	( disjoiningType = QualifiedName
+	| ownedRelatedElement += OwnedFeatureChain )
+	RelationshipBody
+;
+
+OwnedDisjoining:
+	  disjoiningType = QualifiedName
+	| ownedRelatedElement += OwnedFeatureChain
+;
+
+Unioning:
+	  unioningType = QualifiedName
+	| ownedRelatedElement += OwnedFeatureChain
+;
+
+Intersecting:
+	  intersectingType = QualifiedName
+	| ownedRelatedElement += OwnedFeatureChain
+;
+
+Differencing:
+	  differencingType = QualifiedName
+	| ownedRelatedElement += OwnedFeatureChain
+;
+
+Classifier:
+	TypePrefix 'classifier'
+	ClassifierDeclaration TypeBody
+;
+
+ClassifierDeclaration:
+    (isSufficient ?= 'all' )? Identification?
+	( ownedRelationship += OwnedMultiplicity )?
+	( SuperclassingPart | ClassifierConjugationPart )?
+	TypeRelationshipPart*
+;
+
+SuperclassingPart:
+	( ':>' | 'specializes' ) ownedRelationship += Ownedsubclassification
+	( ',' ownedRelationship += Ownedsubclassification )*
+;
+
+ClassifierConjugationPart:
+	( '~' | 'conjugates' ) ownedRelationship += ClassifierConjugation
+;
+
+Subclassification:
+	( 'specialization' Identification? )?
+    'subclassifier' subclassifier = QualifiedName
+    ( ':>' | 'specializes') superclassifier = QualifiedName
+    RelationshipBody
+;
+
+Ownedsubclassification:
+	superclassifier = QualifiedName
+;
+
+ClassifierConjugation:
+	originalType = QualifiedName
+;
+
+FeaturePrefix:
+	( direction = FeatureDirection )?
+	( isAbstract ?= 'abstract' )?
+	( isComposite ?= 'composite' | isPortion ?= 'portion' )?
+	( isReadOnly ?= 'readonly' )?
+	( isDerived ?= 'derived' )?
+	( isEnd ?= 'end' )?
+	( ownedRelationship += PrefixMetadataMember )*
+;
+
+Feature:
+	FeaturePrefix
+	( 'feature'? FeatureDeclaration
+	| ownedRelationship += PrefixMetadataMember
+	| 'feature'
+	)
+	ValuePart? TypeBody
+;
+
+FeatureRelationshipPart:
+	TypeRelationshipPart | ChainingPart | InvertingPart | TypeFeaturingPart
+;
+
+ChainingPart:
+	'chains' ( ownedRelationship += OwnedFeatureChaining | FeatureChain )
+;
+
+InvertingPart:
+	'inverse' 'of' ownedRelationship += OwnedFeatureInverting
+;
+
+TypeFeaturingPart:
+	'featured' 'by' ownedRelationship += OwnedTypeFeaturing
+	( ',' ownedRelationship += OwnedTypeFeaturing )*
+;
+
+Subsets:
+	( ':>' | 'subsets' ) ownedRelationship += OwnedSubsetting
+;
+
+FeatureInverting:
+	( 'inverting' Identification? )?
+	'inverse'
+	( featureInverted = QualifiedName
+	| ownedRelatedElement += OwnedFeatureChain )
+	'of'
+	( invertingFeature = QualifiedName
+	| ownedRelatedElement += OwnedFeatureChain )
+	RelationshipBody
+;
+
+OwnedFeatureInverting:
+	  invertingFeature = QualifiedName
+	| ownedRelatedElement += OwnedFeatureChain
+;
+
+TypeFeaturing:
+	'featuring' ( Identification? 'of')?
+	featureOfType = QualifiedName
+	'by' featuringType = QualifiedName
+	RelationshipBody
+;
+
+OwnedTypeFeaturing:
+	featuringType = QualifiedName
+;
+
+OwnedFeatureTyping:
+	type=FeatureType
+;
+
+FeatureType:
+	  type = QualifiedName | ownedRelatedElement += OwnedFeatureChain
+;
+
+Subsetting:
+	( 'specialization' Identification? )?
+    'subset'
+    ( subsettingFeature = QualifiedName
+	| ownedRelatedElement += OwnedFeatureChain )
+    ( ':>' | 'subsets' )
+    ( subsettedFeature = QualifiedName
+	| ownedRelatedElement += OwnedFeatureChain )
+	RelationshipBody
+;
+
+Redefinition:
+	( 'specialization' Identification? )?
+    'redefinition'
+    ( redefiningFeature = QualifiedName
+	| ownedRelatedElement += OwnedFeatureChain )
+    ( ':>>' | 'redefines' )
+    ( redefinedFeature = QualifiedName
+	| ownedRelatedElement += OwnedFeatureChain )
+	RelationshipBody
+;
+
+FeatureConjugationPart:
+	( '~' | 'conjugates' ) ownedRelationship += FeatureConjugation
+;
+
+FeatureConjugation:
+	originalType = QualifiedName
+;
+
+EmptyFeatureWriteMember:
+	ownedRelatedElement += EmptyFeatureWrite
+;
+
+EmptyFeatureWrite:
+	ownedRelationship += EmptyTargetMember
+	ownedRelationship += EmptyParameterMember
+;
+
+EmptyFeatureMember:
+	ownedRelatedElement += EmptyFeature
+;
+
+Multiplicity:
+	MultiplicitySubset | MultiplicityRange
+;
+
+MultiplicitySubset:
+	'multiplicity' Identification? Subsets TypeBody
+;
+
+OwnedMultiplicityRange:
+	MultiplicityBounds
+;
+
+MultiplicityBounds:
+		'[' ownedRelationship += MultiplicityExpressionMember
+	      ( '..' ownedRelationship += MultiplicityExpressionMember )? ']'
+;
+
+DataType:
+	TypePrefix 'datatype'
+	ClassifierDeclaration TypeBody
+;
+
+Class:
+	TypePrefix 'class'
+	ClassifierDeclaration TypeBody
+;
+
+Structure:
+	TypePrefix 'struct'
+	ClassifierDeclaration TypeBody
+;
+
+Association:
+	TypePrefix 'assoc'
+	ClassifierDeclaration TypeBody
+;
+
+AssociationStructure:
+	TypePrefix 'assoc' 'struct'
+	ClassifierDeclaration TypeBody
+;
+
+Connector:
+	FeaturePrefix 'connector'
+	ConnectorDeclaration TypeBody
+;
+
+ConnectorDeclaration:
+	BinaryConnectorDeclaration | NaryConnectorDeclaration
+;
+
+BinaryConnectorDeclaration:
+	( FeatureDeclaration? 'from' | isSufficient ?= 'all' 'from'? )?
+	ownedRelationship += ConnectorEndMember 'to'
+	ownedRelationship += ConnectorEndMember
+;
+
+NaryConnectorDeclaration:
+	FeatureDeclaration?
+	( '(' ownedRelationship += ConnectorEndMember ','
+	      ownedRelationship += ConnectorEndMember
+	      ( ',' ownedRelationship += ConnectorEndMember )*
+	  ')' )?
+;
+
+BindingConnectorDeclaration:
+	  FeatureDeclaration
+	  ( 'of' ownedRelationship += ConnectorEndMember
+	    '=' ownedRelationship += ConnectorEndMember )?
+	| ( isSufficient ?= 'all' )?
+	  ( 'of'? ownedRelationship += ConnectorEndMember
+	    '=' ownedRelationship += ConnectorEndMember )?
+;
+
+SuccessionDeclaration:
+	  FeatureDeclaration
+	  ( 'first' ownedRelationship += ConnectorEndMember
+	    'then' ownedRelationship += ConnectorEndMember )?
+    | ( isSufficient ?= 'all' )?
+	  ( 'first'? ownedRelationship += ConnectorEndMember
+	    'then' ownedRelationship += ConnectorEndMember )?
+;
+
+Behavior:
+	TypePrefix 'behavior'
+	ClassifierDeclaration TypeBody
+;
+
+Step:
+	FeaturePrefix 'step'
+	StepDeclaration TypeBody
+;
+
+StepDeclaration:
+	FeatureDeclaration? ValuePart?
+;
+
+Function:
+	TypePrefix 'function'
+	ClassifierDeclaration FunctionBody
+;
+
+FunctionBody:
+	';' | '{' FunctionBodyPart '}'
+;
+
+FunctionBodyPart:
+	( ownedRelationship += NonFeatureMember
+	| ownedRelationship += FeatureMember
+	| ownedRelationship += AliasMember
+	| ownedRelationship += Import
+	| ownedRelationship += ReturnFeatureMember
+	)*
+	( ownedRelationship += ResultExpressionMember )?
+;
+
+ReturnFeatureMember:
+	MemberPrefix 'return'
+	ownedRelatedElement += FeatureElement
+;
+
+Expression:
+	FeaturePrefix 'expr'
+	ExpressionDeclaration FunctionBody
+;
+
+ExpressionDeclaration:
+	FeatureDeclaration? ValuePart?
+;
+
+Predicate:
+	TypePrefix 'predicate'
+	ClassifierDeclaration FunctionBody
+;
+
+BooleanExpression:
+	FeaturePrefix 'bool'
+	ExpressionDeclaration FunctionBody
+;
+
+Invariant:
+	FeaturePrefix 'inv' ( 'true' | isNegated ?= 'false' )?
+	ExpressionDeclaration FunctionBody
+;
+
+Interaction:
+	TypePrefix 'interaction'
+	ClassifierDeclaration TypeBody
+;
+
+ItemFlow:
+	FeaturePrefix 'flow'
+	ItemFlowDeclaration TypeBody
+;
+
+SuccessionItemFlow:
+	FeaturePrefix 'succession' 'flow' ItemFlowDeclaration TypeBody
+;
+
+ItemFlowDeclaration:
+	  FeatureDeclaration? ValuePart?
+      ( 'of'  ownedRelationship += ItemFeatureMember )?
+	  ( 'from' ownedRelationship += ItemFlowEndMember
+	    'to' ownedRelationship += ItemFlowEndMember )?
+    | ( isSufficient ?= 'all' )?
+      ownedRelationship += ItemFlowEndMember 'to'
+	  ownedRelationship += ItemFlowEndMember
+;
+
+ItemFeatureSpecializationPart:
+	  ( FeatureSpecialization )+ MultiplicityPart? FeatureSpecialization*
+	| MultiplicityPart FeatureSpecialization+
+;
+
+ItemFlowEndMember:
+	ownedRelatedElement += ItemFlowEnd
+;
+
+ItemFlowEnd:
+	( ownedRelationship += ItemFlowEndSubsetting )?
+	ownedRelationship += ItemFlowFeatureMember
+;
+
+ItemFlowEndSubsetting:
+	  referencedFeature = QualifiedName '.'
+	| ownedRelatedElement += FeatureChainPrefix
+;
+
+ItemFlowFeatureMember:
+	ownedRelatedElement += ItemFlowFeature
+;
+
+ItemFlowFeature:
+	ownedRelationship += ItemFlowRedefinition
+;
+
+ItemFlowRedefinition:
+	redefinedFeature = QualifiedName
+;
+
+Metaclass:
+	TypePrefix 'metaclass'
+	ClassifierDeclaration TypeBody
+;
+
+PrefixMetadataFeature:
+	ownedRelationship += MetadataTyping
+;
+
+MetadataFeature:
+	( '@' | 'metadata' ) MetadataFeatureDeclaration
+	( 'about' ownedRelationship += Annotation
+		( ',' ownedRelationship += Annotation )*
+	)?
+	MetadataBody
+;
+
+MetadataFeatureDeclaration:
+	( Identification ( ':' | 'typed' 'by' ) )? ownedRelationship += MetadataTyping
+;
+
+MetadataBodyFeatureMember:
+	ownedRelatedElement += MetadataBodyFeature
+;
+
+MetadataBodyFeature:
+	'feature'? ( ':>>' | 'redefines' )? ownedRelationship += OwnedRedefinition
+	FeatureSpecializationPart? ValuePart?
+	MetadataBody
+;
+
+OwnedExpressionMember:
+	ownedRelatedElement += OwnedExpression
+;
+
+OwnedExpression:
+	 expression=ConditionalExpression
+;
+
+OwnedExpressionReference:
+	ownedRelationship += OwnedExpressionMember
+;
+
+ConditionalExpression:
+	  operand = NullCoalescingExpression
+	|  operator = ConditionalOperator operand += NullCoalescingExpression
+		  '?' operand += OwnedExpressionReference 'else' operand += OwnedExpressionReference
+;
+
+ConditionalOperator:
+	'if'
+;
+
+NullCoalescingExpression:
+	implies = ImpliesExpression (
+		operator = NullCoalescingOperator operand += ImpliesExpressionReference )*
+;
+
+NullCoalescingOperator:
+	'??'
+;
+
+ImpliesExpressionReference:
+	ownedRelationship += ImpliesExpressionMember
+;
+
+ImpliesExpressionMember:
+	ownedRelatedElement += ImpliesExpression
+;
+
+ImpliesExpression:
+	or = OrExpression (
+		operator = ImpliesOperator operand += OrExpressionReference )*
+;
+
+ImpliesOperator:
+	'implies'
+;
+
+OrExpressionReference:
+	ownedRelationship += OrExpressionMember
+;
+
+OrExpressionMember:
+	ownedRelatedElement += OrExpression
+;
+
+OrExpression:
+	xor=XorExpression (
+		( operator = OrOperator operand += XorExpression
+		| operator = ConditionalOrOperator operand += XorExpressionReference ) )*
+;
+
+OrOperator:
+	'|'
+;
+
+ConditionalOrOperator:
+	'or'
+;
+
+XorExpressionReference:
+	ownedRelationship += XorExpressionMember
+;
+
+XorExpressionMember:
+	ownedRelatedElement += XorExpression
+;
+
+XorExpression:
+	and=AndExpression (
+		operator = XorOperator operand += AndExpression )*
+;
+
+XorOperator:
+	'xor'
+;
+
+AndExpression:
+	equality=EqualityExpression (
+		( operator = AndOperator operand += EqualityExpression
+		| operator = ConditionalAndOperator operand += EqualityExpressionReference ) )*
+;
+
+AndOperator:
+    '&'
+;
+
+ConditionalAndOperator:
+	'and'
+;
+
+EqualityExpressionReference:
+	ownedRelationship += EqualityExpressionMember
+;
+
+EqualityExpressionMember:
+	ownedRelatedElement += EqualityExpression
+;
+
+EqualityExpression:
+	classification=ClassificationExpression (
+		operator = EqualityOperator operand += ClassificationExpression )*
+
+;
+
+EqualityOperator:
+	'==' | '!=' | '===' | '!=='
+;
+
+ClassificationExpression:
+	  relational=RelationalExpression
+	  (
+	  	operator = ClassificationTestOperator ownedRelationship += TypeReferenceMember
+	  |
+	    operator = CastOperator ownedRelationship += TypeResultMember
+	  )?
+	|  operand += SelfReferenceExpression
+	  operator = ClassificationTestOperator ownedRelationship += TypeReferenceMember
+	|  operand += MetadataReference
+	  operator = MetaClassificationTestOperator ownedRelationship += TypeReferenceMember
+	|  operand += SelfReferenceExpression
+	  operator = CastOperator ownedRelationship += TypeResultMember
+	|  operand += MetadataReference
+	  operator = MetaCastOperator ownedRelationship += TypeResultMember
+;
+
+ClassificationTestOperator:
+	'hastype' | 'istype' | '@'
+;
+
+MetaClassificationTestOperator:
+	'@@'
+;
+
+CastOperator:
+    'as'
+;
+
+MetaCastOperator:
+	'meta'
+;
+
+MetadataReference:
+	referencedElement = QualifiedName
+;
+
+TypeReferenceMember:
+	ownedRelatedElement += TypeReference
+;
+
+TypeResultMember:
+	ownedRelatedElement += TypeReference
+;
+
+TypeReference:
+	ownedRelationship += ReferenceTyping
+;
+
+ReferenceTyping:
+	  type = QualifiedName
+;
+
+SelfReferenceExpression:
+	ownedRelationship += SelfReferenceMember
+;
+
+SelfReferenceMember:
+	ownedRelatedElement += EmptyFeature
+;
+
+EmptyFeature:	'emptyfeature'
+;
+
+RelationalExpression:
+	range=RangeExpression (
+		operator = RelationalOperator operand += RangeExpression )*
+;
+
+RelationalOperator:
+	'<' | '>' | '<=' | '>='
+;
+
+RangeExpression:
+	additive=AdditiveExpression (
+		operator = '..' operand += AdditiveExpression )?
+;
+
+AdditiveExpression:
+	multiplicitive=MultiplicativeExpression (
+		operator = AdditiveOperator operand += MultiplicativeExpression )*
+;
+
+AdditiveOperator:
+	'+' | '-'
+;
+
+MultiplicativeExpression:
+	exponential=ExponentiationExpression (
+		operator = MultiplicativeOperator operand += ExponentiationExpression )*
+;
+
+MultiplicativeOperator:
+	'*' | '/' | '%'
+;
+
+ExponentiationExpression:
+	unary=UnaryExpression (
+		operator = ExponentiationOperator operand += UnaryExpression )*
+;
+
+ExponentiationOperator:
+	'**' | '^'
+;
+
+UnaryExpression:
+	   operator = UnaryOperator operand += ExtentExpression
+	| extent=ExtentExpression
+;
+
+UnaryOperator:
+	'+' | '-' | '~' | 'not'
+;
+
+ExtentExpression:
+	   operator = 'all' ownedRelationship += TypeResultMember
+	| primary=PrimaryExpression
+;
+
+PrimaryExpression:
+	base=BaseExpression
+	(  '.' ownedRelationship1 += FeatureChainMember )?
+	(
+    ( operator += '#' '(' operand += SequenceExpression ')'
+      | operator += '[' operand += SequenceExpression ']'
+      | operator += '->' ownedRelationship += ReferenceTyping
+        ( operand += BodyExpression | operand += FunctionReferenceExpression | operand+= ArgumentList )
+      |  operator += '.' operand += BodyExpression
+      |  operator += '.?' operand += BodyExpression
+	  )
+	  (  '.' ownedRelationship2 += FeatureChainMember )?
+	)*
+;
+
+FunctionReferenceExpression:
+	ownedRelationship += FunctionReferenceMember
+;
+
+FunctionReferenceMember:
+	ownedRelatedElement += FunctionReference
+;
+
+FunctionReference:
+	ownedRelationship += ReferenceTyping
+;
+
+FeatureChainMember:
+	  memberElement = QualifiedName
+	|  ownedRelatedElement += OwnedFeatureChain
+;
+
+BaseExpression:
+	  ownedRelationship=NullExpression
+	| ownedRelationship=LiteralExpression
+	| ownedRelationship=FeatureReferenceExpression
+	| ownedRelationship=MetadataAccessExpression
+	| ownedRelationship=InvocationExpression
+	| ownedRelationship=BodyExpression
+	| '(' ownedRelationship=SequenceExpression ')'
+;
+
+BodyExpression:
+	ownedRelationship += ExpressionBodyMember
+;
+
+ExpressionBodyMember:
+	ownedRelatedElement += ExpressionBody
+;
+
+BodyParameterMember:
+	'in' ownedRelatedElement += BodyParameter
+;
+
+BodyParameter:
+	declaredName = Name
+;
+
+SequenceExpression:
+	ownedRelationship=OwnedExpression ( ',' |  operator = ',' operand += SequenceExpression)?
+;
+
+FeatureReferenceExpression:
+	ownedRelationship += FeatureReferenceMember
+;
+
+FeatureReferenceMember:
+	memberElement = QualifiedName
+;
+
+MetadataAccessExpression:
+	referencedElement = QualifiedName '.' 'metadata'
+;
+
+InvocationExpression:
+	ownedRelationship += OwnedFeatureTyping ArgumentList
+;
+
+OwnedFeatureChain:
+	feature=FeatureChain
+;
+
+FeatureChain:
+	ownedRelationship += OwnedFeatureChaining '.' ownedRelationship += OwnedFeatureChaining
+	( '.' ownedRelationship += OwnedFeatureChaining )*
+;
+
+OwnedFeatureChaining:
+	chainingFeature = QualifiedName
+;
+
+ArgumentList:
+	'(' ( PositionalArgumentList | NamedArgumentList )? ')'
+;
+
+PositionalArgumentList:
+	ownedRelationship += ArgumentMember
+	( ',' ownedRelationship += ArgumentMember )*
+;
+
+ArgumentMember:
+	ownedRelatedElement += Argument
+;
+
+Argument:
+	ownedRelationship += ArgumentValue
+;
+
+NamedArgumentList:
+	ownedRelationship += NamedArgumentMember
+	( ',' ownedRelationship += NamedArgumentMember )*
+;
+
+NamedArgumentMember:
+	ownedRelatedElement += NamedArgument
+;
+
+NamedArgument:
+	ownedRelationship += ParameterRedefinition '=' ownedRelationship += ArgumentValue
+;
+
+ParameterRedefinition:
+	redefinedFeature = QualifiedName
+;
+
+ArgumentValue:
+	ownedRelatedElement += OwnedExpression
+;
+
+NullExpression:
+	 ( 'null' | '(' ')' )
+;
+
+LiteralExpression:
+	  LiteralBoolean
+	| LiteralString
+	| LiteralReal
+	| LiteralInteger
+	| LiteralInfinity
+;
+
+LiteralBoolean:
+	value = BooleanValue
+;
+
+BooleanValue:
+	'true' | 'false'
+;
+
+LiteralString:
+	value = STRING_VALUE
+;
+
+LiteralInteger:
+	value = DECIMAL_VALUE
+;
+
+LiteralReal:
+	value = RealValue
+;
+
+RealValue:
+	DECIMAL_VALUE? '.' ( DECIMAL_VALUE | EXP_VALUE ) | EXP_VALUE
+;
+
+LiteralInfinity:
+	 value='*'
+;
+
+ReservedKeyword:
+  'about' | 'to' | 'connect' | 'connection' | 'from' | 'of' | 'then'
+;
+
+Name:
+	!ReservedKeyword ID | UNRESTRICTED_NAME
+;
+
+Qualification:
+	( '::' Name )+
+;
+
+QualifiedName:
+	name1=Name ( '::' names+=Name )*
+;
+
+DECIMAL_VALUE:
+   /[0-9]*/;
+
+EXP_VALUE:
+	DECIMAL_VALUE ('e' | 'E') ('+' | '-')? DECIMAL_VALUE;
+
+ID:
+   /[a-zA-Z_][a-zA-Z_0-9]*/;
+
+UNRESTRICTED_NAME:
+  
+  /[\'].*[\']/;
+
+STRING_VALUE:
+	
+  /[\"].*[\"]/;
+
+REGULAR_COMMENT:
+  /\/\*(.|\n)*?\*\//
+;
+
+Comment:
+  /\/\/.*$/
+;
+
+ML_NOTE:
+	/'\/*'->'*\/'/;
+
+SL_NOTE:
+	/'\/\/' (!('
+' | '
+') !('
+' | '
+')*)? ('
+'? '
+')?/;
+
+WS:
+	/(' ' | '	' | '
+' | '
+')+/;

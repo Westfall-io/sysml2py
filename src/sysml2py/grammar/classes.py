@@ -1503,28 +1503,22 @@ class FeatureValue:
             self.isDefault = definition["isDefault"]
             self.isInitial = definition["isInitial"]
             self.isEqual = definition["isEqual"]
-            self.elements = []
-            for element in definition["ownedRelatedElement"]:
-                self.elements.append(OwnedExpression(element))
+            self.element = OwnedExpression(definition["ownedRelatedElement"])
 
     def dump(self):
         output = []
         if self.isDefault:
             output.append("default")
-            if self.isEqual:
-                output.append("=")
-            elif self.isInitial:
-                output.append(":=")
-        else:
-            output.append('=')
-        for child in self.elements:
-            output.append(child.dump())
+        if self.isEqual:
+            output.append("=")
+        elif self.isInitial:
+            output.append(":=")
+        output.append(self.element.dump())
         return " ".join(output)
 
     def get_definition(self):
-        output = {"name": self.__class__.__name__, "ownedRelatedElement": []}
-        for child in self.elements:
-            output["ownedRelatedElement"].append(child.get_definition())
+        output = {"name": self.__class__.__name__}
+        output["ownedRelatedElement"] = self.element.get_definition()
         output["isEqual"] = self.isEqual
         output["isInitial"] = self.isInitial
         output["isDefault"] = self.isDefault
@@ -1799,7 +1793,7 @@ class AdditiveExpression:
                     self.right_hand.append(MultiplicativeExpression(
                         definition["operand"]
                     ))
-                
+
 
     def dump(self):
         if self.operator is None:
