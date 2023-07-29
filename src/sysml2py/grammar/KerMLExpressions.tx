@@ -47,7 +47,7 @@ OwnedExpressionReference :
 ;
 
 ConditionalExpression :
-	  operand += NullCoalescingExpression
+	  operand = NullCoalescingExpression
 	|  operator = ConditionalOperator operand += NullCoalescingExpression
 		  '?' operand += OwnedExpressionReference 'else' operand += OwnedExpressionReference
 ;
@@ -461,8 +461,8 @@ NullExpression :
 LiteralExpression :
 	  LiteralBoolean
 	| LiteralString
-	| LiteralInteger
 	| LiteralReal
+	| LiteralInteger
 	| LiteralInfinity
 ;
 
