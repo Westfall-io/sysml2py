@@ -1380,7 +1380,7 @@ class FeatureValue:
             self.isDefault = definition["isDefault"]
             self.isInitial = definition["isInitial"]
             self.isEqual = definition["isEqual"]
-            self.element =OwnedExpression(definition["ownedRelatedElement"])
+            self.element = OwnedExpression(definition["ownedRelatedElement"])
 
     def dump(self):
         output = ["="]
