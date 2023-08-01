@@ -975,6 +975,7 @@ def test_Training_Expressions_Car_Mass_Rollup_Example_2():
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
 
+
 def test_Training_Expressions_Mass_Rollup_1():
     text = """package MassRollup1 {
     	import NumericalFunctions::*;
@@ -998,7 +999,8 @@ def test_Training_Expressions_Mass_Rollup_1():
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
-    
+
+
 def test_Training_Expressions_Mass_Rollup_2():
     text = """package MassRollup2 {
     	import NumericalFunctions::*;
