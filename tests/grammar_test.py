@@ -975,6 +975,56 @@ def test_Training_Expressions_Car_Mass_Rollup_Example_2():
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
 
+def test_Training_Expressions_Mass_Rollup_1():
+    text = """package MassRollup1 {
+    	import NumericalFunctions::*;
+    	
+    	part def MassedThing {
+    		attribute simpleMass :> ISQ::mass; 
+    		attribute totalMass :> ISQ::mass;
+    	}
+    	
+    	part simpleThing : MassedThing {
+    		attribute :>> totalMass = simpleMass;
+    	}
+    	
+    	part compositeThing : MassedThing {
+    		part subcomponents: MassedThing[*];		
+    		attribute :>> totalMass =
+    			simpleMass + sum(subcomponents.totalMass); 
+    	}
+    	
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+    
+def test_Training_Expressions_Mass_Rollup_2():
+    text = """package MassRollup2 {
+    	import NumericalFunctions::*;
+    	
+    	part def MassedThing {
+    		attribute simpleMass :> ISQ::mass; 
+    		attribute totalMass :> ISQ::mass default simpleMass;
+    	}
+    	
+    	part compositeThing : MassedThing {
+    		part subcomponents: MassedThing[*];		
+    		attribute :>> totalMass default
+    			simpleMass + sum(subcomponents.totalMass); 
+    	}
+    	
+    	part filteredMassThing :> compositeThing {
+    		attribute minMass :> ISQ::mass;		
+    		attribute :>> totalMass =
+    			simpleMass + sum(subcomponents.totalMass.?{in p:>ISQ::mass; p >= minMass});
+    	}
+    
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+
 
 # 29. Calculations
 # 30. Constraints

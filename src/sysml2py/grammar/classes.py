@@ -1730,27 +1730,44 @@ class ClassificationExpression:
             "relational": self.relational.get_definition(),
         }
         return output
+    
+class RelationalOperand:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.operator = definition['operator']
+            self.operand = RangeExpression(definition['operand'])
+            
+    def dump(self):
+        return " ".join([self.operator, self.operand.dump()])
+        
+    def get_definition(self):
+        output = {
+            "name": self.__class__.__name__,
+            "operator": self.operator,
+            "operand": self.operand.get_definition(),
+        }
+        return output
 
 
 class RelationalExpression:
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
-            if definition["range"] is not None:
-                self.range = RangeExpression(definition["range"])
-            else:
-                raise NotImplementedError
-
-            if not (definition["operand"] == [] and definition["operator"] == []):
-                raise NotImplementedError
+            self.range = RangeExpression(definition["range"])
+            self.operations = []
+            for child in definition['operation']:
+                self.operations.append(RelationalOperand(child))
 
     def dump(self):
-        return self.range.dump()
+        output = [self.range.dump()]
+        for child in self.operations:
+            output.append(child.dump())
+            
+        return " ".join(output)
 
     def get_definition(self):
         output = {
             "name": self.__class__.__name__,
-            "operator": [],
-            "operand": [],
+            "operation": [x.get_definition() for x in self.operations],
             "range": self.range.get_definition(),
         }
         return output
@@ -1778,6 +1795,15 @@ class RangeExpression:
             "additive": self.additive.get_definition(),
         }
         return output
+    
+class AdditiveOperand:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.operator=definition['operator']
+            self.operand=MultiplicativeExpression(definition['operand'])
+            
+    def dump(self):
+        return "".join([self.operator, self.operand.dump()])
 
 
 class AdditiveExpression:
@@ -1785,32 +1811,25 @@ class AdditiveExpression:
         if valid_definition(definition, self.__class__.__name__):
             # This is the left hand statement
             self.left_hand = MultiplicativeExpression(definition["multiplicitive"])
-            self.right_hand = []
-            self.operator = []
-            if len(definition["operator"]) > 0:
-                for child in definition["operator"]:
-                    self.operator.append(child)
-                for child in definition["operand"]:
-                    self.right_hand.append(
-                        MultiplicativeExpression(definition["operand"])
-                    )
+            self.operations = []
+            print(definition)
+            if len(definition["operation"]) > 0:
+                for child in definition["operation"]:
+                    self.operations.append(AdditiveOperand(child))
 
     def dump(self):
-        if self.operator is None:
+        if len(self.operations)==0:
             return self.left_hand.dump()
         else:
             output = [self.left_hand.dump()]
-            for k, v in enumerate(self.operator):
-                output.append(v)
-                output.append(self.right_hand[k].dump())
+            output.append(" ".join([x.dump() for x in self.operations]))
             return " ".join(output)
 
     def get_definition(self):
         output = {
             "name": self.__class__.__name__,
-            "operator": self.operator,
-            "operand": self.right_hand,
             "multiplicitive": self.left_hand.get_definition(),
+            "operation": [x.get_definition() for x in self.operations]
         }
         return output
 
@@ -1915,10 +1934,7 @@ class ExtentExpression:
 class PrimaryExpression:
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
-            if definition["base"] is not None:
-                self.base = BaseExpression(definition["base"])
-            else:
-                raise NotImplementedError
+            self.base = BaseExpression(definition["base"])
 
             self.children1 = None
             self.children2 = None
@@ -1938,6 +1954,8 @@ class PrimaryExpression:
                 for child in definition["operand"]:
                     if child["name"] == "SequenceExpression":
                         self.operand.append(SequenceExpression(child))
+                    elif child["name"] == 'BodyExpression':
+                        self.operand.append(BodyExpression(child))
 
     def dump(self):
         output = [self.base.dump()]
@@ -1951,7 +1969,7 @@ class PrimaryExpression:
                 output.append("[{}]".format(self.operand[k].dump()))
 
             if v == "." or v == ".?":
-                raise NotImplementedError
+                output.append("{}{}".format(v,self.operand[k].dump()))
 
         if self.children2 is not None:
             output.append("." + self.children2.dump())
@@ -1979,6 +1997,33 @@ class PrimaryExpression:
         if self.children2 is not None:
             output["ownedRelationship2"].append(self.children2.get_definition())
         return output
+    
+class BodyExpression:
+    def __init__(self, definition):
+        self.children = None
+        if valid_definition(definition, self.__class__.__name__):
+            self.children = ExpressionBodyMember(definition['ownedRelationship'])
+                
+    def dump(self):
+        return self.children.dump()
+    
+class ExpressionBodyMember:
+    def __init__(self, definition):
+        self.children = None
+        if valid_definition(definition, self.__class__.__name__):
+            self.children = ExpressionBody(definition['ownedRelatedElement'])
+                
+    def dump(self):
+        return self.children.dump()
+    
+class ExpressionBody:
+    def __init__(self, definition):
+        self.children = None
+        if valid_definition(definition, self.__class__.__name__):
+            self.children = CalculationBody(definition['body'])
+                
+    def dump(self):
+        return self.children.dump()
 
 
 class FeatureChainMember:
@@ -2032,6 +2077,8 @@ class BaseExpression:
                 self.relationship = LiteralReal(definition["ownedRelationship"])
             elif definition["ownedRelationship"]["name"] == "SequenceExpression":
                 self.relationship = SequenceExpression(definition["ownedRelationship"])
+            elif definition["ownedRelationship"]["name"] == "InvocationExpression":
+                self.relationship = InvocationExpression(definition["ownedRelationship"])
             else:
                 print(definition["ownedRelationship"]["name"])
                 raise NotImplementedError
@@ -2049,7 +2096,108 @@ class BaseExpression:
         }
         return output
 
-
+class InvocationExpression:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.relationship = OwnedFeatureTyping(definition["ownedRelationship"])
+            self.children = ArgumentList(definition['arg_list'])
+            
+    def dump(self):
+        return "".join([self.relationship.dump(), self.children.dump()])
+    
+    
+class ArgumentList:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            if definition['pos_list'] is not None:
+                self.children = PositionalArgumentList(definition['pos_list'])
+            elif definition['named_list'] is not None:
+                # Only one, the other, or none
+                self.children = NamedArgumentList(definition['named_list'])
+            else:
+                self.children = None
+    
+    def dump(self):
+        output = ['(']
+        if self.children is not None:
+            output.append(self.children.dump())
+        output.append(')')
+        return "".join(output)
+    
+class PositionalArgumentList:
+    def __init__(self, definition):
+        self.children = []
+        if valid_definition(definition, self.__class__.__name__):
+            for child in definition['ownedRelationship']:
+                self.children.append(ArgumentMember(child))
+                
+    def dump(self):
+        return ",".join([x.dump() for x in self.children])
+    
+class ArgumentMember:
+    def __init__(self, definition):
+        self.children = None
+        if valid_definition(definition, self.__class__.__name__):
+            self.children = Argument(definition['ownedRelatedElement'])
+                
+    def dump(self):
+        return self.children.dump()
+    
+class Argument:
+    def __init__(self, definition):
+        self.children = None
+        if valid_definition(definition, self.__class__.__name__):
+                self.children = ArgumentValue(definition['ownedRelationship'])
+                
+    def dump(self):
+        return self.children.dump()
+    
+class ArgumentValue:
+    def __init__(self, definition):
+        self.children = None
+        if valid_definition(definition, self.__class__.__name__):
+            self.children = OwnedExpression(definition['ownedRelatedElement'])
+                
+    def dump(self):
+        return self.children.dump()
+    
+class NamedArgumentList:
+    def __init__(self, definition):
+        self.children = []
+        if valid_definition(definition, self.__class__.__name__):
+            for child in definition['ownedRelationship']:
+                self.children.append(NamedArgumentMember(child))
+                
+    def dump(self):
+        return ",".join([x.dump() for x in self.children])
+    
+class NamedArgumentMember:
+    def __init__(self, definition):
+        self.children = None
+        if valid_definition(definition, self.__class__.__name__):
+            self.children = NamedArgument(definition['ownedRelatedElement'])
+                
+    def dump(self):
+        return self.children.dump()
+    
+class NamedArgument:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.redefinition = ParameterRedefinition(definition['redefinition'])
+            self.value = ArgumentValue(definition['value'])
+                
+    def dump(self):
+        return "".join([self.redefinition.dump(), self.value.dump()])
+    
+class ParameterRedefinition:
+    def __init__(self, definition):
+        if valid_definition(definition, self.__class__.__name__):
+            self.children = QualifiedName(definition['redefinedFeature'])
+        
+    def dump(self):
+        return self.children.dump()
+            
+    
 class FeatureReferenceExpression:
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):

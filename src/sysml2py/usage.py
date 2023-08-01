@@ -405,8 +405,7 @@ class Attribute(Usage):
                 }
                 package_units = {
                     "name": "AdditiveExpression",
-                    "operand": [],
-                    "operator": [],
+                    "operation": [],
                     "multiplicitive": package_units,
                 }
                 package_units = {
@@ -417,8 +416,7 @@ class Attribute(Usage):
                 }
                 package_units = {
                     "name": "RelationalExpression",
-                    "operand": [],
-                    "operator": [],
+                    "operation": [],
                     "range": package_units,
                 }
                 package_units = {
@@ -523,8 +521,7 @@ class Attribute(Usage):
             }
             package = {
                 "name": "AdditiveExpression",
-                "operand": [],
-                "operator": [],
+                "operation": [],
                 "multiplicitive": package,
             }
             package = {
@@ -535,8 +532,7 @@ class Attribute(Usage):
             }
             package = {
                 "name": "RelationalExpression",
-                "operand": [],
-                "operator": [],
+                "operation": [],
                 "range": package,
             }
             package = {
