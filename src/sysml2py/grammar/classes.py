@@ -1509,10 +1509,12 @@ class FeatureValue:
         output = []
         if self.isDefault:
             output.append("default")
-        if self.isEqual:
-            output.append("=")
-        elif self.isInitial:
-            output.append(":=")
+            if self.isEqual:
+                output.append("=")
+            elif self.isInitial:
+                output.append(":=")
+        else:
+            output.append('=')
         output.append(self.element.dump())
         return " ".join(output)
 
@@ -1783,6 +1785,7 @@ class AdditiveExpression:
         if valid_definition(definition, self.__class__.__name__):
             # This is the left hand statement
             self.left_hand = MultiplicativeExpression(definition["multiplicitive"])
+            self.right_hand = []
             self.operator = []
             if len(definition["operator"]) > 0:
                 for child in definition["operator"]:
@@ -1805,9 +1808,9 @@ class AdditiveExpression:
     def get_definition(self):
         output = {
             "name": self.__class__.__name__,
-            "operator": [],
-            "operand": [],
-            "multiplicitive": self.multiplicitive.get_definition(),
+            "operator": self.operator,
+            "operand": self.right_hand,
+            "multiplicitive": self.left_hand.get_definition(),
         }
         return output
 
@@ -2987,7 +2990,7 @@ class Usage:
             self.completion = UsageCompletion()
 
     def dump(self):
-        return " ".join([self.declaration.dump(), self.completion.dump()])
+        return "".join([self.declaration.dump(), self.completion.dump()])
 
     def get_definition(self):
         output = {}

@@ -1171,12 +1171,13 @@ FlowEnd :
 ;
 
 FlowEndSubsetting :
-	  referencedFeature = QualifiedName '.'
-	| ownedRelatedElement += FeatureChainPrefix
+	  ownedRelatedElement += FeatureChainPrefix
+	| referencedFeature = QualifiedName '.'
 ;
 
 FeatureChainPrefix :
-	ownedRelationship += OwnedFeatureChaining['.']
+  ( ownedRelationship += OwnedFeatureChaining '.' )+
+  ownedRelationship += OwnedFeatureChaining '.'
 ;
 
 FlowFeatureMember :
@@ -2398,10 +2399,6 @@ RenderingUsage :
 ;
 
 /* EXPRESSIONS */
-
-BaseExpression :
-  be=[KerMLExpressions.BaseExpression]
-;
 
 ExpressionBody :
 	body=CalculationBody
