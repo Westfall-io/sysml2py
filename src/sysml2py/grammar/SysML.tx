@@ -386,7 +386,7 @@ DefinedByKeyword :
 ;
 
  Subsettings :
-	SubsetsKeyword ownedRelationship += OwnedSubsetting ( ',' ownedRelationship += OwnedSubsetting )*
+	SubsetsKeyword ownedRelationship += OwnedSubsetting[',']
 ;
 
 /* Subsets :
@@ -405,12 +405,18 @@ ReferencesKeyword :
 	'::>' | 'references'
 ;
 
+/*
+Removing original redefinitions, because it requires two OwnedRedefinition
  Redefinitions :
-	redefines=Redefines ( ',' ownedRelationship += OwnedRedefinition )*
+	redefines=Redefines ownedRelationship += OwnedRedefinition[',']
 ;
 
  Redefines :
 	RedefinesKeyword ownedRelationship += OwnedRedefinition
+;*/
+
+Redefinitions :
+ redefines=RedefinesKeyword ownedRelationship += OwnedRedefinition[',']
 ;
 
 RedefinesKeyword :
@@ -438,8 +444,8 @@ OwnedReferenceSubsetting :
 ;
 
 OwnedRedefinition :
-	  ownedRelatedElement += OwnedFeatureChain
-	| redefinedFeature = QualifiedName
+  redefinedFeature = QualifiedName
+  | ownedRelatedElement += OwnedFeatureChain
 ;
 
 /* Multiplicity */
@@ -1165,13 +1171,13 @@ FlowEnd :
 ;
 
 FlowEndSubsetting :
-	  referencedFeature = QualifiedName '.'
-	| ownedRelatedElement += FeatureChainPrefix
+	  ownedRelatedElement += FeatureChainPrefix
+	| referencedFeature = QualifiedName '.'
 ;
 
 FeatureChainPrefix :
-	( ownedRelationship += OwnedFeatureChaining '.' )+
-	ownedRelationship += OwnedFeatureChaining '.'
+  ( ownedRelationship += OwnedFeatureChaining '.' )+
+  ownedRelationship += OwnedFeatureChaining '.'
 ;
 
 FlowFeatureMember :
@@ -1915,27 +1921,27 @@ CalculationDefinition :
 ;
 
  CalculationBody :
-	';' | '{' CalculationBodyPart '}'
+	';' | '{' part+=CalculationBodyPart '}'
 ;
 
  CalculationBodyPart :
- CalculationBodyItem*
+ item += CalculationBodyItem*
 	( ownedRelationship += ResultExpressionMember )?
 ;
 
  CalculationBodyItem :
-	  ActionBodyItem
+	  item = ActionBodyItem
 	| ownedRelationship += ReturnParameterMember
 ;
 
 ReturnParameterMember :
-	MemberPrefix 'return'
+	prefix=MemberPrefix 'return'
 	ownedRelatedElement += UsageElement
 ;
 
 
 ResultExpressionMember :
-	MemberPrefix ownedRelatedElement += OwnedExpression
+	prefix=MemberPrefix ownedRelatedElement += OwnedExpression
 ;
 
 /* Calculation Usages */
@@ -1979,11 +1985,11 @@ ConstraintUsage :
 ;
 
 AssertConstraintUsage :
-	OccurrenceUsagePrefix 'assert' ( isNegated ?= 'not' )?
-    ( ownedRelationship += OwnedReferenceSubsetting FeatureSpecializationPart?
-    | ConstraintUsageKeyword UsageDeclaration?
+	prefix=OccurrenceUsagePrefix 'assert' ( isNegated ?= 'not' )?
+    ( ownedRelationship += OwnedReferenceSubsetting featurespecializationpart=FeatureSpecializationPart?
+    | ConstraintUsageKeyword declaration=UsageDeclaration?
     )
-    CalculationBody
+    body=CalculationBody
 ;
 
 /* REQUIREMENTS */
@@ -2394,7 +2400,6 @@ RenderingUsage :
 
 /* EXPRESSIONS */
 
-
 ExpressionBody :
-	CalculationBody
+	body=CalculationBody
 ;

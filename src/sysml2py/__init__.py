@@ -37,7 +37,7 @@ def enforce_grammar():
     return grammar
 
 
-def load_grammar(fp, debug=True, enforce=False):
+def load_grammar(fp, debug=False, enforce=False):
     """SysML load from file pointer
 
     Deserialize ``fp`` (a ``.read()``-supporting file-like object containing

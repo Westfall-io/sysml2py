@@ -211,8 +211,7 @@ class Usage:
                 if self.grammar.usage.declaration.declaration.specialization is None:
                     package = {
                         "name": "QualifiedName",
-                        "name1": typed.name,
-                        "names": [],
+                        "names": [typed.name],
                     }
                     package = {
                         "name": "FeatureType",
@@ -358,8 +357,7 @@ class Attribute(Usage):
             if str(value.unit) != "":
                 package_units = {
                     "name": "QualifiedName",
-                    "name1": str(value.unit),
-                    "names": [],
+                    "names": [str(value.unit)],
                 }
                 package_units = {
                     "name": "FeatureReferenceMember",
@@ -407,8 +405,7 @@ class Attribute(Usage):
                 }
                 package_units = {
                     "name": "AdditiveExpression",
-                    "operand": [],
-                    "operator": [],
+                    "operation": [],
                     "multiplicitive": package_units,
                 }
                 package_units = {
@@ -419,8 +416,7 @@ class Attribute(Usage):
                 }
                 package_units = {
                     "name": "RelationalExpression",
-                    "operand": [],
-                    "operator": [],
+                    "operation": [],
                     "range": package_units,
                 }
                 package_units = {
@@ -525,8 +521,7 @@ class Attribute(Usage):
             }
             package = {
                 "name": "AdditiveExpression",
-                "operand": [],
-                "operator": [],
+                "operation": [],
                 "multiplicitive": package,
             }
             package = {
@@ -537,8 +532,7 @@ class Attribute(Usage):
             }
             package = {
                 "name": "RelationalExpression",
-                "operand": [],
-                "operator": [],
+                "operation": [],
                 "range": package,
             }
             package = {
@@ -607,13 +601,13 @@ class Attribute(Usage):
         realpart = (
             self.grammar.usage.completion.valuepart.relationships[0]
             .element.expression.operands[0]
-            .implies.orexpression.xor.andexpression.equality.classification.relational.range.additive.multiplicitive.exponential.unary.extent.primary
+            .implies.orexpression.xor.andexpression.equality.classification.relational.range.additive.left_hand.exponential.unary.extent.primary
         )
         real = float(realpart.base.relationship.dump())
         unit = (
             realpart.operand[0]
             .child.expression.operands[0]
-            .implies.orexpression.xor.andexpression.equality.classification.relational.range.additive.multiplicitive.exponential.unary.extent.primary.base.relationship.children[
+            .implies.orexpression.xor.andexpression.equality.classification.relational.range.additive.left_hand.exponential.unary.extent.primary.base.relationship.children[
                 0
             ]
             .memberElement.dump()
