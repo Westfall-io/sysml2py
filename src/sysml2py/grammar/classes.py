@@ -1514,7 +1514,7 @@ class FeatureValue:
             elif self.isInitial:
                 output.append(":=")
         else:
-            output.append('=')
+            output.append("=")
         output.append(self.element.dump())
         return " ".join(output)
 
