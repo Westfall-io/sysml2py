@@ -1714,17 +1714,17 @@ StateDefKeyword :
 ;
 
 StateDefinition :
-	OccurrenceDefinitionPrefix StateDefKeyword DefinitionDeclaration StateDefBody
+	prefix=OccurrenceDefinitionPrefix StateDefKeyword declaration=DefinitionDeclaration body=StateDefBody
 ;
 
  StateDefBody :
-	';' | ( isParallel ?= 'parallel' )? '{' StateBodyPart '}'
+	';' | ( isParallel ?= 'parallel' )? '{' part=StateBodyPart '}'
 ;
 
  StateBodyPart :
 	// Note: Using a syntactic predicate here seems to avoid a possible infinite loop
 	// while incrementally parsing.
- StateBodyItem*
+ item+=StateBodyItem*
 ;
 
  StateBodyItem :
@@ -1746,7 +1746,7 @@ StateDefinition :
 ;
 
 EntryActionMember :
-	MemberPrefix kind = EntryActionKind ownedRelatedElement += StateActionUsage
+	prefix=MemberPrefix kind=EntryActionKind ownedRelatedElement=StateActionUsage
 ;
 
 EntryActionKind :
@@ -1754,7 +1754,7 @@ EntryActionKind :
 ;
 
 DoActionMember :
-	MemberPrefix kind = DoActionKind ownedRelatedElement += StateActionUsage
+	prefix=MemberPrefix kind=DoActionKind ownedRelatedElement=StateActionUsage
 ;
 
 DoActionKind :
@@ -1762,7 +1762,7 @@ DoActionKind :
 ;
 
 ExitActionMember :
-	MemberPrefix kind = ExitActionKind ownedRelatedElement += StateActionUsage
+	prefix=MemberPrefix kind=ExitActionKind ownedRelatedElement=StateActionUsage
 ;
 
 ExitActionKind :
