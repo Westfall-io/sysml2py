@@ -399,8 +399,7 @@ class Attribute(Usage):
                 }
                 package_units = {
                     "name": "MultiplicativeExpression",
-                    "operand": [],
-                    "operator": [],
+                    "operation": [],
                     "exponential": package_units,
                 }
                 package_units = {
@@ -515,8 +514,7 @@ class Attribute(Usage):
             }
             package = {
                 "name": "MultiplicativeExpression",
-                "operand": [],
-                "operator": [],
+                "operation": [],
                 "exponential": package,
             }
             package = {
