@@ -899,6 +899,47 @@ def test_Training_Action_Decomposition():
 # 21. Opaque Actions
 # 22. State Definitions
 # 23. States
+
+def test_Training_States_State_Actions():
+    text = """package 'State Actions' {
+	
+    	attribute def VehicleStartSignal;
+    	attribute def VehicleOnSignal;
+    	attribute def VehicleOffSignal;
+    	
+    	part def Vehicle;
+    	
+    	action performSelfTest { in vehicle : Vehicle; }
+    	
+    	state def VehicleStates { in operatingVehicle : Vehicle; }
+    		
+    	state vehicleStates : VehicleStates {
+    		in operatingVehicle : Vehicle;
+    			
+    		entry; then off;
+    		
+    		state off;
+    		accept VehicleStartSignal 
+    			then starting;
+    			
+    		state starting;
+    		accept VehicleOnSignal
+    			then on;
+    			
+    		state on {
+    			entry performSelfTest{ in vehicle = operatingVehicle; }
+    			do action providePower { /* ... */ }
+    			exit action applyParkingBrake { /* ... */ }
+    		}
+    		accept VehicleOffSignal
+    			then off;
+    	}
+    	
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+    
 # 24. Transitions
 # 25. State Exhibition
 # 26. Occurrences
