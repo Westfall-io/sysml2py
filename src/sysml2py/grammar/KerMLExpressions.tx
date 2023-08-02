@@ -261,9 +261,12 @@ AdditiveOperator :
 	'+' | '-'
 ;
 
+MultiplicativeOperand:
+  operator=MultiplicativeOperator operand=ExponentiationExpression
+;
+
 MultiplicativeExpression :
-	exponential=ExponentiationExpression (
-		operator = MultiplicativeOperator operand += ExponentiationExpression )*
+	exponential=ExponentiationExpression operation+=MultiplicativeOperand*
 ;
 
 MultiplicativeOperator :

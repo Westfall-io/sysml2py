@@ -1711,8 +1711,8 @@ CalculationDefKeyword:
 ;
 
 CalculationDefinition:
-	OccurrenceDefinitionPrefix CalculationDefKeyword DefinitionDeclaration
-	CalculationBody
+	prefix=OccurrenceDefinitionPrefix CalculationDefKeyword declaration=DefinitionDeclaration
+	body=CalculationBody
 ;
 
 CalculationBody:
@@ -1726,16 +1726,15 @@ CalculationBodyPart:
 
 CalculationBodyItem:
 	  item = ActionBodyItem
-	| ownedRelationship += ReturnParameterMember
+	| ownedRelationship = ReturnParameterMember
 ;
 
 ReturnParameterMember:
-	prefix=MemberPrefix 'return'
-	ownedRelatedElement += UsageElement
+	prefix=MemberPrefix 'return' ownedRelatedElement=UsageElement
 ;
 
 ResultExpressionMember:
-	prefix=MemberPrefix ownedRelatedElement += OwnedExpression
+	prefix=MemberPrefix ownedRelatedElement=OwnedExpression
 ;
 
 CalculationUsageKeyword:
@@ -1743,11 +1742,11 @@ CalculationUsageKeyword:
 ;
 
 CalculationUsage:
-	OccurrenceUsagePrefix CalculationUsageKeyword CalculationUsageDeclaration CalculationBody
+	prefix=OccurrenceUsagePrefix CalculationUsageKeyword declaration=CalculationUsageDeclaration body=CalculationBody
 ;
 
 CalculationUsageDeclaration:
-	  UsageDeclaration? ValuePart?
+	  declaration=UsageDeclaration? valuepart=ValuePart?
 ;
 
 ConstraintKeyword:
@@ -2664,8 +2663,7 @@ FunctionBodyPart:
 ;
 
 ReturnFeatureMember:
-	MemberPrefix 'return'
-	ownedRelatedElement += FeatureElement
+	MemberPrefix 'return' ownedRelatedElement += FeatureElement
 ;
 
 Expression:
@@ -2991,9 +2989,12 @@ AdditiveOperator:
 	'+' | '-'
 ;
 
+MultiplicativeOperand:
+  operator=MultiplicativeOperator operand=ExponentiationExpression
+;
+
 MultiplicativeExpression:
-	exponential=ExponentiationExpression (
-		operator = MultiplicativeOperator operand += ExponentiationExpression )*
+	exponential=ExponentiationExpression operation+=MultiplicativeOperand*
 ;
 
 MultiplicativeOperator:

@@ -936,8 +936,7 @@ Function :
 ;
 
 ReturnFeatureMember :
-	MemberPrefix 'return'
-	ownedRelatedElement += FeatureElement
+	MemberPrefix 'return' ownedRelatedElement += FeatureElement
 ;
 
 

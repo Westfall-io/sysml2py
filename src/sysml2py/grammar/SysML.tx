@@ -1916,8 +1916,8 @@ CalculationDefKeyword :
 ;
 
 CalculationDefinition :
-	OccurrenceDefinitionPrefix CalculationDefKeyword DefinitionDeclaration
-	CalculationBody
+	prefix=OccurrenceDefinitionPrefix CalculationDefKeyword declaration=DefinitionDeclaration
+	body=CalculationBody
 ;
 
  CalculationBody :
@@ -1931,17 +1931,15 @@ CalculationDefinition :
 
  CalculationBodyItem :
 	  item = ActionBodyItem
-	| ownedRelationship += ReturnParameterMember
+	| ownedRelationship = ReturnParameterMember
 ;
 
 ReturnParameterMember :
-	prefix=MemberPrefix 'return'
-	ownedRelatedElement += UsageElement
+	prefix=MemberPrefix 'return' ownedRelatedElement=UsageElement
 ;
 
-
 ResultExpressionMember :
-	prefix=MemberPrefix ownedRelatedElement += OwnedExpression
+	prefix=MemberPrefix ownedRelatedElement=OwnedExpression
 ;
 
 /* Calculation Usages */
@@ -1951,11 +1949,11 @@ CalculationUsageKeyword :
 ;
 
 CalculationUsage :
-	OccurrenceUsagePrefix CalculationUsageKeyword CalculationUsageDeclaration CalculationBody
+	prefix=OccurrenceUsagePrefix CalculationUsageKeyword declaration=CalculationUsageDeclaration body=CalculationBody
 ;
 
  CalculationUsageDeclaration :
-	  UsageDeclaration? ValuePart?
+	  declaration=UsageDeclaration? valuepart=ValuePart?
 ;
 
 /* CONSTRAINTS */
