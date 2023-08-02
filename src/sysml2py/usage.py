@@ -211,8 +211,7 @@ class Usage:
                 if self.grammar.usage.declaration.declaration.specialization is None:
                     package = {
                         "name": "QualifiedName",
-                        "name1": typed.name,
-                        "names": [],
+                        "names": [typed.name],
                     }
                     package = {
                         "name": "FeatureType",
@@ -358,8 +357,7 @@ class Attribute(Usage):
             if str(value.unit) != "":
                 package_units = {
                     "name": "QualifiedName",
-                    "name1": str(value.unit),
-                    "names": [],
+                    "names": [str(value.unit)],
                 }
                 package_units = {
                     "name": "FeatureReferenceMember",
@@ -401,14 +399,12 @@ class Attribute(Usage):
                 }
                 package_units = {
                     "name": "MultiplicativeExpression",
-                    "operand": [],
-                    "operator": [],
+                    "operation": [],
                     "exponential": package_units,
                 }
                 package_units = {
                     "name": "AdditiveExpression",
-                    "operand": [],
-                    "operator": [],
+                    "operation": [],
                     "multiplicitive": package_units,
                 }
                 package_units = {
@@ -419,8 +415,7 @@ class Attribute(Usage):
                 }
                 package_units = {
                     "name": "RelationalExpression",
-                    "operand": [],
-                    "operator": [],
+                    "operation": [],
                     "range": package_units,
                 }
                 package_units = {
@@ -519,14 +514,12 @@ class Attribute(Usage):
             }
             package = {
                 "name": "MultiplicativeExpression",
-                "operand": [],
-                "operator": [],
+                "operation": [],
                 "exponential": package,
             }
             package = {
                 "name": "AdditiveExpression",
-                "operand": [],
-                "operator": [],
+                "operation": [],
                 "multiplicitive": package,
             }
             package = {
@@ -537,8 +530,7 @@ class Attribute(Usage):
             }
             package = {
                 "name": "RelationalExpression",
-                "operand": [],
-                "operator": [],
+                "operation": [],
                 "range": package,
             }
             package = {
@@ -595,7 +587,7 @@ class Attribute(Usage):
                 "isDefault": False,
                 "isEqual": False,
                 "isInitial": False,
-                "ownedRelatedElement": [package],
+                "ownedRelatedElement": package,
             }
             package = {"name": "ValuePart", "ownedRelationship": [package]}
             self.grammar.usage.completion.valuepart = ValuePart(package)
@@ -606,15 +598,14 @@ class Attribute(Usage):
     def get_value(self):
         realpart = (
             self.grammar.usage.completion.valuepart.relationships[0]
-            .elements[0]
-            .expression.operands[0]
-            .implies.orexpression.xor.andexpression.equality.classification.relational.range.additive.multiplicitive.exponential.unary.extent.primary
+            .element.expression.operands[0]
+            .implies.orexpression.xor.andexpression.equality.classification.relational.range.additive.left_hand.exponential.unary.extent.primary
         )
         real = float(realpart.base.relationship.dump())
         unit = (
             realpart.operand[0]
             .child.expression.operands[0]
-            .implies.orexpression.xor.andexpression.equality.classification.relational.range.additive.multiplicitive.exponential.unary.extent.primary.base.relationship.children[
+            .implies.orexpression.xor.andexpression.equality.classification.relational.range.additive.left_hand.exponential.unary.extent.primary.base.relationship.children[
                 0
             ]
             .memberElement.dump()

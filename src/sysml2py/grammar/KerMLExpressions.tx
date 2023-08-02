@@ -47,7 +47,7 @@ OwnedExpressionReference :
 ;
 
 ConditionalExpression :
-	  operand += NullCoalescingExpression
+	  operand = NullCoalescingExpression
 	|  operator = ConditionalOperator operand += NullCoalescingExpression
 		  '?' operand += OwnedExpressionReference 'else' operand += OwnedExpressionReference
 ;
@@ -227,14 +227,16 @@ EmptyFeature ://This doesn't work.
 ;
 
 // Relational Expressions
+RelationalOperand:
+  operator=RelationalOperator operand=RangeExpression
+;
 
 RelationalExpression :
-	range=RangeExpression (
-		operator = RelationalOperator operand += RangeExpression )*
+	range=RangeExpression operation+=RelationalOperand*
 ;
 
 RelationalOperator :
-	'<' | '>' | '<=' | '>='
+	'<=' | '>=' | '<' | '>'
 ;
 
 // Range Expressions
@@ -246,18 +248,25 @@ RangeExpression :
 
 // Arithmetic Expressions
 
+AdditiveOperand:
+  operator=AdditiveOperator operand=MultiplicativeExpression
+;
+
 AdditiveExpression :
-	multiplicitive=MultiplicativeExpression (
-		operator = AdditiveOperator operand += MultiplicativeExpression )*
+	multiplicitive=MultiplicativeExpression
+  (operation+=AdditiveOperand)*
 ;
 
 AdditiveOperator :
 	'+' | '-'
 ;
 
+MultiplicativeOperand:
+  operator=MultiplicativeOperator operand=ExponentiationExpression
+;
+
 MultiplicativeExpression :
-	exponential=ExponentiationExpression (
-		operator = MultiplicativeOperator operand += ExponentiationExpression )*
+	exponential=ExponentiationExpression operation+=MultiplicativeOperand*
 ;
 
 MultiplicativeOperator :
@@ -330,9 +339,9 @@ FeatureChainMember :
 BaseExpression :
 	  ownedRelationship=NullExpression
 	| ownedRelationship=LiteralExpression
-	| ownedRelationship=FeatureReferenceExpression
-	| ownedRelationship=MetadataAccessExpression
 	| ownedRelationship=InvocationExpression
+  | ownedRelationship=FeatureReferenceExpression
+	| ownedRelationship=MetadataAccessExpression
 	| ownedRelationship=BodyExpression
 	| '(' ownedRelationship=SequenceExpression ')'
 ;
@@ -340,11 +349,11 @@ BaseExpression :
 // Expression Bodies
 
 BodyExpression :
-	ownedRelationship += ExpressionBodyMember
+	ownedRelationship = ExpressionBodyMember
 ;
 
 ExpressionBodyMember :
-	ownedRelatedElement += ExpressionBody
+	ownedRelatedElement = ExpressionBody
 ;
 
 // This default production is overridden in the KerML and SysML grammars.
@@ -390,7 +399,7 @@ MetadataAccessExpression :
 // Invocation Expressions
 
 InvocationExpression :
-	ownedRelationship += OwnedFeatureTyping ArgumentList
+	ownedRelationship=OwnedFeatureTyping arg_list=ArgumentList
 ;
 
 OwnedFeatureTyping :
@@ -413,33 +422,31 @@ OwnedFeatureChaining :
 ;
 
  ArgumentList :
-	'(' ( PositionalArgumentList | NamedArgumentList )? ')'
+	'(' ( pos_list=PositionalArgumentList | named_list=NamedArgumentList )? ')'
 ;
 
  PositionalArgumentList :
-	ownedRelationship += ArgumentMember
-	( ',' ownedRelationship += ArgumentMember )*
+	ownedRelationship += ArgumentMember[',']
 ;
 
 ArgumentMember :
-	ownedRelatedElement += Argument
+	ownedRelatedElement = Argument
 ;
 
 Argument :
-	ownedRelationship += ArgumentValue
+	ownedRelationship = ArgumentValue
 ;
 
  NamedArgumentList :
-	ownedRelationship += NamedArgumentMember
-	( ',' ownedRelationship += NamedArgumentMember )*
+	ownedRelationship += NamedArgumentMember[',']
 ;
 
 NamedArgumentMember :
-	ownedRelatedElement += NamedArgument
+	ownedRelatedElement = NamedArgument
 ;
 
 NamedArgument :
-	ownedRelationship += ParameterRedefinition '=' ownedRelationship += ArgumentValue
+	redefinition = ParameterRedefinition '=' value = ArgumentValue
 ;
 
 ParameterRedefinition :
@@ -447,7 +454,7 @@ ParameterRedefinition :
 ;
 
 ArgumentValue :
-	ownedRelatedElement += OwnedExpression
+	ownedRelatedElement = OwnedExpression
 ;
 
 // Null Expressions
@@ -461,8 +468,8 @@ NullExpression :
 LiteralExpression :
 	  LiteralBoolean
 	| LiteralString
-	| LiteralInteger
 	| LiteralReal
+	| LiteralInteger
 	| LiteralInfinity
 ;
 
@@ -497,7 +504,7 @@ LiteralInfinity :
 /* NAMES */
 
 ReservedKeyword:
-  'about' | 'to' | 'connect' | 'connection' | 'from' | 'of' | 'then'
+  'about' | /to[\s]/ | 'connect' | 'connection' | 'from' | 'of' | 'then'
 ;
 
 Name:
@@ -509,7 +516,8 @@ Qualification :
 ;
 
 QualifiedName:
-	name1=Name ( '::' names+=Name )*
+	//name1=Name ( '::' names+=Name )*
+  names+=Name['::']
 ;
 
 /* TERMINALS */

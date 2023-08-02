@@ -904,6 +904,238 @@ def test_Training_Action_Decomposition():
 # 26. Occurrences
 # 27. Individual
 # 28. Expressions
+def test_Training_Expressions_Car_Mass_Rollup_Example():
+    text = """package 'Car Mass Rollup Example 1' {
+    	import ScalarValues::*;
+    	import MassRollup1::*;
+    	
+    	part def CarPart :> MassedThing {			
+    		attribute serialNumber: String;
+    	}
+    	
+    	part car: CarPart :> compositeThing {	
+    		attribute vin :>> serialNumber;
+    		
+    		part carParts: CarPart[*] :>> subcomponents;
+    		
+    		part engine :> simpleThing, carParts;
+    		
+    		part transmission :> simpleThing, carParts;
+    	}
+    	
+    	import SI::kg;
+    	part c :> car {
+    		attribute :>> simpleMass = 1000[kg];
+    		part :>> engine {
+    			attribute :>> simpleMass = 100[kg];
+    		}
+    		
+    		part redefines transmission {
+    			attribute :>> simpleMass = 50[kg];
+    		}	
+    	}
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+
+
+def test_Training_Expressions_Car_Mass_Rollup_Example_2():
+    text = """package 'Car Mass Rollup 1' {
+    	import ScalarValues::*;
+    	import MassRollup2::*;
+    	
+    	part def CarPart :> MassedThing {			
+    		attribute serialNumber: String;
+    	}
+    	
+    	part car: CarPart :> compositeThing {	
+    		attribute vin :>> serialNumber;
+    		
+    		part carParts: CarPart[*] :>> subcomponents;
+    		
+    		part engine :> carParts;
+    		
+    		part transmission :> carParts;
+    	}
+    	
+    	import SI::kg;
+    	part c :> car {
+    		attribute :>> simpleMass = 1000[kg];
+    		part :>> engine {
+    			attribute :>> simpleMass = 100[kg];
+    		}
+    		
+    		part redefines transmission {
+    			attribute :>> simpleMass = 50[kg];
+    		}	
+    	}
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+
+
+def test_Training_Expressions_Mass_Rollup_1():
+    text = """package MassRollup1 {
+    	import NumericalFunctions::*;
+    	
+    	part def MassedThing {
+    		attribute simpleMass :> ISQ::mass; 
+    		attribute totalMass :> ISQ::mass;
+    	}
+    	
+    	part simpleThing : MassedThing {
+    		attribute :>> totalMass = simpleMass;
+    	}
+    	
+    	part compositeThing : MassedThing {
+    		part subcomponents: MassedThing[*];		
+    		attribute :>> totalMass =
+    			simpleMass + sum(subcomponents.totalMass); 
+    	}
+    	
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+
+
+def test_Training_Expressions_Mass_Rollup_2():
+    text = """package MassRollup2 {
+    	import NumericalFunctions::*;
+    	
+    	part def MassedThing {
+    		attribute simpleMass :> ISQ::mass; 
+    		attribute totalMass :> ISQ::mass default simpleMass;
+    	}
+    	
+    	part compositeThing : MassedThing {
+    		part subcomponents: MassedThing[*];		
+    		attribute :>> totalMass default
+    			simpleMass + sum(subcomponents.totalMass); 
+    	}
+    	
+    	part filteredMassThing :> compositeThing {
+    		attribute minMass :> ISQ::mass;		
+    		attribute :>> totalMass =
+    			simpleMass + sum(subcomponents.totalMass.?{in p:>ISQ::mass; p >= minMass});
+    	}
+    
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+
+
 # 29. Calculations
+def test_Training_Calculations_Calculation_Definitions():
+    text = """package 'Calculation Definitions' {
+    	import ScalarValues::Real;
+    	import ISQ::*;
+    	
+    	calc def Power { in whlpwr : PowerValue; in Cd : Real; in Cf : Real; in tm : MassValue; in v : SpeedValue;
+    		attribute drag = Cd * v;
+    		attribute friction = Cf * tm * v;
+    		
+    		return : PowerValue = whlpwr - drag - friction;
+    	}
+    	
+    	calc def Acceleration { in tp: PowerValue; in tm : MassValue; in v : SpeedValue;
+    		return : AccelerationValue = tp / (tm * v);
+    	}
+    	
+    	calc def Velocity { in dt : TimeValue; in v0 : SpeedValue; in a : AccelerationValue;
+    		return : SpeedValue = v0 + a * dt;
+     	}
+     	
+    	calc def Position { in dt : TimeValue; in x0 : LengthValue; in v : SpeedValue;
+    		return : LengthValue = x0 + v * dt;
+    	}
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+
+
+def test_Training_Calculations_Calculation_Usages_1():
+    text = """package 'Calculation Usages-1' {
+    	import 'Calculation Definitions'::*;
+    	
+    	part def VehicleDynamics {
+    		attribute C_d : Real;
+    		attribute C_f : Real;
+    		attribute wheelPower : PowerValue;
+    		attribute mass : MassValue;
+    		
+    		action straightLineDynamics {
+    			in delta_t : TimeValue;
+    			in v_in : SpeedValue;
+    			in x_in : LengthValue;
+    			out v_out : SpeedValue;
+    			out x_out : LengthValue;
+    		
+    			calc acc : Acceleration {
+    				in tp = Power(wheelPower, C_d, C_f, mass, v_in);
+    				in tm = mass;
+    				in v = v_in;
+    				return a;
+    			}
+    			
+    			calc vel : Velocity {
+    				in dt = delta_t;
+    				in v0 = v_in;
+    				in a = acc.a;
+    				return v = v_out;
+    			}
+    			
+    			calc pos : Position {
+    				in dt = delta_t;
+    				in x0 = x_in;
+    				in v0 = vel.v;
+    				return x = x_out;	
+    			}
+    		}
+    	} 
+    	
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+
+
+def test_Training_Calculations_Calculation_Usages_2():
+    text = """package 'Calculation Usages-2' {
+	import 'Calculation Definitions'::*;
+	
+	attribute def DynamicState {
+		attribute v: SpeedValue;
+		attribute x: LengthValue;
+	}
+	
+	part def VehicleDynamics {
+		attribute C_d : Real;
+		attribute C_f : Real;
+		attribute wheelPower : PowerValue;
+		attribute mass : MassValue;
+		
+		calc updateState { 
+			in delta_t : TimeValue; 
+			in currState : DynamicState;
+			attribute totalPower : PowerValue = Power(wheelPower, C_d, C_f, mass, currState.v);
+			
+			return attribute newState : DynamicState {
+				:>> v = Velocity(delta_t, currState.v, Acceleration(totalPower, mass, currState.v));
+				:>> x = Position(delta_t, currState.x, currState.v);
+			}
+		}
+	} 
+	
+}"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+
+
 # 30. Constraints
 # 31. Requirements

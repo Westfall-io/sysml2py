@@ -709,7 +709,7 @@ FeatureConjugation :
 
 FeatureValue :
 	( '=' | isDefault ?= 'default' ( '=' | isInitial ?= ':=' )? )
-	ownedRelatedElement += OwnedExpression
+	ownedRelatedElement = OwnedExpression
 ;
 
 FeatureValueExpression :
@@ -936,8 +936,7 @@ Function :
 ;
 
 ReturnFeatureMember :
-	MemberPrefix 'return'
-	ownedRelatedElement += FeatureElement
+	MemberPrefix 'return' ownedRelatedElement += FeatureElement
 ;
 
 
