@@ -165,18 +165,19 @@ class DefinitionElement:
         for item in self.children:
             output["ownedRelatedElement"] = item.get_definition()
         return output
-    
+
+
 class CalculationDefinition:
     def __init__(self, definition):
         self.prefix = None
-        self.keyword = 'calc def'
+        self.keyword = "calc def"
         if valid_definition(definition, self.__class__.__name__):
             if definition["prefix"] is not None:
-                self.prefix = OccurrenceDefinitionPrefix(definition['prefix'])
-            
-            self.declaration = DefinitionDeclaration(definition['declaration'])
-            self.body = CalculationBody(definition['body'])
-            
+                self.prefix = OccurrenceDefinitionPrefix(definition["prefix"])
+
+            self.declaration = DefinitionDeclaration(definition["declaration"])
+            self.body = CalculationBody(definition["body"])
+
     def dump(self):
         output = []
         if self.prefix is not None:
@@ -417,7 +418,9 @@ class CalculationBodyItem:
             if definition["item"] is not None:
                 self.children.append(ActionBodyItem(definition["item"]))
             else:
-                self.children.append(ReturnParameterMember(definition["ownedRelationship"]))
+                self.children.append(
+                    ReturnParameterMember(definition["ownedRelationship"])
+                )
 
     def dump(self):
         return "".join([x.dump() for x in self.children])
@@ -468,17 +471,18 @@ class BehaviorUsageElement:
 
     def dump(self):
         return self.children.dump()
-    
+
+
 class CalculationUsage:
     def __init__(self, definition):
-        self.prefix=None
-        self.keyword = 'calc'
+        self.prefix = None
+        self.keyword = "calc"
         if valid_definition(definition, self.__class__.__name__):
-            if definition['prefix'] is not None:
-                self.prefix = OccurrenceUsagePrefix(definition['prefix'])
-            self.declaration = CalculationUsageDeclaration(definition['declaration'])
-            self.body = CalculationBody(definition['body'])
-            
+            if definition["prefix"] is not None:
+                self.prefix = OccurrenceUsagePrefix(definition["prefix"])
+            self.declaration = CalculationUsageDeclaration(definition["declaration"])
+            self.body = CalculationBody(definition["body"])
+
     def dump(self):
         output = []
         if self.prefix is not None:
@@ -487,17 +491,18 @@ class CalculationUsage:
         output.append(self.declaration.dump())
         output.append(self.body.dump())
         return " ".join(output)
-    
+
+
 class CalculationUsageDeclaration:
     def __init__(self, definition):
         self.declaration = None
         self.valuepart = None
         if valid_definition(definition, self.__class__.__name__):
-            if definition['declaration'] is not None:
-                self.declaration = UsageDeclaration(definition['declaration'])
-            if definition['valuepart'] is not None:
-                self.valuepart = ValuePart(definition['valuepart'])
-            
+            if definition["declaration"] is not None:
+                self.declaration = UsageDeclaration(definition["declaration"])
+            if definition["valuepart"] is not None:
+                self.valuepart = ValuePart(definition["valuepart"])
+
     def dump(self):
         output = []
         if self.declaration is not None:
@@ -505,7 +510,7 @@ class CalculationUsageDeclaration:
         if self.valuepart is not None:
             output.append(self.valuepart.dump())
         return "".join(output)
-        
+
 
 class ActionUsage:
     def __init__(self, definition):
@@ -1890,15 +1895,16 @@ class AdditiveExpression:
         }
         return output
 
+
 class MultiplicativeOperand:
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
-            self.operator = definition['operator']
-            self.operand = ExponentiationExpression(definition['operand'])
-    
+            self.operator = definition["operator"]
+            self.operand = ExponentiationExpression(definition["operand"])
+
     def dump(self):
         return " ".join([self.operator, self.operand.dump()])
-    
+
     def get_definition(self):
         output = {
             "name": self.__class__.__name__,
@@ -1906,18 +1912,18 @@ class MultiplicativeOperand:
             "operand": self.operand.get_definition(),
         }
         return output
-        
+
 
 class MultiplicativeExpression:
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
             self.exponential = ExponentiationExpression(definition["exponential"])
             self.operators = []
-            for child in definition['operation']:
+            for child in definition["operation"]:
                 self.operators.append(MultiplicativeOperand(child))
 
     def dump(self):
-        return "".join([self.exponential.dump()]+[x.dump() for x in self.operators])
+        return "".join([self.exponential.dump()] + [x.dump() for x in self.operators])
 
     def get_definition(self):
         output = {

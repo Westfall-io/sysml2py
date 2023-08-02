@@ -1056,7 +1056,8 @@ def test_Training_Calculations_Calculation_Definitions():
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
-    
+
+
 def test_Training_Calculations_Calculation_Usages_1():
     text = """package 'Calculation Usages-1' {
     	import 'Calculation Definitions'::*;
@@ -1101,7 +1102,8 @@ def test_Training_Calculations_Calculation_Usages_1():
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
-    
+
+
 def test_Training_Calculations_Calculation_Usages_2():
     text = """package 'Calculation Usages-2' {
 	import 'Calculation Definitions'::*;
@@ -1133,6 +1135,7 @@ def test_Training_Calculations_Calculation_Usages_2():
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
+
 
 # 30. Constraints
 # 31. Requirements
