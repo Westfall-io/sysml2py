@@ -900,6 +900,7 @@ def test_Training_Action_Decomposition():
 # 22. State Definitions
 # 23. States
 
+
 def test_Training_States_State_Actions():
     text = """package 'State Actions' {
 	
@@ -939,7 +940,8 @@ def test_Training_States_State_Actions():
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
-    
+
+
 # 24. Transitions
 # 25. State Exhibition
 # 26. Occurrences
