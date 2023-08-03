@@ -37,7 +37,7 @@ def beautify(string):
             level += -1
 
         ns.append(level * "   " + line)
-        #print("\n\n\n\n-----\n{}|\n".format(line))
+        # print("\n\n\n\n-----\n{}|\n".format(line))
         if len(line) > 0:
             if line[-1] == "{":
                 # Last character is new bracket
@@ -150,9 +150,7 @@ class DefinitionElement:
                     CalculationDefinition(definition["ownedRelatedElement"])
                 )
             elif de == "StateDefinition":
-                self.children.append(
-                    StateDefinition(definition["ownedRelatedElement"])
-                )
+                self.children.append(StateDefinition(definition["ownedRelatedElement"]))
             else:
                 print(de)
                 raise NotImplementedError
@@ -171,17 +169,18 @@ class DefinitionElement:
             output["ownedRelatedElement"] = item.get_definition()
         return output
 
+
 class StateDefinition:
     def __init__(self, definition):
         self.prefix = None
         self.keyword = "state def"
         if valid_definition(definition, self.__class__.__name__):
-            if definition['prefix'] is not None:
-                self.prefix = OccurrenceDefinitionPrefix(definition['prefix'])
-                
-            self.declaration = DefinitionDeclaration(definition['declaration'])
-            self.body = StateDefBody(definition['body'])
-            
+            if definition["prefix"] is not None:
+                self.prefix = OccurrenceDefinitionPrefix(definition["prefix"])
+
+            self.declaration = DefinitionDeclaration(definition["declaration"])
+            self.body = StateDefBody(definition["body"])
+
     def dump(self):
         output = []
         if self.prefix is not None:
@@ -190,64 +189,68 @@ class StateDefinition:
         output.append(self.declaration.dump())
         output.append(self.body.dump())
         return " ".join(output)
-    
+
+
 class StateDefBody:
-#     StateDefBody :
-# 	';' | ( isParallel ?= 'parallel' )? '{' part=StateBodyPart '}'
-# ;
+    #     StateDefBody :
+    # 	';' | ( isParallel ?= 'parallel' )? '{' part=StateBodyPart '}'
+    # ;
     def __init__(self, definition):
         self.children = None
         if valid_definition(definition, self.__class__.__name__):
-            if definition['part'] is not None:
-                self.children = StateBodyPart(definition['part'])
-                self.isParallel = definition['isParallel']
-        
+            if definition["part"] is not None:
+                self.children = StateBodyPart(definition["part"])
+                self.isParallel = definition["isParallel"]
+
     def dump(self):
         if self.children is None:
-            return ';'
+            return ";"
         else:
             output = []
             if self.isParallel is not None:
                 if self.isParallel:
-                    output.append('parallel')
-            
-            output.append('{\n')
+                    output.append("parallel")
+
+            output.append("{\n")
             output.append(self.children.dump())
-            output.append('\n}')
+            output.append("\n}")
             return " ".join(output)
-            
+
+
 class StateBodyPart:
     def __init__(self, definition):
         self.children = []
         if valid_definition(definition, self.__class__.__name__):
-            for child in definition['item']:
+            for child in definition["item"]:
                 self.children.append(StateBodyItem(child))
-            
+
     def dump(self):
         return "\n".join([x.dump() for x in self.children])
-    
+
+
 class StateBodyItem:
     def __init__(self, definition):
         self.children = []
         if valid_definition(definition, self.__class__.__name__):
             for child in definition["ownedRelationship"]:
                 self.children.append(globals()[child["name"]](child))
-            
+
     def dump(self):
         return " ".join([x.dump() for x in self.children])
-    
+
+
 class StateUsage:
-	# prefix=OccurrenceUsagePrefix StateUsageKeyword 
+    # prefix=OccurrenceUsagePrefix StateUsageKeyword
     # declaration=ActionUsageDeclaration body=StateUsageBody
     def __init__(self, definition):
         self.prefix = None
-        self.keyword = 'state'
+        self.keyword = "state"
         if valid_definition(definition, self.__class__.__name__):
-            if definition['prefix'] is not None:
-                self.prefix = OccurrenceUsagePrefix(definition['prefix'])
-            self.declaration = ActionUsageDeclaration(definition['declaration'])
-            self.body = StateUsageBody(definition['body'])
-        
+            if definition["prefix"] is not None:
+                self.prefix = OccurrenceUsagePrefix(definition["prefix"])
+            self.declaration = ActionUsageDeclaration(definition["declaration"])
+            self.body = StateUsageBody(definition["body"])
+
     def dump(self):
         output = []
         if self.prefix is not None:
@@ -256,38 +259,41 @@ class StateUsage:
         output.append(self.declaration.dump())
         output.append(self.body.dump())
         return " ".join(output)
-    
+
+
 class StateUsageBody:
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
-            self.children = StateDefBody(definition['body'])
-            
+            self.children = StateDefBody(definition["body"])
+
     def dump(self):
         return self.children.dump()
-        
+
+
 class EntryActionMember:
     # EntryActionMember :
     # 	prefix=MemberPrefix EntryActionKind ownedRelatedElement=StateActionUsage
     # ;
     def __init__(self, definition):
         self.prefix = None
-        self.keyword = 'entry'
+        self.keyword = "entry"
         self.children = None
         if valid_definition(definition, self.__class__.__name__):
-            if definition['prefix'] is not None:
-                self.prefix=MemberPrefix(definition['prefix'])
-                
-            self.children = StateActionUsage(definition['ownedRelatedElement'])
-            
+            if definition["prefix"] is not None:
+                self.prefix = MemberPrefix(definition["prefix"])
+
+            self.children = StateActionUsage(definition["ownedRelatedElement"])
+
     def dump(self):
         output = []
         if self.prefix is not None:
             output.append(self.prefix.dump())
-            
+
         output.append(self.keyword)
         output.append(self.children.dump())
         return " ".join(output)
-    
+
+
 class StateActionUsage:
     # StateActionUsage :
     # 	';' | pau=PerformedActionUsage body=ActionBody
@@ -295,18 +301,19 @@ class StateActionUsage:
     def __init__(self, definition):
         self.body = None
         if valid_definition(definition, self.__class__.__name__):
-            if definition['body'] is not None:
-                self.body = ActionBody(definition['body'])
-            
-            if definition['pau'] is not None:
-                self.pau = PerformedActionUsage(definition['pau'])
-            
+            if definition["body"] is not None:
+                self.body = ActionBody(definition["body"])
+
+            if definition["pau"] is not None:
+                self.pau = PerformedActionUsage(definition["pau"])
+
     def dump(self):
         if self.body is None:
-            return ';'
+            return ";"
         else:
             return "".join([self.pau.dump(), self.body.dump()])
-        
+
+
 class PerformedActionUsage:
     # PerformedActionUsage :
     # 	   declaration=PerformActionUsageDeclaration
@@ -317,11 +324,14 @@ class PerformedActionUsage:
     def __init__(self, definition):
         self.declaration = None
         if valid_definition(definition, self.__class__.__name__):
-            self.declaration = globals()[definition['declaration']["name"]](definition['declaration'])
-    
+            self.declaration = globals()[definition["declaration"]["name"]](
+                definition["declaration"]
+            )
+
     def dump(self):
         return self.declaration.dump()
-    
+
+
 class EntryTransitionMember:
     # EntryTransitionMember :
     # 	prefix=MemberPrefix
@@ -331,26 +341,29 @@ class EntryTransitionMember:
     # ;
     def __init__(self, definition):
         self.prefix = None
-        self.body = ';'
+        self.body = ";"
         if valid_definition(definition, self.__class__.__name__):
-            if definition['prefix'] is not None:
-                self.prefix = MemberPrefix(definition['prefix'])
-            
-            if definition['ownedRelatedElement']['name'] == 'GuardedTargetSuccession':
-                self.children = GuardedTargetSuccession(definition['ownedRelatedElement'])
+            if definition["prefix"] is not None:
+                self.prefix = MemberPrefix(definition["prefix"])
+
+            if definition["ownedRelatedElement"]["name"] == "GuardedTargetSuccession":
+                self.children = GuardedTargetSuccession(
+                    definition["ownedRelatedElement"]
+                )
             else:
-                self.children = TransitionSuccession(definition['ownedRelatedElement'])
-                
+                self.children = TransitionSuccession(definition["ownedRelatedElement"])
+
     def dump(self):
         output = []
         if self.prefix is not None:
             output.append(self.prefix.dump())
-        if self.children.__class__.__name__ == 'TransitionSuccession':
-            output.append('then')
+        if self.children.__class__.__name__ == "TransitionSuccession":
+            output.append("then")
         output.append(self.children.dump())
         output.append(self.body)
         return " ".join(output)
-    
+
+
 class GuardedTargetSuccession:
     # GuardedTargetSuccession :
     # 	ownedRelationship += GuardExpressionMember
@@ -359,49 +372,53 @@ class GuardedTargetSuccession:
     def __init__(self, definition):
         self.children = []
         if valid_definition(definition, self.__class__.__name__):
-            for child in definition['ownedRelationship']:
-                if child['name'] == 'GuardExpressionMember':
+            for child in definition["ownedRelationship"]:
+                if child["name"] == "GuardExpressionMember":
                     self.children.append(GuardExpressionMember(child))
                 else:
                     self.children.append(TransitionSuccessionMember(child))
-            
+
     def dump(self):
         return " then ".join([x.dump() for x in self.children])
-    
+
+
 class GuardExpressionMember:
     # GuardExpressionMember :
     # 	GuardFeatureKind ownedRelatedElement=OwnedExpression
     # ;
     def __init__(self, definition):
-        self.keyword = 'if'
+        self.keyword = "if"
         if valid_definition(definition, self.__class__.__name__):
-            self.children = OwnedExpression(definition['ownedRelatedElement'])
-            
+            self.children = OwnedExpression(definition["ownedRelatedElement"])
+
     def dump(self):
         return " ".join([self.keyword, self.children.dump()])
-    
+
+
 class TransitionSuccessionMember:
     # TransitionSuccessionMember :
     # 	ownedRelatedElement = TransitionSuccession
     # ;
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
-            self.children = TransitionSuccession(definition['ownedRelatedElement'])
-            
+            self.children = TransitionSuccession(definition["ownedRelatedElement"])
+
     def dump(self):
         return self.children.dump()
-    
+
+
 class TransitionSuccession:
     # TransitionSuccession :
     # 	ownedRelationship = ConnectorEndMember
     # ;
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
-            self.children = ConnectorEndMember(definition['ownedRelationship'])
-            
+            self.children = ConnectorEndMember(definition["ownedRelationship"])
+
     def dump(self):
         return self.children.dump()
-    
+
+
 class TransitionUsageMember:
     # TransitionUsageMember :
     # 	prefix=MemberPrefix ownedRelatedElement=TransitionUsage
@@ -409,18 +426,19 @@ class TransitionUsageMember:
     def __init__(self, definition):
         self.prefix = None
         if valid_definition(definition, self.__class__.__name__):
-            if definition['prefix'] is not None:
-                self.prefix = MemberPrefix(definition['prefix'])
-                
-            self.children = TransitionUsage(definition['ownedRelatedElement'])
-            
+            if definition["prefix"] is not None:
+                self.prefix = MemberPrefix(definition["prefix"])
+
+            self.children = TransitionUsage(definition["ownedRelatedElement"])
+
     def dump(self):
         output = []
         if self.prefix is not None:
             output.append(self.prefix.dump())
         output.append(self.children.dump())
         return " ".join(output)
-    
+
+
 class TransitionUsage:
     # TransitionUsage :
     # 	TransitionUsageKeyword ( declaration=UsageDeclaration? 'first' )?
@@ -432,52 +450,54 @@ class TransitionUsage:
     # 	body=ActionBody
     # ;
     def __init__(self, definition):
-        self.keyword = 'transition'
+        self.keyword = "transition"
         self.declaration = None
         self.children = []
         if valid_definition(definition, self.__class__.__name__):
-            if definition['declaration'] is not None:
-                self.declaration=UsageDeclaration(definition['declaration'])
-                
-            self.body = ActionBody(definition['body'])
-            
-            for child in definition['ownedRelationship']:
-                if child['name'] == 'TransitionSourceMember':
+            if definition["declaration"] is not None:
+                self.declaration = UsageDeclaration(definition["declaration"])
+
+            self.body = ActionBody(definition["body"])
+
+            for child in definition["ownedRelationship"]:
+                if child["name"] == "TransitionSourceMember":
                     self.children.append(TransitionSourceMember(child))
-                elif child['name'] == 'TriggerActionMember':
+                elif child["name"] == "TriggerActionMember":
                     self.children.append(TriggerActionMember(child))
-                elif child['name'] == 'GuardExpressionMember':
+                elif child["name"] == "GuardExpressionMember":
                     self.children.append(GuardExpressionMember(child))
-                elif child['name'] == 'EffectBehaviorMember':
+                elif child["name"] == "EffectBehaviorMember":
                     self.children.append(EffectBehaviorMember(child))
                 else:
                     self.children.append(TransitionSuccessionMember(child))
-            
+
     def dump(self):
         output = [self.keyword]
         if self.declaration is not None:
             output.append(self.declaration.dump())
-            output.append('\n   first')
-        
+            output.append("\n   first")
+
         for child in self.children:
-            if child.__class__.__name__ == 'TransitionSuccessionMember':
-                output.append('\n   then')
+            if child.__class__.__name__ == "TransitionSuccessionMember":
+                output.append("\n   then")
             output.append(child.dump())
-        
+
         output.append(self.body.dump())
-        return ' '.join(output)
-    
+        return " ".join(output)
+
+
 class EffectBehaviorMember:
     # EffectBehaviorMember :
     # 	EffectFeatureKind ownedRelatedElement=EffectBehaviorUsage
     # ;
     def __init__(self, definition):
-        self.keyword = 'do'
+        self.keyword = "do"
         if valid_definition(definition, self.__class__.__name__):
-            self.children = EffectBehaviorUsage(definition['ownedRelatedElement'])
-        
+            self.children = EffectBehaviorUsage(definition["ownedRelatedElement"])
+
     def dump(self):
         return " ".join([self.keyword, self.children.dump()])
+
 
 class EffectBehaviorUsage:
     # EffectBehaviorUsage :
@@ -486,20 +506,20 @@ class EffectBehaviorUsage:
     def __init__(self, definition):
         self.children = []
         if valid_definition(definition, self.__class__.__name__):
-            self.usage = PerformedActionUsage(definition['usage'])
-            for item in definition['item']:
+            self.usage = PerformedActionUsage(definition["usage"])
+            for item in definition["item"]:
                 self.children.append(ActionBodyItem(item))
-            
-        
+
     def dump(self):
         output = [self.usage.dump()]
         if len(self.children) > 0:
-            output.append('{\n')
+            output.append("{\n")
             for child in self.children:
                 output.append(child.dump())
-            output.append('\n}')
+            output.append("\n}")
         return " ".join(output)
-    
+
+
 class TransitionSourceMember:
     # TransitionSourceMember :
     # 	  ownedRelatedElement += OwnedFeatureChain
@@ -508,55 +528,59 @@ class TransitionSourceMember:
     def __init__(self, definition):
         self.children = []
         if valid_definition(definition, self.__class__.__name__):
-            if definition['memberElement'] is not None:
-                self.children.append(QualifiedName(definition['memberElement']))
+            if definition["memberElement"] is not None:
+                self.children.append(QualifiedName(definition["memberElement"]))
             else:
-                for child in definition['ownedRelatedElement']:
+                for child in definition["ownedRelatedElement"]:
                     self.children.append(OwnedFeatureChain(child))
-        
+
     def dump(self):
         return "".join([x.dump() for x in self.children])
-    
+
+
 class TriggerActionMember:
     # TriggerActionMember :
     # 	TriggerFeatureKind ownedRelatedElement=TriggerAction
     # ;
     def __init__(self, definition):
-        self.keyword = 'accept'
+        self.keyword = "accept"
         if valid_definition(definition, self.__class__.__name__):
-            self.children = TriggerAction(definition['ownedRelatedElement'])
-        
+            self.children = TriggerAction(definition["ownedRelatedElement"])
+
     def dump(self):
         return " ".join([self.keyword, self.children.dump()])
-    
+
+
 class TriggerAction:
     # TriggerAction :
     # 	part=AcceptParameterPart
     # ;
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
-            self.children = AcceptParameterPart(definition['ownedRelatedElement'])
-        
+            self.children = AcceptParameterPart(definition["ownedRelatedElement"])
+
     def dump(self):
         return self.children.dump()
-    
+
+
 class AcceptParameterPart:
     # AcceptParameterPart :
-    # 	ownedRelationship += PayloadParameterMember 'via' 
+    # 	ownedRelationship += PayloadParameterMember 'via'
     #   ownedRelationship += NodeParameterMember
     # ;
     def __init__(self, definition):
-        self.keyword = 'via'
+        self.keyword = "via"
         self.children = []
         if valid_definition(definition, self.__class__.__name__):
-            for child in definition['ownedRelationship']:
-                if child['name'] == 'PayloadParameterMember':
+            for child in definition["ownedRelationship"]:
+                if child["name"] == "PayloadParameterMember":
                     self.children.append(PayloadParameterMember(child))
                 else:
                     self.children.append(NodeParameterMember(child))
-        
+
     def dump(self):
-        return (" "+self.keyword+" ").join([x.dump() for x in self.children])
+        return (" " + self.keyword + " ").join([x.dump() for x in self.children])
+
 
 class PayloadParameterMember:
     # PayloadParameterMember :
@@ -564,10 +588,11 @@ class PayloadParameterMember:
     # ;
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
-            self.children = PayloadParameter(definition['ownedRelatedElement'])
-        
+            self.children = PayloadParameter(definition["ownedRelatedElement"])
+
     def dump(self):
         return self.children.dump()
+
 
 class PayloadParameter:
     # PayloadParameter :
@@ -578,48 +603,51 @@ class PayloadParameter:
         self.identification = None
         self.pfsp = None
         if valid_definition(definition, self.__class__.__name__):
-            if definition['feature'] is not None:
-                self.children = PayloadFeature(definition['feature'])
+            if definition["feature"] is not None:
+                self.children = PayloadFeature(definition["feature"])
             else:
-                if definition['identification'] is not None:
-                    self.identification = Identification(definition['identification'])
-                
-                if definition['pfsp'] is not None:
-                    self.pfsp = PayloadFeatureSpecializationPart(definition['pfsp'])
-                
-                self.children = TriggerValuePart(definition['tvp'])
-        
+                if definition["identification"] is not None:
+                    self.identification = Identification(definition["identification"])
+
+                if definition["pfsp"] is not None:
+                    self.pfsp = PayloadFeatureSpecializationPart(definition["pfsp"])
+
+                self.children = TriggerValuePart(definition["tvp"])
+
     def dump(self):
         output = []
         if self.identification is not None:
             output.append(self.identification.dump())
         if self.pfsp is not None:
             output.append(self.pfsp.dump())
-        
+
         output.append(self.children.dump())
         return " ".join(output)
-    
+
+
 class TriggerValuePart:
     # TriggerValuePart :
     # 	ownedRelationship = TriggerFeatureValue
     # ;
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
-            self.children = TriggerFeatureValue(definition['ownedRelationship'])
-        
+            self.children = TriggerFeatureValue(definition["ownedRelationship"])
+
     def dump(self):
         return self.children.dump()
-    
+
+
 class TriggerFeatureValue:
     # TriggerFeatureValue :
     # 	ownedRelatedElement = TriggerExpression
     # ;
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
-            self.children = TriggerExpression(definition['ownedRelatedElement'])
-        
+            self.children = TriggerExpression(definition["ownedRelatedElement"])
+
     def dump(self):
         return self.children.dump()
+
 
 class TriggerExpression:
     # TriggerExpression :
@@ -631,32 +659,34 @@ class TriggerExpression:
     def __init__(self, definition):
         self.kind = None
         if valid_definition(definition, self.__class__.__name__):
-            if definition['ownedRelationship']['name'] == 'OwnedExpressionMember':
-                self.kind = TimeTriggerKind(definition['kind'])
-                self.children = OwnedExpressionMember(definition['ownedRelationship'])
+            if definition["ownedRelationship"]["name"] == "OwnedExpressionMember":
+                self.kind = TimeTriggerKind(definition["kind"])
+                self.children = OwnedExpressionMember(definition["ownedRelationship"])
             else:
-                self.kind = 'when'
-                self.children = ChangeExpressionMember(definition['ownedRelationship'])
-        
+                self.kind = "when"
+                self.children = ChangeExpressionMember(definition["ownedRelationship"])
+
     def dump(self):
         if isinstance(self.kind, str):
             kind = self.kind
         else:
             kind = self.kind.dump()
-            
-        return ' '.join([kind,self.children.dump()])
-            
+
+        return " ".join([kind, self.children.dump()])
+
+
 class TimeTriggerKind:
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
-            self.isAt = definition['isAt']
-            self.isAfter = definition['isAfter']
-            
+            self.isAt = definition["isAt"]
+            self.isAfter = definition["isAfter"]
+
     def dump(self):
         if self.isAt:
-            return 'at'
+            return "at"
         else:
-            return 'after'
+            return "after"
+
 
 class OwnedExpressionMember:
     # OwnedExpressionMember :
@@ -664,44 +694,50 @@ class OwnedExpressionMember:
     # ;
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
-            self.children = OwnedExpression(definition['ownedRelatedElement'])
-        
+            self.children = OwnedExpression(definition["ownedRelatedElement"])
+
     def dump(self):
         return self.children.dump()
-    
+
+
 class ChangeExpressionMember:
     # ChangeExpressionMember :
     # 	ownedRelatedElement = ChangeExpression
     # ;
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
-            self.children = ChangeExpression(definition['ownedRelatedElement'])
-        
+            self.children = ChangeExpression(definition["ownedRelatedElement"])
+
     def dump(self):
         return self.children.dump()
-    
+
+
 class ChangeExpression:
     # ChangeExpression :
     # 	ownedRelationship = ChangeResultExpressionMember
     # ;
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
-            self.children = ChangeResultExpressionMember(definition['ownedRelationship'])
-        
+            self.children = ChangeResultExpressionMember(
+                definition["ownedRelationship"]
+            )
+
     def dump(self):
         return self.children.dump()
-    
+
+
 class ChangeResultExpressionMember:
     # ChangeResultExpressionMember :
     # 	ownedRelatedElement = OwnedExpression
     # ;
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
-            self.children = OwnedExpression(definition['ownedRelatedElement'])
-        
+            self.children = OwnedExpression(definition["ownedRelatedElement"])
+
     def dump(self):
         return self.children.dump()
-    
+
+
 class CalculationDefinition:
     def __init__(self, definition):
         self.prefix = None
@@ -762,11 +798,15 @@ class ActionBodyItem:
     def __init__(self, definition):
         self.children = []
         if valid_definition(definition, self.__class__.__name__):
-            if isinstance(definition['ownedRelationship'], list):
-                for child in definition['ownedRelationship']:
+            if isinstance(definition["ownedRelationship"], list):
+                for child in definition["ownedRelationship"]:
                     self.children.append(globals()[child["name"]](child))
             else:
-                self.children.append(globals()[definition["ownedRelationship"]["name"]](definition["ownedRelationship"]))
+                self.children.append(
+                    globals()[definition["ownedRelationship"]["name"]](
+                        definition["ownedRelationship"]
+                    )
+                )
 
     def dump(self):
         output = []
@@ -779,21 +819,23 @@ class ActionBodyItem:
         if output[-1] == "\n":
             output = output[:-1]
         return "".join(output)
-    
+
+
 class ActionBodyItemTarget:
     # ActionBodyItemTarget :
     #     ( member=BehaviorUsageMember | member=ActionNodeMember )
     # ;
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
-            if definition['member']['name'] == 'BehaviorUsageMember':
+            if definition["member"]["name"] == "BehaviorUsageMember":
                 self.children = BehaviorUsageMember(definition["member"])
             else:
                 self.children = ActionNodeMember(definition["member"])
 
     def dump(self):
         return self.children.dump()
-    
+
+
 class ActionNodeMember:
     # ActionNodeMember :
     # 	prefix=MemberPrefix ownedRelatedElement = ActionNode
@@ -801,9 +843,9 @@ class ActionNodeMember:
     def __init__(self, definition):
         self.prefix = None
         if valid_definition(definition, self.__class__.__name__):
-            if definition['prefix'] is not None:
-                self.prefix = MemberPrefix(definition['prefix'])
-            self.children = ActionNode(definition['ownedRelatedElement'])
+            if definition["prefix"] is not None:
+                self.prefix = MemberPrefix(definition["prefix"])
+            self.children = ActionNode(definition["ownedRelatedElement"])
 
     def dump(self):
         output = []
@@ -811,7 +853,8 @@ class ActionNodeMember:
             output.append(self.prefix.dump())
         output.append(self.children.dump())
         return " ".join(output)
-    
+
+
 class ActionNode:
     # ActionNode :
     # 	  node=SendNode
@@ -825,10 +868,9 @@ class ActionNode:
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
             self.children = globals()[definition["node"]["name"]](definition["node"])
-            
+
     def dump(self):
         return self.children.dump()
-    
 
 
 class EmptySuccessionMember:

@@ -934,30 +934,31 @@ def test_Training_State_Definitions_State_Definition_Example():
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
-    
+
+
 # def test_Training_State_Definitions_State_Definition_Example_2():
 #     text = """package 'State Definition Example-2' {
-# 	
+#
 #     	attribute def VehicleStartSignal;
 #     	attribute def VehicleOnSignal;
 #     	attribute def VehicleOffSignal;
-    		
+
 #     	state def VehicleStates {
 #     		entry; then off;
-    		
+
 #     		state off;
-#     		accept VehicleStartSignal 
+#     		accept VehicleStartSignal
 #     			then starting;
-    			
+
 #     		state starting;
 #     		accept VehicleOnSignal
 #     			then on;
-    			
+
 #     		state on;
 #     		accept VehicleOffSignal
 #     			then off;
 #     	}
-    	
+
 #     }"""
 #     a = loads(text)
 #     b = classtree(a)
@@ -966,30 +967,30 @@ def test_Training_State_Definitions_State_Definition_Example():
 # 23. States
 # def test_Training_States_State_Actions():
 #     text = """package 'State Actions' {
-# 	
+#
 #     	attribute def VehicleStartSignal;
 #     	attribute def VehicleOnSignal;
 #     	attribute def VehicleOffSignal;
-    	
+
 #     	part def Vehicle;
-    	
+
 #     	action performSelfTest { in vehicle : Vehicle; }
-    	
+
 #     	state def VehicleStates { in operatingVehicle : Vehicle; }
-    		
+
 #     	state vehicleStates : VehicleStates {
 #     		in operatingVehicle : Vehicle;
-    			
+
 #     		entry; then off;
-    		
+
 #     		state off;
-#     		accept VehicleStartSignal 
+#     		accept VehicleStartSignal
 #     			then starting;
-    			
+
 #     		state starting;
 #     		accept VehicleOnSignal
 #     			then on;
-    			
+
 #     		state on {
 #     			entry performSelfTest{ in vehicle = operatingVehicle; }
 #     			do action providePower { /* ... */ }
@@ -998,11 +999,12 @@ def test_Training_State_Definitions_State_Definition_Example():
 #     		accept VehicleOffSignal
 #     			then off;
 #     	}
-    	
+
 #     }"""
 #     a = loads(text)
 #     b = classtree(a)
 #     assert strip_ws(text) == strip_ws(b.dump())
+
 
 # 24. Transitions
 # 25. State Exhibition
