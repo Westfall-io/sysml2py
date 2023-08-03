@@ -747,7 +747,6 @@ EmptySuccessionMember:
 
 EmptySuccession:
 	'then' ownedRelationship += MultiplicitySourceEndMember
-	(ownedRelationship += EmptyTargetEndMember)?
 ;
 
 MultiplicitySourceEndMember:
@@ -756,13 +755,6 @@ MultiplicitySourceEndMember:
 
 MultiplicitySourceEnd:
 	 ( ownedRelationship += OwnedMultiplicity )?
-;
-
-EmptyTargetEndMember:
-	ownedRelatedElement += EmptyTargetEnd
-;
-
-EmptyTargetEnd:	'emptytargetend'
 ;
 
 ItemKeyword:
@@ -1174,23 +1166,23 @@ ActionBody:
 ;
 
 ActionBodyItemTarget:
-    ( BehaviorUsageMember | ActionNodeMember )
+    ( member=BehaviorUsageMember | member=ActionNodeMember )
 ;
 
 ActionBodyItem:
-	  ownedRelationship += Import
-	| ownedRelationship += AliasMember
-	| ownedRelationship += DefinitionMember
-	| ownedRelationship += VariantUsageMember
+	  ownedRelationship = Import
+	| ownedRelationship = AliasMember
+	| ownedRelationship = DefinitionMember
+	| ownedRelationship = VariantUsageMember
 	| ( ownedRelationship += EmptySuccessionMember )?
-	  ownedRelationship += StructureUsageMember
-	| ownedRelationship += InitialNodeMember
-	  ( ownedRelationship += TargetSuccessionMember )*
+    ownedRelationship = StructureUsageMember
+	| ownedRelationship = InitialNodeMember
+	  ( target += TargetSuccessionMember )*
 	| ( ownedRelationship += EmptySuccessionMember )?
-	  ownedRelationship += ActionBodyItemTarget
-	  ( ownedRelationship += TargetSuccessionMember )*
-	| ownedRelationship += GuardedSuccessionMember
-	| ownedRelationship += NonOccurrenceUsageMember
+    ownedRelationship = ActionBodyItemTarget
+	  ( target += TargetSuccessionMember )*
+	| ownedRelationship = GuardedSuccessionMember
+	| ownedRelationship = NonOccurrenceUsageMember
 ;
 
 InitialNodeMember:
@@ -1199,7 +1191,7 @@ InitialNodeMember:
 ;
 
 ActionNodeMember:
-	MemberPrefix ownedRelatedElement += ActionNode
+	prefix=MemberPrefix ownedRelatedElement = ActionNode
 ;
 
 TargetSuccessionMember:
@@ -1233,9 +1225,13 @@ ActionUsageDeclaration:
 ;
 
 ActionNode:
-	  SendNode | AcceptNode | AssignmentNode
-	| IfNode | WhileLoopNode | ForLoopNode
-	| ControlNode
+	  node=SendNode
+  | node=AcceptNode
+  | node=AssignmentNode
+	| node=IfNode
+  | node=WhileLoopNode
+  | node=ForLoopNode
+	| node=ControlNode
 ;
 
 ActionNodeUsageDeclaration:
@@ -1255,38 +1251,36 @@ AcceptNodeDeclaration:
 ;
 
 AcceptParameterPart:
-	ownedRelationship += PayloadParameterMember
-	( 'via' ownedRelationship += NodeParameterMember
-	| ownedRelationship += EmptyParameterMember
-	)
+	ownedRelationship += PayloadParameterMember 'via'
+  ownedRelationship += NodeParameterMember
 ;
 
 PayloadParameterMember:
-	ownedRelatedElement += PayloadParameter
+	ownedRelatedElement = PayloadParameter
 ;
 
 PayloadParameter:
-	  PayloadFeature
-	| Identification? PayloadFeatureSpecializationPart? TriggerValuePart
+	  feature=PayloadFeature
+	| identification=Identification? pfsp=PayloadFeatureSpecializationPart? tvp=TriggerValuePart
 ;
 
 TriggerValuePart:
-	ownedRelationship += TriggerFeatureValue
+	ownedRelationship = TriggerFeatureValue
 ;
 
 TriggerFeatureValue:
-	ownedRelatedElement += TriggerExpression
+	ownedRelatedElement = TriggerExpression
 ;
 
 TriggerExpression:
 	  kind = TimeTriggerKind
-	  ownedRelationship += OwnedExpressionMember
-	| kind = ChangeTriggerKind
-	  ownedRelationship += ChangeExpressionMember
+	  ownedRelationship = OwnedExpressionMember
+	| ChangeTriggerKind
+	  ownedRelationship = ChangeExpressionMember
 ;
 
 TimeTriggerKind:
-	'at' | 'after'
+	isAt ?= 'at' | isAfter ?= 'after'
 ;
 
 ChangeTriggerKind:
@@ -1294,15 +1288,15 @@ ChangeTriggerKind:
 ;
 
 ChangeExpressionMember:
-	ownedRelatedElement += ChangeExpression
+	ownedRelatedElement = ChangeExpression
 ;
 
 ChangeExpression:
-	ownedRelationship += ChangeResultExpressionMember
+	ownedRelationship = ChangeResultExpressionMember
 ;
 
 ChangeResultExpressionMember:
-	ownedRelatedElement += OwnedExpression
+	ownedRelatedElement = OwnedExpression
 ;
 
 SendNode:
@@ -1337,30 +1331,8 @@ AssignmentNode:
 
 AssignmentNodeDeclaration:
 	ActionNodeUsageDeclaration? 'assign'
-	ownedRelationship += AssignmentTargetMember
 	ownedRelationship += FeatureChainMember ':='
 	ownedRelationship += NodeParameterMember
-;
-
-AssignmentTargetMember:
-	ownedRelatedElement += TargetParameter
-;
-
-TargetParameter:
-	( ownedRelationship += TargetBinding '.' )?
-	ownedRelationship += TargetFeatureMember
-;
-
-TargetFeatureMember:
-	ownedRelatedElement += TargetFeature
-;
-
-TargetFeature:
-	ownedRelationship += TargetAccessedFeatureMember
-;
-
-TargetAccessedFeatureMember:
-	ownedRelatedElement += EmptyUsage
 ;
 
 TargetBinding:
@@ -1408,7 +1380,7 @@ ActionBodyParameterMember:
 ;
 
 ActionBodyParameter:
-	 ( ActionUsageKeyword UsageDeclaration? )? '{' ActionBodyItem* '}'
+	 ( ActionUsageKeyword UsageDeclaration? )? '{' items+=ActionBodyItem* '}'
 ;
 
 IfNodeParameterMember:
@@ -1476,13 +1448,6 @@ ActionNodeBody:
 	';' | '{' ( ownedRelationship += AnnotatingMember )* '}'
 ;
 
-EmptyParameterMember:
-	ownedRelatedElement += EmptyUsage
-;
-
-EmptyUsage:	'emptyusage'
-;
-
 ActionTargetSuccession:
 	( TargetSuccession | GuardedTargetSuccession | DefaultTargetSuccession )
 	UsageBody
@@ -1494,18 +1459,17 @@ TargetSuccession:
 ;
 
 GuardedTargetSuccession:
-		ownedRelationship += GuardExpressionMember
+	ownedRelationship += GuardExpressionMember
 	'then' ownedRelationship += TransitionSuccessionMember
 ;
 
 DefaultTargetSuccession:
-		'else' ownedRelationship += TransitionSuccessionMember
+	'else' ownedRelationship += TransitionSuccessionMember
 ;
 
 GuardedSuccession:
 	( SuccessionKeyword UsageDeclaration )? 'first'
 	ownedRelationship += TransitionSourceMember
-	ownedRelationship += EmptyParameterMember
 	ownedRelationship += GuardExpressionMember
 	'then' ownedRelationship += TransitionSuccessionMember
 	UsageBody
@@ -1520,15 +1484,15 @@ StateDefKeyword:
 ;
 
 StateDefinition:
-	OccurrenceDefinitionPrefix StateDefKeyword DefinitionDeclaration StateDefBody
+	prefix=OccurrenceDefinitionPrefix StateDefKeyword declaration=DefinitionDeclaration body=StateDefBody
 ;
 
 StateDefBody:
-	';' | ( isParallel ?= 'parallel' )? '{' StateBodyPart '}'
+	';' | ( isParallel ?= 'parallel' )? '{' part=StateBodyPart '}'
 ;
 
 StateBodyPart:
-		 StateBodyItem*
+		 item+=StateBodyItem*
 ;
 
 StateBodyItem:
@@ -1538,9 +1502,9 @@ StateBodyItem:
 	| ownedRelationship += VariantUsageMember
 	| ownedRelationship += NonOccurrenceUsageMember
 	| ( ownedRelationship += EmptySuccessionMember )?
-	  ownedRelationship += StructureUsageMember
+    ownedRelationship += StructureUsageMember
 	| ( ownedRelationship += EmptySuccessionMember )?
-	  ownedRelationship += BehaviorUsageMember
+    ownedRelationship += BehaviorUsageMember
 	  ( ownedRelationship += TargetTransitionUsageMember )*
 	| ownedRelationship += TransitionUsageMember
 	| ownedRelationship += EntryActionMember
@@ -1550,7 +1514,7 @@ StateBodyItem:
 ;
 
 EntryActionMember:
-	MemberPrefix kind = EntryActionKind ownedRelatedElement += StateActionUsage
+	prefix=MemberPrefix EntryActionKind ownedRelatedElement=StateActionUsage
 ;
 
 EntryActionKind:
@@ -1558,7 +1522,7 @@ EntryActionKind:
 ;
 
 DoActionMember:
-	MemberPrefix kind = DoActionKind ownedRelatedElement += StateActionUsage
+	prefix=MemberPrefix kind=DoActionKind ownedRelatedElement=StateActionUsage
 ;
 
 DoActionKind:
@@ -1566,7 +1530,7 @@ DoActionKind:
 ;
 
 ExitActionMember:
-	MemberPrefix kind = ExitActionKind ownedRelatedElement += StateActionUsage
+	prefix=MemberPrefix kind=ExitActionKind ownedRelatedElement=StateActionUsage
 ;
 
 ExitActionKind:
@@ -1574,32 +1538,29 @@ ExitActionKind:
 ;
 
 EntryTransitionMember:
-	MemberPrefix
-	( ownedRelatedElement += GuardedTargetSuccession
-	| 'then' ownedRelatedElement += TransitionSuccession
+	prefix=MemberPrefix
+	( ownedRelatedElement=GuardedTargetSuccession
+	| 'then' ownedRelatedElement=TransitionSuccession
 	) ';'
 ;
 
 StateActionUsage:
-	EmptyActionUsage ';' | PerformedActionUsage ActionBody
-;
-
-EmptyActionUsage:	'emptyactionusage'
+	';' | pau=PerformedActionUsage body=ActionBody
 ;
 
 PerformedActionUsage:
-	   PerformActionUsageDeclaration
-	|  AcceptNodeDeclaration
-	|  SendNodeDeclaration
-	|  AssignmentNodeDeclaration
+	   declaration=PerformActionUsageDeclaration
+	|  declaration=AcceptNodeDeclaration
+	|  declaration=SendNodeDeclaration
+	|  declaration=AssignmentNodeDeclaration
 ;
 
 TransitionUsageMember:
-	MemberPrefix ownedRelatedElement += TransitionUsage
+	prefix=MemberPrefix ownedRelatedElement=TransitionUsage
 ;
 
 TargetTransitionUsageMember:
-	MemberPrefix ownedRelatedElement += TargetTransitionUsage
+	prefix=MemberPrefix ownedRelatedElement += TargetTransitionUsage
 ;
 
 StateUsageKeyword:
@@ -1607,11 +1568,11 @@ StateUsageKeyword:
 ;
 
 StateUsage:
-	OccurrenceUsagePrefix StateUsageKeyword ActionUsageDeclaration StateUsageBody
+	prefix=OccurrenceUsagePrefix StateUsageKeyword declaration=ActionUsageDeclaration body=StateUsageBody
 ;
 
 StateUsageBody:
-	';' | ( isParallel ?= 'parallel' )? '{' StateBodyPart '}'
+	body=StateDefBody
 ;
 
 ExhibitStateUsage:
@@ -1627,15 +1588,13 @@ TransitionUsageKeyword:
 ;
 
 TransitionUsage:
-	TransitionUsageKeyword ( UsageDeclaration? 'first' )?
+	TransitionUsageKeyword ( declaration=UsageDeclaration? 'first' )?
 	ownedRelationship += TransitionSourceMember
-	ownedRelationship += EmptyParameterMember
-	( ownedRelationship += EmptyParameterMember
-	  ownedRelationship += TriggerActionMember )?
+	( ownedRelationship += TriggerActionMember )?
 	( ownedRelationship += GuardExpressionMember )?
 	( ownedRelationship += EffectBehaviorMember )?
 	'then' ownedRelationship += TransitionSuccessionMember
-	ActionBody
+	body=ActionBody
 ;
 
 TargetTransitionUsage:
@@ -1662,7 +1621,7 @@ TransitionSourceMember:
 ;
 
 TriggerActionMember:
-	kind = TriggerFeatureKind ownedRelatedElement += TriggerAction
+	TriggerFeatureKind ownedRelatedElement=TriggerAction
 ;
 
 TriggerFeatureKind:
@@ -1670,11 +1629,11 @@ TriggerFeatureKind:
 ;
 
 TriggerAction:
-	AcceptParameterPart
+	part=AcceptParameterPart
 ;
 
 GuardExpressionMember:
-	kind = GuardFeatureKind ownedRelatedElement += OwnedExpression
+	GuardFeatureKind ownedRelatedElement=OwnedExpression
 ;
 
 GuardFeatureKind:
@@ -1682,7 +1641,7 @@ GuardFeatureKind:
 ;
 
 EffectBehaviorMember:
-	kind = EffectFeatureKind ownedRelatedElement += EffectBehaviorUsage
+	EffectFeatureKind ownedRelatedElement=EffectBehaviorUsage
 ;
 
 EffectFeatureKind:
@@ -1690,16 +1649,15 @@ EffectFeatureKind:
 ;
 
 EffectBehaviorUsage:
-	  EmptyActionUsage | PerformedActionUsage ( '{' ActionBodyItem* '}' )?
+	  usage=PerformedActionUsage ( '{' item+=ActionBodyItem* '}' )?
 ;
 
 TransitionSuccessionMember:
-	ownedRelatedElement += TransitionSuccession
+	ownedRelatedElement = TransitionSuccession
 ;
 
 TransitionSuccession:
-	ownedRelationship += EmptySourceEndMember
-	ownedRelationship += ConnectorEndMember
+	ownedRelationship = ConnectorEndMember
 ;
 
 CalculationKeyword:
@@ -2542,7 +2500,19 @@ EmptyFeatureWrite:
 	ownedRelationship += EmptyParameterMember
 ;
 
+TargetFeatureMember:
+	ownedRelatedElement += TargetFeature
+;
+
+TargetFeature:
+	ownedRelationship += EmptyFeatureMember
+;
+
 EmptyFeatureMember:
+	ownedRelatedElement += EmptyFeature
+;
+
+EmptyParameterMember:
 	ownedRelatedElement += EmptyFeature
 ;
 
@@ -2777,7 +2747,7 @@ MetadataBodyFeature:
 ;
 
 OwnedExpressionMember:
-	ownedRelatedElement += OwnedExpression
+	ownedRelatedElement = OwnedExpression
 ;
 
 OwnedExpression:
@@ -3192,7 +3162,7 @@ LiteralInfinity:
 ;
 
 ReservedKeyword:
-  'about' | /to[\s]/ | 'connect' | 'connection' | 'from' | 'of' | 'then'
+  'about' | /to[\s]/ | 'connect' | 'connection' | 'from' | /of[\s]/ | 'then' | 'entry'
 ;
 
 Name:
