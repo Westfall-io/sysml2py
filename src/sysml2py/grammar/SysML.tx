@@ -1420,16 +1420,15 @@ ActionNode :
 ;
 
 AcceptNode :
-	OccurrenceUsagePrefix AcceptNodeDeclaration ActionBody
+	prefix=OccurrenceUsagePrefix declaration=AcceptNodeDeclaration body=ActionBody
 ;
 
  AcceptNodeDeclaration :
-	ActionNodeUsageDeclaration? 'accept' AcceptParameterPart
+	declaration=ActionNodeUsageDeclaration? 'accept' part=AcceptParameterPart
 ;
 
  AcceptParameterPart :
-	ownedRelationship += PayloadParameterMember 'via'
-  ownedRelationship += NodeParameterMember
+	ownedRelationship += PayloadParameterMember ('via' ownedRelationship += NodeParameterMember)?
 ;
 
 PayloadParameterMember :
@@ -1483,12 +1482,8 @@ SendNode :
 
  SendNodeDeclaration :
 	ActionNodeUsageDeclaration? 'send' ownedRelationship += NodeParameterMember
-	( 'via' ownedRelationship += NodeParameterMember
-	| ownedRelationship += EmptyParameterMember
-	)
-	( 'to' ownedRelationship += NodeParameterMember
-	| ownedRelationship += EmptyParameterMember
-	)
+	( 'via' ownedRelationship += NodeParameterMember)
+	( 'to' ownedRelationship += NodeParameterMember)
 ;
 
 NodeParameterMember :
@@ -1569,9 +1564,7 @@ IfNodeParameterMember :
 
 WhileLoopNode :
 	ActionNodePrefix
-	( 'while' ownedRelationship += ExpressionParameterMember
-	| 'loop' ownedRelationship += EmptyParameterMember
-	)
+	( 'while' ownedRelationship += ExpressionParameterMember | 'loop')
 	ownedRelationship += ActionBodyParameterMember
 	( 'until' ownedRelationship += ExpressionParameterMember ';' )?
 ;
@@ -1751,7 +1744,7 @@ TransitionUsageMember :
 ;
 
 TargetTransitionUsageMember :
-	prefix=MemberPrefix ownedRelatedElement += TargetTransitionUsage
+	prefix=MemberPrefix ownedRelatedElement=TargetTransitionUsage
 ;
 
 /* State Usages */
@@ -1793,21 +1786,19 @@ TransitionUsage :
 ;
 
 TargetTransitionUsage :
-	ownedRelationship += EmptyParameterMember
-	( TransitionUsageKeyword
-	  ( ownedRelationship += EmptyParameterMember
-	    ownedRelationship += TriggerActionMember )?
-	  ( ownedRelationship += GuardExpressionMember )?
-	  ( ownedRelationship += EffectBehaviorMember )?
-	| ownedRelationship += EmptyParameterMember
-	  ownedRelationship += TriggerActionMember
-	  ( ownedRelationship += GuardExpressionMember )?
-	  ( ownedRelationship += EffectBehaviorMember )?
-	| ownedRelationship += GuardExpressionMember
-	  ( ownedRelationship += EffectBehaviorMember )?
-	)?
-	'then' ownedRelationship += TransitionSuccessionMember
-	ActionBody
+	TransitionUsageKeyword?
+	((
+    (ownedRelationship1 = TriggerActionMember)
+	  (ownedRelationship2 = GuardExpressionMember)?
+	  (ownedRelationship3 = EffectBehaviorMember)?
+  ) | (
+    (ownedRelationship2 = GuardExpressionMember)
+    (ownedRelationship3 = EffectBehaviorMember)?
+  ) | (
+    (ownedRelationship3 = EffectBehaviorMember)
+  ))
+	'then' ownedRelationship4 = TransitionSuccessionMember
+	body=ActionBody
 ;
 
 TransitionSourceMember :

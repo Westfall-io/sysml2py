@@ -225,18 +225,20 @@ class StateBodyPart:
                 self.children.append(StateBodyItem(child))
 
     def dump(self):
-        return "\n".join([x.dump() for x in self.children])
+        return "".join([x.dump() for x in self.children])
 
 
 class StateBodyItem:
     def __init__(self, definition):
         self.children = []
         if valid_definition(definition, self.__class__.__name__):
+            print(definition)
             for child in definition["ownedRelationship"]:
                 self.children.append(globals()[child["name"]](child))
 
     def dump(self):
-        return " ".join([x.dump() for x in self.children])
+        print([x.dump() for x in self.children])
+        return "\n".join([x.dump() for x in self.children])
 
 
 class StateUsage:
@@ -437,6 +439,72 @@ class TransitionUsageMember:
             output.append(self.prefix.dump())
         output.append(self.children.dump())
         return " ".join(output)
+    
+class TargetTransitionUsageMember:
+    # This is a special class version of the previous, but it assumes the
+    # previous node as a target
+    # TargetTransitionUsageMember :
+    # 	prefix=MemberPrefix ownedRelatedElement = TargetTransitionUsage
+    # ;
+    def __init__(self, definition):
+        self.prefix = None
+        if valid_definition(definition, self.__class__.__name__):
+            if definition['prefix'] is not None:
+                self.prefix = MemberPrefix(definition['prefix'])
+            self.children = TargetTransitionUsage(definition["ownedRelatedElement"])
+
+    def dump(self):
+        output = []
+        if self.prefix is not None:
+            output.append(self.prefix.dump())
+        output.append(self.children.dump())
+        return " ".join(output)
+    
+class TargetTransitionUsage:
+    # TargetTransitionUsage :
+    # 	TransitionUsageKeyword?
+    # 	(
+    #     (ownedRelationship1 = TriggerActionMember)
+    # 	  (ownedRelationship2 = GuardExpressionMember)?
+    # 	  (ownedRelationship3 = EffectBehaviorMember)?
+    #   ) | (
+    #     (ownedRelationship2 = GuardExpressionMember)
+    #     (ownedRelationship3 = EffectBehaviorMember)?
+    #   ) | (
+    #     (ownedRelationship3 = EffectBehaviorMember)
+    #   )
+    # 	'then' ownedRelationship4 = TransitionSuccessionMember
+    # 	body=ActionBody
+    # ;
+    # Here transition is optional
+    def __init__(self, definition):
+        self.children = []
+        if valid_definition(definition, self.__class__.__name__):
+            child = definition['ownedRelationship1']
+            if child is not None:
+                self.children.append(TriggerActionMember(child))
+                
+            child = definition['ownedRelationship2']
+            if child is not None:
+                self.children.append(GuardExpressionMember(child))
+            child = definition['ownedRelationship3']
+            if child is not None:
+                self.children.append(EffectBehaviorMember(child))
+            child = definition['ownedRelationship4']
+            if child is not None:
+                self.children.append(TransitionSuccessionMember(child))
+            
+            self.body = ActionBody(definition['body'])
+            
+    def dump(self):
+        output = []
+        # Skip the transition keyword here.
+        for child in self.children:
+            if child.__class__.__name__ == 'TransitionSuccessionMember':
+                output.append('\n   then')
+            output.append(child.dump())
+        output.append(self.body.dump())
+        return " ".join(output)
 
 
 class TransitionUsage:
@@ -557,7 +625,7 @@ class TriggerAction:
     # ;
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
-            self.children = AcceptParameterPart(definition["ownedRelatedElement"])
+            self.children = AcceptParameterPart(definition["part"])
 
     def dump(self):
         return self.children.dump()

@@ -504,7 +504,7 @@ LiteralInfinity :
 /* NAMES */
 
 ReservedKeyword:
-  'about' | /to[\s]/ | 'connect' | 'connection' | 'from' | /of[\s]/ | 'then' | 'entry'
+  'about' | /to[\s]/ | 'connect' | 'connection' | 'from' | /of[\s]/ | 'then' | 'entry' | /accept[\s]/
 ;
 
 Name:

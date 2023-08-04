@@ -936,33 +936,33 @@ def test_Training_State_Definitions_State_Definition_Example():
     assert strip_ws(text) == strip_ws(b.dump())
 
 
-# def test_Training_State_Definitions_State_Definition_Example_2():
-#     text = """package 'State Definition Example-2' {
-#
-#     	attribute def VehicleStartSignal;
-#     	attribute def VehicleOnSignal;
-#     	attribute def VehicleOffSignal;
+def test_Training_State_Definitions_State_Definition_Example_2():
+    text = """package 'State Definition Example-2' {
 
-#     	state def VehicleStates {
-#     		entry; then off;
+     	attribute def VehicleStartSignal;
+     	attribute def VehicleOnSignal;
+     	attribute def VehicleOffSignal;
 
-#     		state off;
-#     		accept VehicleStartSignal
-#     			then starting;
+     	state def VehicleStates {
+    		entry; then off;
 
-#     		state starting;
-#     		accept VehicleOnSignal
-#     			then on;
+    		state off;
+    		accept VehicleStartSignal
+     			then starting;
 
-#     		state on;
-#     		accept VehicleOffSignal
-#     			then off;
-#     	}
+    		state starting;
+    		accept VehicleOnSignal
+     			then on;
 
-#     }"""
-#     a = loads(text)
-#     b = classtree(a)
-#     assert strip_ws(text) == strip_ws(b.dump())
+    		state on;
+    		accept VehicleOffSignal
+     			then off;
+     	}
+
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
 
 # 23. States
 # def test_Training_States_State_Actions():
