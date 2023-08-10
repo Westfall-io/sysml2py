@@ -34,7 +34,7 @@ pythonpath = [
   "src"
 ]
 
-[[tool.semantic_release]
+[tool.semantic_release]
 version_variable = [
     "src/sysml2py/__init__.py:version",
 ]

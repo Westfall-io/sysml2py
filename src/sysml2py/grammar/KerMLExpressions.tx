@@ -33,7 +33,7 @@
 /* Operator Expressions */
 
 OwnedExpressionMember :
-	ownedRelatedElement += OwnedExpression
+	ownedRelatedElement = OwnedExpression
 ;
 
 OwnedExpression :
@@ -504,7 +504,7 @@ LiteralInfinity :
 /* NAMES */
 
 ReservedKeyword:
-  'about' | /to[\s]/ | 'connect' | 'connection' | 'from' | 'of' | 'then'
+  'about' | /to[\s]/ | 'connect' | 'connection' | 'from' | /of[\s]/ | 'then' | 'entry' | /accept[\s]/ | /do[\s]/ | /exit[\s]/ | /action[\s]/
 ;
 
 Name:
