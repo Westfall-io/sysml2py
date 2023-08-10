@@ -1005,7 +1005,8 @@ def test_Training_States_State_Actions():
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
-    
+
+
 def test_Training_States_State_Decomp1():
     text = """package 'State Decomposition-1' {
     	
@@ -1035,7 +1036,8 @@ def test_Training_States_State_Decomp1():
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
-    
+
+
 def test_Training_States_State_Decomp2():
     text = """package 'State Decomposition-1' {
 	

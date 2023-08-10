@@ -269,19 +269,20 @@ class StateUsageBody:
 
     def dump(self):
         return self.children.dump()
-    
+
+
 class DoActionMember:
     # DoActionMember :
     # 	prefix=MemberPrefix DoActionKind ownedRelatedElement=StateActionUsage
     # ;
     def __init__(self, definition):
         self.prefix = None
-        self.keyword = 'do'
+        self.keyword = "do"
         if valid_definition(definition, self.__class__.__name__):
-            if definition['prefix'] is not None:
-                self.prefix = MemberPrefix(definition['prefix'])
-                
-            self.children = StateActionUsage(definition['ownedRelatedElement'])
+            if definition["prefix"] is not None:
+                self.prefix = MemberPrefix(definition["prefix"])
+
+            self.children = StateActionUsage(definition["ownedRelatedElement"])
 
     def dump(self):
         output = []
@@ -290,19 +291,20 @@ class DoActionMember:
         output.append(self.keyword)
         output.append(self.children.dump())
         return " ".join(output)
-    
+
+
 class ExitActionMember:
     # ExitActionMember :
     # 	prefix=MemberPrefix DoActionKind ownedRelatedElement=StateActionUsage
     # ;
     def __init__(self, definition):
         self.prefix = None
-        self.keyword = 'exit'
+        self.keyword = "exit"
         if valid_definition(definition, self.__class__.__name__):
-            if definition['prefix'] is not None:
-                self.prefix = MemberPrefix(definition['prefix'])
-                
-            self.children = StateActionUsage(definition['ownedRelatedElement'])
+            if definition["prefix"] is not None:
+                self.prefix = MemberPrefix(definition["prefix"])
+
+            self.children = StateActionUsage(definition["ownedRelatedElement"])
 
     def dump(self):
         output = []
@@ -311,6 +313,7 @@ class ExitActionMember:
         output.append(self.keyword)
         output.append(self.children.dump())
         return " ".join(output)
+
 
 class EntryActionMember:
     # EntryActionMember :
@@ -372,7 +375,8 @@ class PerformedActionUsage:
 
     def dump(self):
         return self.declaration.dump()
-    
+
+
 class PerformActionUsageDeclaration:
     # PerformActionUsageDeclaration :
     #    	( ownedRelationship = OwnedReferenceSubsetting fspart=FeatureSpecializationPart?
@@ -383,32 +387,35 @@ class PerformActionUsageDeclaration:
         self.valuepart = None
         self.children = []
         if valid_definition(definition, self.__class__.__name__):
-            if definition['ownedRelationship'] is not None:
+            if definition["ownedRelationship"] is not None:
                 print(definition)
-                self.children.append(OwnedReferenceSubsetting(definition['ownedRelationship']))
-                if definition['fspart'] is not None:
-                    self.children.append(FeatureSpecializationPart(definition['fspart']))
+                self.children.append(
+                    OwnedReferenceSubsetting(definition["ownedRelationship"])
+                )
+                if definition["fspart"] is not None:
+                    self.children.append(
+                        FeatureSpecializationPart(definition["fspart"])
+                    )
             else:
-                if definition['declaration'] is not None:
-                    self.children.append(UsageDeclaration(definition['declaration']))
-            
-            if definition['valuepart'] is not None:
-                self.valuepart = ValuePart(definition['valuepart'])
+                if definition["declaration"] is not None:
+                    self.children.append(UsageDeclaration(definition["declaration"]))
+
+            if definition["valuepart"] is not None:
+                self.valuepart = ValuePart(definition["valuepart"])
 
     def dump(self):
         if self.valuepart is not None:
-            vpdump = " "+self.valuepart.dump()
+            vpdump = " " + self.valuepart.dump()
         else:
             vpdump = ""
-            
-        if len(self.children) == 0:
-            return 'action'+vpdump
-        else:
-            if self.children[0].__class__.__name__ == 'UsageDeclaration':
-                return 'action '+self.children[0].dump()+vpdump
-            else:
-                return " ".join([x.dump() for x in self.children])+vpdump
 
+        if len(self.children) == 0:
+            return "action" + vpdump
+        else:
+            if self.children[0].__class__.__name__ == "UsageDeclaration":
+                return "action " + self.children[0].dump() + vpdump
+            else:
+                return " ".join([x.dump() for x in self.children]) + vpdump
 
 
 class EntryTransitionMember:
