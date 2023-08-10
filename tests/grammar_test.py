@@ -965,45 +965,112 @@ def test_Training_State_Definitions_State_Definition_Example_2():
     assert strip_ws(text) == strip_ws(b.dump())
 
 # 23. States
-# def test_Training_States_State_Actions():
-#     text = """package 'State Actions' {
-#
-#     	attribute def VehicleStartSignal;
-#     	attribute def VehicleOnSignal;
-#     	attribute def VehicleOffSignal;
+def test_Training_States_State_Actions():
+    text = """package 'State Actions' {
 
-#     	part def Vehicle;
+     	attribute def VehicleStartSignal;
+     	attribute def VehicleOnSignal;
+     	attribute def VehicleOffSignal;
 
-#     	action performSelfTest { in vehicle : Vehicle; }
+     	part def Vehicle;
 
-#     	state def VehicleStates { in operatingVehicle : Vehicle; }
+     	action performSelfTest { in vehicle : Vehicle; }
 
-#     	state vehicleStates : VehicleStates {
-#     		in operatingVehicle : Vehicle;
+     	state def VehicleStates { in operatingVehicle : Vehicle; }
 
-#     		entry; then off;
+     	state vehicleStates : VehicleStates {
+    		in operatingVehicle : Vehicle;
 
-#     		state off;
-#     		accept VehicleStartSignal
-#     			then starting;
+    		entry; then off;
 
-#     		state starting;
-#     		accept VehicleOnSignal
-#     			then on;
+    		state off;
+    		accept VehicleStartSignal
+     			then starting;
 
-#     		state on {
-#     			entry performSelfTest{ in vehicle = operatingVehicle; }
-#     			do action providePower { /* ... */ }
-#     			exit action applyParkingBrake { /* ... */ }
-#     		}
-#     		accept VehicleOffSignal
-#     			then off;
-#     	}
+    		state starting;
+    		accept VehicleOnSignal
+     			then on;
 
-#     }"""
-#     a = loads(text)
-#     b = classtree(a)
-#     assert strip_ws(text) == strip_ws(b.dump())
+    		state on {
+     			entry performSelfTest{ in vehicle = operatingVehicle; }
+     			do action providePower { /* ... */ }
+     			exit action applyParkingBrake { /* ... */ }
+    		}
+    		accept VehicleOffSignal
+     			then off;
+     	}
+
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+    
+def test_Training_States_State_Decomp1():
+    text = """package 'State Decomposition-1' {
+    	
+    	attribute def VehicleStartSignal;
+    	attribute def VehicleOnSignal;
+    	attribute def VehicleOffSignal;
+    	
+    	state def VehicleStates;
+    		
+    	state vehicleStates : VehicleStates {
+    		entry; then off;
+    		
+    		state off;
+    		accept VehicleStartSignal 
+    			then starting;
+    			
+    		state starting;
+    		accept VehicleOnSignal
+    			then on;
+    			
+    		state on;
+    		accept VehicleOffSignal
+    			then off;
+    	}
+    	
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+    
+def test_Training_States_State_Decomp2():
+    text = """package 'State Decomposition-1' {
+	
+    	attribute def VehicleStartSignal;
+    	attribute def VehicleOnSignal;
+    	attribute def VehicleOffSignal;
+    	
+    	state def VehicleStates;
+    		
+    	state vehicleStates : VehicleStates parallel {
+    		
+    		state operationalStates {
+    			entry; then off;
+    			
+    			state off;
+    			accept VehicleStartSignal 
+    				then starting;
+    				
+    			state starting;
+    			accept VehicleOnSignal
+    				then on;
+    				
+    			state on;
+    			accept VehicleOffSignal
+    				then off;
+    		}
+    		
+    		state healthStates { 
+    			/* ... */
+    		}
+    	}
+    	
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
 
 
 # 24. Transitions

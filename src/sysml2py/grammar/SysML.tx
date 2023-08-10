@@ -1386,13 +1386,13 @@ ActionUsage :
 ;
 
 PerformActionUsage :
-	OccurrenceUsagePrefix 'perform' PerformActionUsageDeclaration ActionBody
+	prefix=OccurrenceUsagePrefix 'perform' declaration=PerformActionUsageDeclaration body=ActionBody
 ;
 
  PerformActionUsageDeclaration :
-   	( ownedRelationship += OwnedReferenceSubsetting FeatureSpecializationPart?
-   	| ActionUsageKeyword UsageDeclaration? )
-    ValuePart?
+   	( ownedRelationship = OwnedReferenceSubsetting fspart=FeatureSpecializationPart?
+   	| ActionUsageKeyword declaration=UsageDeclaration? )
+    valuepart=ValuePart?
 ;
 
  ActionUsageDeclaration :
@@ -1680,21 +1680,21 @@ StateDefBody :
 ;
 
  StateBodyItem :
-	  ownedRelationship += Import
-	| ownedRelationship += AliasMember
-	| ownedRelationship += DefinitionMember
-	| ownedRelationship += VariantUsageMember
-	| ownedRelationship += NonOccurrenceUsageMember
+	  ownedRelationship = Import
+	| ownedRelationship = AliasMember
+	| ownedRelationship = DefinitionMember
+	| ownedRelationship = VariantUsageMember
+	| ownedRelationship = NonOccurrenceUsageMember
 	| ( ownedRelationship += EmptySuccessionMember )?
     ownedRelationship += StructureUsageMember
 	| ( ownedRelationship += EmptySuccessionMember )?
     ownedRelationship += BehaviorUsageMember
 	  ( ownedRelationship += TargetTransitionUsageMember )*
-	| ownedRelationship += TransitionUsageMember
+	| ownedRelationship = TransitionUsageMember
 	| ownedRelationship += EntryActionMember
 	  ( ownedRelationship += EntryTransitionMember )*
-	| ownedRelationship += DoActionMember
-	| ownedRelationship += ExitActionMember
+	| ownedRelationship = DoActionMember
+	| ownedRelationship = ExitActionMember
 ;
 
 EntryActionMember :
@@ -1706,7 +1706,7 @@ EntryActionKind :
 ;
 
 DoActionMember :
-	prefix=MemberPrefix kind=DoActionKind ownedRelatedElement=StateActionUsage
+	prefix=MemberPrefix DoActionKind ownedRelatedElement=StateActionUsage
 ;
 
 DoActionKind :
@@ -1714,7 +1714,7 @@ DoActionKind :
 ;
 
 ExitActionMember :
-	prefix=MemberPrefix kind=ExitActionKind ownedRelatedElement=StateActionUsage
+	prefix=MemberPrefix ExitActionKind ownedRelatedElement=StateActionUsage
 ;
 
 ExitActionKind :

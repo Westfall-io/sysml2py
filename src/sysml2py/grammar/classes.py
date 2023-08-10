@@ -225,7 +225,7 @@ class StateBodyPart:
                 self.children.append(StateBodyItem(child))
 
     def dump(self):
-        return "".join([x.dump() for x in self.children])
+        return "\n".join([x.dump() for x in self.children])
 
 
 class StateBodyItem:
@@ -237,7 +237,6 @@ class StateBodyItem:
                 self.children.append(globals()[child["name"]](child))
 
     def dump(self):
-        print([x.dump() for x in self.children])
         return "\n".join([x.dump() for x in self.children])
 
 
@@ -270,7 +269,48 @@ class StateUsageBody:
 
     def dump(self):
         return self.children.dump()
+    
+class DoActionMember:
+    # DoActionMember :
+    # 	prefix=MemberPrefix DoActionKind ownedRelatedElement=StateActionUsage
+    # ;
+    def __init__(self, definition):
+        self.prefix = None
+        self.keyword = 'do'
+        if valid_definition(definition, self.__class__.__name__):
+            if definition['prefix'] is not None:
+                self.prefix = MemberPrefix(definition['prefix'])
+                
+            self.children = StateActionUsage(definition['ownedRelatedElement'])
 
+    def dump(self):
+        output = []
+        if self.prefix is not None:
+            output.append(self.prefix.dump())
+        output.append(self.keyword)
+        output.append(self.children.dump())
+        return " ".join(output)
+    
+class ExitActionMember:
+    # ExitActionMember :
+    # 	prefix=MemberPrefix DoActionKind ownedRelatedElement=StateActionUsage
+    # ;
+    def __init__(self, definition):
+        self.prefix = None
+        self.keyword = 'exit'
+        if valid_definition(definition, self.__class__.__name__):
+            if definition['prefix'] is not None:
+                self.prefix = MemberPrefix(definition['prefix'])
+                
+            self.children = StateActionUsage(definition['ownedRelatedElement'])
+
+    def dump(self):
+        output = []
+        if self.prefix is not None:
+            output.append(self.prefix.dump())
+        output.append(self.keyword)
+        output.append(self.children.dump())
+        return " ".join(output)
 
 class EntryActionMember:
     # EntryActionMember :
@@ -332,6 +372,43 @@ class PerformedActionUsage:
 
     def dump(self):
         return self.declaration.dump()
+    
+class PerformActionUsageDeclaration:
+    # PerformActionUsageDeclaration :
+    #    	( ownedRelationship = OwnedReferenceSubsetting fspart=FeatureSpecializationPart?
+    #    	| ActionUsageKeyword declaration=UsageDeclaration? )
+    #     valuepart=ValuePart?
+    # ;
+    def __init__(self, definition):
+        self.valuepart = None
+        self.children = []
+        if valid_definition(definition, self.__class__.__name__):
+            if definition['ownedRelationship'] is not None:
+                print(definition)
+                self.children.append(OwnedReferenceSubsetting(definition['ownedRelationship']))
+                if definition['fspart'] is not None:
+                    self.children.append(FeatureSpecializationPart(definition['fspart']))
+            else:
+                if definition['declaration'] is not None:
+                    self.children.append(UsageDeclaration(definition['declaration']))
+            
+            if definition['valuepart'] is not None:
+                self.valuepart = ValuePart(definition['valuepart'])
+
+    def dump(self):
+        if self.valuepart is not None:
+            vpdump = " "+self.valuepart.dump()
+        else:
+            vpdump = ""
+            
+        if len(self.children) == 0:
+            return 'action'+vpdump
+        else:
+            if self.children[0].__class__.__name__ == 'UsageDeclaration':
+                return 'action '+self.children[0].dump()+vpdump
+            else:
+                return " ".join([x.dump() for x in self.children])+vpdump
+
 
 
 class EntryTransitionMember:
@@ -859,7 +936,7 @@ class ActionBody:
         if len(self.children) == 0:
             return ";"
         else:
-            return "{\n" + "\n".join([x.dump() for x in self.children]) + "\n}"
+            return " {\n" + "\n".join([x.dump() for x in self.children]) + "\n}"
 
 
 class ActionBodyItem:
