@@ -964,6 +964,7 @@ def test_Training_State_Definitions_State_Definition_Example_2():
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
 
+
 # 23. States
 def test_Training_States_State_Actions():
     text = """package 'State Actions' {

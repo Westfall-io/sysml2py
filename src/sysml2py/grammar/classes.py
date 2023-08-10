@@ -516,7 +516,8 @@ class TransitionUsageMember:
             output.append(self.prefix.dump())
         output.append(self.children.dump())
         return " ".join(output)
-    
+
+
 class TargetTransitionUsageMember:
     # This is a special class version of the previous, but it assumes the
     # previous node as a target
@@ -526,8 +527,8 @@ class TargetTransitionUsageMember:
     def __init__(self, definition):
         self.prefix = None
         if valid_definition(definition, self.__class__.__name__):
-            if definition['prefix'] is not None:
-                self.prefix = MemberPrefix(definition['prefix'])
+            if definition["prefix"] is not None:
+                self.prefix = MemberPrefix(definition["prefix"])
             self.children = TargetTransitionUsage(definition["ownedRelatedElement"])
 
     def dump(self):
@@ -536,7 +537,8 @@ class TargetTransitionUsageMember:
             output.append(self.prefix.dump())
         output.append(self.children.dump())
         return " ".join(output)
-    
+
+
 class TargetTransitionUsage:
     # TargetTransitionUsage :
     # 	TransitionUsageKeyword?
@@ -557,28 +559,28 @@ class TargetTransitionUsage:
     def __init__(self, definition):
         self.children = []
         if valid_definition(definition, self.__class__.__name__):
-            child = definition['ownedRelationship1']
+            child = definition["ownedRelationship1"]
             if child is not None:
                 self.children.append(TriggerActionMember(child))
-                
-            child = definition['ownedRelationship2']
+
+            child = definition["ownedRelationship2"]
             if child is not None:
                 self.children.append(GuardExpressionMember(child))
-            child = definition['ownedRelationship3']
+            child = definition["ownedRelationship3"]
             if child is not None:
                 self.children.append(EffectBehaviorMember(child))
-            child = definition['ownedRelationship4']
+            child = definition["ownedRelationship4"]
             if child is not None:
                 self.children.append(TransitionSuccessionMember(child))
-            
-            self.body = ActionBody(definition['body'])
-            
+
+            self.body = ActionBody(definition["body"])
+
     def dump(self):
         output = []
         # Skip the transition keyword here.
         for child in self.children:
-            if child.__class__.__name__ == 'TransitionSuccessionMember':
-                output.append('\n   then')
+            if child.__class__.__name__ == "TransitionSuccessionMember":
+                output.append("\n   then")
             output.append(child.dump())
         output.append(self.body.dump())
         return " ".join(output)
