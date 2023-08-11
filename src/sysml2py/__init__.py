@@ -14,7 +14,7 @@ from sysml2py.usage import Item, Attribute, Part, Port
 from sysml2py.definition import Model, Package
 
 
-def enforce_grammar(): # pragma: no cover
+def enforce_grammar():  # pragma: no cover
     import re
 
     comments_strip_rule = r"(?:(?:(?<!\\)(\/\/.*\n))|(?:\/\*(?:.|\n)*?\*\/))"

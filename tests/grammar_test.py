@@ -1362,6 +1362,7 @@ def test_Training_Constraints_Analytical_Constraints():
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
 
+
 def test_Training_Constraints_Constraint_Assertions_1():
     text = """package 'Constraint Assertions-1' {
     	import ISQ::*;
@@ -1398,7 +1399,8 @@ def test_Training_Constraints_Constraint_Assertions_1():
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
-    
+
+
 def test_Training_Constraints_Constraint_Assertions_2():
     text = """package 'Constraint Assertions-2' {
     	import ISQ::*;
@@ -1440,7 +1442,8 @@ def test_Training_Constraints_Constraint_Assertions_2():
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
-    
+
+
 def test_Training_Constraints_Constraints_Example_1():
     text = """package 'Constraints Example-1' {
     	import ISQ::*;
@@ -1477,7 +1480,8 @@ def test_Training_Constraints_Constraints_Example_1():
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
-    
+
+
 def test_Training_Constraints_Constraints_Example_2():
     text = """package 'Constraints Example-2' {
     	import ISQ::*;
@@ -1514,7 +1518,8 @@ def test_Training_Constraints_Constraints_Example_2():
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
-    
+
+
 def test_Training_Constraints_Derivation_Constraints():
     text = """package 'Derivation Constraints' {
     	import 'Constraints Example-1'::*;
@@ -1543,7 +1548,8 @@ def test_Training_Constraints_Derivation_Constraints():
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
-    
+
+
 def test_Training_Constraints_Time_Constraints():
     text = """package 'Time Constraints' {
     	import ISQ::TemperatureValue;

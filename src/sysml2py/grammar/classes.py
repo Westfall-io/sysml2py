@@ -152,9 +152,11 @@ class DefinitionElement:
                 )
             elif de == "StateDefinition":
                 self.children.append(StateDefinition(definition["ownedRelatedElement"]))
-            elif de == 'ConstraintDefinition':
-                self.children.append(ConstraintDefinition(definition['ownedRelatedElement']))
-                
+            elif de == "ConstraintDefinition":
+                self.children.append(
+                    ConstraintDefinition(definition["ownedRelatedElement"])
+                )
+
             else:
                 print(de)
                 raise NotImplementedError
@@ -172,7 +174,8 @@ class DefinitionElement:
         for item in self.children:
             output["ownedRelatedElement"] = item.get_definition()
         return output
-    
+
+
 class ConstraintDefinition:
     # ConstraintDefinition :
     # 	prefix=OccurrenceDefinitionPrefix ConstraintDefKeyword declaration=DefinitionDeclaration body=CalculationBody
@@ -181,11 +184,11 @@ class ConstraintDefinition:
         self.prefix = None
         self.keyword = "constraint def"
         if valid_definition(definition, self.__class__.__name__):
-            if definition['prefix'] is not None:
-                self.prefix = OccurrenceDefinitionPrefix(definition['prefix'])
-            self.declaration = DefinitionDeclaration(definition['declaration'])
-            self.body = CalculationBody(definition['body'])
-    
+            if definition["prefix"] is not None:
+                self.prefix = OccurrenceDefinitionPrefix(definition["prefix"])
+            self.declaration = DefinitionDeclaration(definition["declaration"])
+            self.body = CalculationBody(definition["body"])
+
     def dump(self):
         output = []
         if self.prefix is not None:
@@ -194,6 +197,7 @@ class ConstraintDefinition:
         output.append(self.declaration.dump())
         output.append(self.body.dump())
         return " ".join(output)
+
 
 class StateDefinition:
     def __init__(self, definition):
@@ -381,7 +385,8 @@ class StateActionUsage:
             return ";"
         else:
             return "".join([self.pau.dump(), self.body.dump()])
-        
+
+
 class AssignmentNode:
     # AssignmentNode :
     # 	prefix=OccurrenceUsagePrefix declaration=AssignmentNodeDeclaration body=ActionBody
@@ -389,10 +394,10 @@ class AssignmentNode:
     def __init__(self, definition):
         self.prefix = None
         if valid_definition(definition, self.__class__.__name__):
-            if definition['prefix'] is not None:
-                self.prefix = OccurrenceUsagePrefix(definition['prefix'])
-            self.declaration = AssignmentNodeDeclaration(definition['declaration'])
-            self.body = ActionBody(definition['body'])
+            if definition["prefix"] is not None:
+                self.prefix = OccurrenceUsagePrefix(definition["prefix"])
+            self.declaration = AssignmentNodeDeclaration(definition["declaration"])
+            self.body = ActionBody(definition["body"])
 
     def dump(self):
         output = []
@@ -401,7 +406,8 @@ class AssignmentNode:
         output.append(self.declaration.dump())
         output.append(self.body.dump())
         return "".join(output)
-    
+
+
 class AssignmentNodeDeclaration:
     #  AssignmentNodeDeclaration :
     # 	declaration=ActionNodeUsageDeclaration? 'assign'
@@ -410,13 +416,13 @@ class AssignmentNodeDeclaration:
     # ;
     def __init__(self, definition):
         self.declaration = None
-        self.keyword = 'assign'
-        self.keyword2 = ':='
+        self.keyword = "assign"
+        self.keyword2 = ":="
         if valid_definition(definition, self.__class__.__name__):
-            if definition['declaration'] is not None:
-                self.declaration = ActionNodeUsageDeclaration(definition['declaration'])
-            self.fcm = FeatureChainMember(definition['ownedRelationship1'])
-            self.npm = NodeParameterMember(definition['ownedRelationship2'])
+            if definition["declaration"] is not None:
+                self.declaration = ActionNodeUsageDeclaration(definition["declaration"])
+            self.fcm = FeatureChainMember(definition["ownedRelationship1"])
+            self.npm = NodeParameterMember(definition["ownedRelationship2"])
 
     def dump(self):
         output = []
@@ -427,56 +433,61 @@ class AssignmentNodeDeclaration:
         output.append(self.keyword2)
         output.append(self.npm.dump())
         return " ".join(output)
-    
+
+
 class ActionNodeUsageDeclaration:
     #  ActionNodeUsageDeclaration :
     # 	ActionUsageKeyword declaration=UsageDeclaration?
     # ;
     def __init__(self, definition):
         self.declaration = None
-        self.keyword = 'action'
+        self.keyword = "action"
         if valid_definition(definition, self.__class__.__name__):
-            if definition['declaration'] is not None:
-                self.declaration = UsageDeclaration(definition['declaration'])
+            if definition["declaration"] is not None:
+                self.declaration = UsageDeclaration(definition["declaration"])
 
     def dump(self):
         if self.declaration is not None:
             return " ".join([self.keyword, self.declaration.dump()])
         else:
             return self.keyword
-        
+
+
 class NodeParameterMember:
     # NodeParameterMember :
     # 	ownedRelatedElement = NodeParameter
     # ;
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
-            self.children = NodeParameter(definition['ownedRelatedElement'])
+            self.children = NodeParameter(definition["ownedRelatedElement"])
 
     def dump(self):
         return self.children.dump()
-    
+
+
 class NodeParameter:
     # NodeParameter :
     # 	 ownedRelationship = FeatureBinding
     # ;
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
-            self.children = FeatureBinding(definition['ownedRelationship'])
+            self.children = FeatureBinding(definition["ownedRelationship"])
 
     def dump(self):
         return self.children.dump()
-    
+
+
 class FeatureBinding:
     # FeatureBinding :
     # 	ownedRelatedElement = OwnedExpression
     # ;
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
-            self.children = OwnedExpression(definition['ownedRelatedElement'])
+            self.children = OwnedExpression(definition["ownedRelatedElement"])
 
     def dump(self):
         return self.children.dump()
+
 
 class PerformedActionUsage:
     # PerformedActionUsage :
@@ -1090,7 +1101,7 @@ class ActionBodyItem:
             else:
                 # Otherwise add a space
                 output.append(" ")
-                
+
         if output[-1] == "\n":
             # Remove a extra new line
             output = output[:-1]
@@ -1221,7 +1232,9 @@ class BehaviorUsageMember:
         if valid_definition(definition, self.__class__.__name__):
             if definition["prefix"] is not None:
                 self.prefix = MemberPrefix(definition["prefix"])
-            self.children.append(BehaviorUsageElement(definition["ownedRelatedElement"]))
+            self.children.append(
+                BehaviorUsageElement(definition["ownedRelatedElement"])
+            )
 
     def dump(self):
         output = []
@@ -1230,7 +1243,8 @@ class BehaviorUsageMember:
         for child in self.children:
             output.append(child.dump())
         return " ".join(output)
-    
+
+
 class ConstraintUsage:
     # ConstraintUsage :
     # 	prefix=OccurrenceUsagePrefix ConstraintUsageKeyword declaration=CalculationUsageDeclaration body=CalculationBody
@@ -1238,14 +1252,16 @@ class ConstraintUsage:
     def __init__(self, definition):
         self.prefix = None
         self.declaration = None
-        self.keyword = 'constraint'
+        self.keyword = "constraint"
         if valid_definition(definition, self.__class__.__name__):
-            if definition['prefix'] is not None:
-                self.prefix = OccurrenceUsagePrefix(definition['prefix'])
-            if definition['declaration'] is not None: 
-                self.declaration = CalculationUsageDeclaration(definition['declaration'])
-            self.body = CalculationBody(definition['body'])
-    
+            if definition["prefix"] is not None:
+                self.prefix = OccurrenceUsagePrefix(definition["prefix"])
+            if definition["declaration"] is not None:
+                self.declaration = CalculationUsageDeclaration(
+                    definition["declaration"]
+                )
+            self.body = CalculationBody(definition["body"])
+
     def dump(self):
         output = []
         if self.prefix is not None:
@@ -2645,7 +2661,8 @@ class XorExpression:
             "and": self.andexpression.get_definition(),
         }
         return output
-    
+
+
 class EqualityExpressionReference:
     # EqualityExpressionReference :
     # 	ownedRelationship = EqualityExpressionMember
@@ -2653,11 +2670,14 @@ class EqualityExpressionReference:
     def __init__(self, definition):
         self.children = []
         if valid_definition(definition, self.__class__.__name__):
-            self.children.append(EqualityExpressionMember(definition['ownedRelationship']))
-            
+            self.children.append(
+                EqualityExpressionMember(definition["ownedRelationship"])
+            )
+
     def dump(self):
         return "".join([x.dump() for x in self.children])
-    
+
+
 class EqualityExpressionMember:
     # EqualityExpressionMember :
     # 	ownedRelatedElement = EqualityExpression
@@ -2665,25 +2685,25 @@ class EqualityExpressionMember:
     def __init__(self, definition):
         self.children = []
         if valid_definition(definition, self.__class__.__name__):
-            self.children.append(EqualityExpression(definition['ownedRelatedElement']))
-            
+            self.children.append(EqualityExpression(definition["ownedRelatedElement"]))
+
     def dump(self):
         return "\n".join([x.dump() for x in self.children])
-    
+
 
 class AndOperand:
     def __init__(self, definition):
         self.operations = []
         if valid_definition(definition, self.__class__.__name__):
-            self.operator = definition['operator']
-            if self.operator == '&':
-                self.operand = EqualityExpression(definition['operand'])
+            self.operator = definition["operator"]
+            if self.operator == "&":
+                self.operand = EqualityExpression(definition["operand"])
             else:
-                self.operand = EqualityExpressionReference(definition['operand'])
-            
+                self.operand = EqualityExpressionReference(definition["operand"])
+
     def dump(self):
-        return "".join([self.operator, '\n   ', self.operand.dump()])
-    
+        return "".join([self.operator, "\n   ", self.operand.dump()])
+
     def get_definition(self):
         output = {
             "name": self.__class__.__name__,
@@ -2691,23 +2711,22 @@ class AndOperand:
             "operand": self.operand.get_definition(),
         }
         return output
-    
-    
+
+
 class AndExpression:
     def __init__(self, definition):
         self.operations = []
         if valid_definition(definition, self.__class__.__name__):
             self.equality = EqualityExpression(definition["equality"])
-            for op in definition['operation']:
+            for op in definition["operation"]:
                 self.operations.append(AndOperand(op))
-                    
 
     def dump(self):
         output = [self.equality.dump()]
         for op in self.operations:
             output.append(" ")
             output.append(op.dump())
-            
+
         return "".join(output)
 
     def get_definition(self):
@@ -2718,18 +2737,19 @@ class AndExpression:
         }
         return output
 
+
 class EqualityOperand:
     # EqualityOperand:
     #   operator=EqualityOperator operand=ClassificationExpression
     # ;
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
-            self.operator = definition['operator']
-            self.operand = ClassificationExpression(definition['operand'])
-            
+            self.operator = definition["operator"]
+            self.operand = ClassificationExpression(definition["operand"])
+
     def dump(self):
         return " ".join([self.operator, self.operand.dump()])
-    
+
     def get_definition(self):
         output = {
             "name": self.__class__.__name__,
@@ -2737,16 +2757,15 @@ class EqualityOperand:
             "operand": self.operand.get_definition(),
         }
         return output
-    
+
 
 class EqualityExpression:
     def __init__(self, definition):
         self.operations = []
         if valid_definition(definition, self.__class__.__name__):
             self.classification = ClassificationExpression(definition["classification"])
-            for op in definition['operation']:
+            for op in definition["operation"]:
                 self.operations.append(EqualityOperand(op))
-                
 
     def dump(self):
         output = [self.classification.dump()]
@@ -3109,7 +3128,8 @@ class FeatureChainMember:
 
     def dump(self):
         return self.children.dump()
-    
+
+
 class SequenceOperand:
     # SequenceOperand:
     #   (',' operand = OwnedExpression)
@@ -3118,11 +3138,11 @@ class SequenceOperand:
     # ; // Allow trailing comma
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
-            self.operand = OwnedExpression(definition['operand'])
-            
+            self.operand = OwnedExpression(definition["operand"])
+
     def dump(self):
-        return ", "+self.operand.dump()
-    
+        return ", " + self.operand.dump()
+
     def get_definition(self):
         output = {
             "name": self.__class__.__name__,
@@ -3138,8 +3158,8 @@ class SequenceExpression:
     def __init__(self, definition):
         self.operations = []
         if valid_definition(definition, self.__class__.__name__):
-            self.relationship = OwnedExpression(definition['ownedRelationship'])
-            for op in definition['operation']:
+            self.relationship = OwnedExpression(definition["ownedRelationship"])
+            for op in definition["operation"]:
                 self.operations.append(SequenceOperand(op))
 
     def dump(self):
