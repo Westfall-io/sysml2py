@@ -8,13 +8,13 @@ Created on Mon May 29 23:26:16 2023
 
 __all__ = ["load", "loads", "load_grammar"]
 __author__ = "Christopher Cox"
-version = "0.1.0"
+__version__ = "0.1.0"
 
 from sysml2py.usage import Item, Attribute, Part, Port
 from sysml2py.definition import Model, Package
 
 
-def enforce_grammar():
+def enforce_grammar():  # pragma: no cover
     import re
 
     comments_strip_rule = r"(?:(?:(?<!\\)(\/\/.*\n))|(?:\/\*(?:.|\n)*?\*\/))"

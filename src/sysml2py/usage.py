@@ -427,14 +427,12 @@ class Attribute(Usage):
                 }
                 package_units = {
                     "name": "EqualityExpression",
-                    "operand": [],
-                    "operator": [],
+                    "operation": [],
                     "classification": package_units,
                 }
                 package_units = {
                     "name": "AndExpression",
-                    "operand": [],
-                    "operator": [],
+                    "operation": [],
                     "equality": package_units,
                 }
                 package_units = {
@@ -469,8 +467,7 @@ class Attribute(Usage):
                 package_units = {"name": "OwnedExpression", "expression": package_units}
                 package_units = {
                     "name": "SequenceExpression",
-                    "operand": [],
-                    "operator": "",
+                    "operation": [],
                     "ownedRelationship": package_units,
                 }
                 package_units = [package_units]
@@ -542,14 +539,12 @@ class Attribute(Usage):
             }
             package = {
                 "name": "EqualityExpression",
-                "operand": [],
-                "operator": [],
+                "operation": [],
                 "classification": package,
             }
             package = {
                 "name": "AndExpression",
-                "operand": [],
-                "operator": [],
+                "operation": [],
                 "equality": package,
             }
             package = {
@@ -604,7 +599,7 @@ class Attribute(Usage):
         real = float(realpart.base.relationship.dump())
         unit = (
             realpart.operand[0]
-            .child.expression.operands[0]
+            .relationship.expression.operands[0]
             .implies.orexpression.xor.andexpression.equality.classification.relational.range.additive.left_hand.exponential.unary.extent.primary.base.relationship.children[
                 0
             ]
