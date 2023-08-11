@@ -1315,4 +1315,276 @@ def test_Training_Calculations_Calculation_Usages_2():
 
 
 # 30. Constraints
+def test_Training_Constraints_Analytical_Constraints():
+    text = """package 'Analytical Constraints' {
+    	import 'Calculation Definitions'::*;
+    	
+    	constraint def StraightLineDynamicsEquations {
+    		in p : PowerValue;
+    		in m : MassValue;
+    		in dt : TimeValue;
+    		in x_i : LengthValue;
+    		in v_i : SpeedValue;
+    		in x_f : LengthValue;
+    		in v_f : SpeedValue;
+    		in a : AccelerationValue;
+    	
+    		attribute v_avg : SpeedValue = (v_i + v_f)/2;
+    		
+    		a == Acceleration(p, m, v_avg) and
+    		v_f == Velocity(dt, v_i, a) and
+    		x_f == Position(dt, x_i, v_avg)
+    	}
+    	
+    	action def StraightLineDynamics {
+    		in power : PowerValue;
+    		in mass : MassValue;
+    		in delta_t : TimeValue;
+    		in x_in : LengthValue;
+    		in v_in : SpeedValue;
+    		out x_out : LengthValue;
+    		out v_out : SpeedValue;
+    		out a_out : AccelerationValue;
+    	
+    	    assert constraint dynamics : StraightLineDynamicsEquations {
+    			in p = power;
+    			in m = mass;
+    			in dt = delta_t;
+    			in x_i = x_in;
+    			in v_i = v_in;
+    			in x_f = x_out;
+    			in v_f = v_out;
+    			in a = a_out;
+    	    }
+    	}
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+
+def test_Training_Constraints_Constraint_Assertions_1():
+    text = """package 'Constraint Assertions-1' {
+    	import ISQ::*;
+    	import SI::*;
+    	import NumericalFunctions::*;
+    	
+    	part def Engine;
+    	part def Transmission;
+    	
+    	constraint def MassConstraint {
+    		in partMasses : MassValue[0..*];
+    		in massLimit : MassValue;
+    			
+    		sum(partMasses) <= massLimit
+    	}
+    	
+    	part def Vehicle {
+    		assert constraint massConstraint : MassConstraint {
+    			in partMasses = (chassisMass, engine.mass, transmission.mass);
+    			in massLimit = 2500[kg];
+    		}
+    		
+    		attribute chassisMass : MassValue;
+    		
+    		part engine : Engine {
+    			attribute mass : MassValue;
+    		}
+    		
+    		part transmission : Engine {
+    			attribute mass : MassValue;
+    		}
+    	}	
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+    
+def test_Training_Constraints_Constraint_Assertions_2():
+    text = """package 'Constraint Assertions-2' {
+    	import ISQ::*;
+    	import SI::*;
+    	import NumericalFunctions::*;
+    	
+    	part def Engine;
+    	part def Transmission;
+    	
+    	constraint def MassConstraint {
+    		in partMasses : MassValue[0..*];
+    		in massLimit : MassValue;
+    	}
+    	
+    	constraint massConstraint : MassConstraint {
+    		in partMasses : MassValue[0..*];
+    		in massLimit : MassValue;
+    			
+    		sum(partMasses) <= massLimit
+    	}
+    	
+    	part def Vehicle {
+    		assert massConstraint {
+    			in partMasses = (chassisMass, engine.mass, transmission.mass);
+    			in massLimit = 2500[kg];
+    		}
+    		
+    		attribute chassisMass : MassValue;
+    		
+    		part engine : Engine {
+    			attribute mass : MassValue;
+    		}
+    		
+    		part transmission : Engine {
+    			attribute mass : MassValue;
+    		}
+    	}	
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+    
+def test_Training_Constraints_Constraints_Example_1():
+    text = """package 'Constraints Example-1' {
+    	import ISQ::*;
+    	import SI::*;
+    	import NumericalFunctions::*;
+    	
+    	part def Engine;
+    	part def Transmission;
+    	
+    	constraint def MassConstraint {
+    		in partMasses : MassValue[0..*];
+    		in massLimit : MassValue;
+    			
+    		sum(partMasses) <= massLimit
+    	}
+    	
+    	part def Vehicle {
+    		constraint massConstraint : MassConstraint {
+    			in partMasses = (chassisMass, engine.mass, transmission.mass);
+    			in massLimit = 2500[kg];
+    		}
+    		
+    		attribute chassisMass : MassValue;
+    		
+    		part engine : Engine {
+    			attribute mass : MassValue;
+    		}
+    		
+    		part transmission : Engine {
+    			attribute mass : MassValue;
+    		}
+    	}
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+    
+def test_Training_Constraints_Constraints_Example_2():
+    text = """package 'Constraints Example-2' {
+    	import ISQ::*;
+    	import SI::*;
+    	import NumericalFunctions::*;
+    	
+    	part def Engine;
+    	part def Transmission;
+    	
+    	constraint def MassConstraint {
+    		attribute partMasses : MassValue[0..*];
+    		attribute massLimit : MassValue;
+    			
+    		sum(partMasses) <= massLimit
+    	}
+    	
+    	part def Vehicle {
+    		constraint massConstraint : MassConstraint {
+    			redefines partMasses = (chassisMass, engine.mass, transmission.mass);
+    			redefines massLimit = 2500[kg];
+    		}
+    		
+    		attribute chassisMass : MassValue;
+    		
+    		part engine : Engine {
+    			attribute mass : MassValue;
+    		}
+    		
+    		part transmission : Engine {
+    			attribute mass : MassValue;
+    		}
+    	}
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+    
+def test_Training_Constraints_Derivation_Constraints():
+    text = """package 'Derivation Constraints' {
+    	import 'Constraints Example-1'::*;
+    	
+    	part vehicle1 : Vehicle {
+    		attribute totalMass : MassValue;			
+    		assert constraint {totalMass == chassisMass + engine.mass + transmission.mass}	
+    	}
+    	
+    	part vehicle2 : Vehicle {
+    		attribute totalMass : MassValue = chassisMass + engine.mass + transmission.mass;
+    	}
+    	
+    	constraint def Dynamics {
+    		in mass: MassValue;
+    		in initialSpeed : SpeedValue;
+    		in finalSpeed : SpeedValue;
+    		in deltaT : TimeValue;
+    		in force : ForceValue;
+    
+    		force * deltaT == mass * (finalSpeed - initialSpeed) and
+    		mass > 0[kg]
+    	}
+    	
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+    
+def test_Training_Constraints_Time_Constraints():
+    text = """package 'Time Constraints' {
+    	import ISQ::TemperatureValue;
+    	import ISQ::DurationValue;
+    	import Time::TimeInstantValue;
+    	import Time::TimeOf;
+    	import Time::DurationOf;
+    	import SI::h;
+    	import SI::s;
+
+    	attribute def MaintenanceDone;
+    	
+    	part def Vehicle {
+    		attribute maintenanceTime : TimeInstantValue;
+    		attribute maintenanceInterval : DurationValue;
+    		attribute maxTemperature : TemperatureValue;
+    	}
+    	
+    	state healthStates {
+    		in vehicle : Vehicle;
+    		
+    		entry; then normal;
+    		
+    		state normal;
+    		accept at vehicle.maintenanceTime
+    			then maintenance;
+    		
+    		state maintenance {
+    			assert constraint { TimeOf(maintenance) > vehicle.maintenanceTime }
+    			assert constraint { TimeOf(maintenance) - TimeOf(normal.done) < 2 [s] }
+    			entry assign vehicle.maintenanceTime := vehicle.maintenanceTime + vehicle.maintenanceInterval;
+    		}
+    		accept MaintenanceDone
+    			then normal;
+    		
+    		constraint { DurationOf(maintenance) <= 48 [h] }
+    	}
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+
+
 # 31. Requirements

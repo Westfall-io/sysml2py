@@ -434,7 +434,7 @@ StructureUsageMember:
 ;
 
 BehaviorUsageMember:
-	prefix=MemberPrefix ownedRelatedElement += BehaviorUsageElement
+	prefix=MemberPrefix ownedRelatedElement = BehaviorUsageElement
 ;
 
 FeatureDirection:
@@ -1235,7 +1235,7 @@ ActionNode:
 ;
 
 ActionNodeUsageDeclaration:
-	ActionUsageKeyword UsageDeclaration?
+	ActionUsageKeyword declaration=UsageDeclaration?
 ;
 
 ActionNodePrefix:
@@ -1309,25 +1309,25 @@ SendNodeDeclaration:
 ;
 
 NodeParameterMember:
-	ownedRelatedElement += NodeParameter
+	ownedRelatedElement = NodeParameter
 ;
 
 NodeParameter:
-	 ownedRelationship += FeatureBinding
+	 ownedRelationship = FeatureBinding
 ;
 
 FeatureBinding:
-	ownedRelatedElement += OwnedExpression
+	ownedRelatedElement = OwnedExpression
 ;
 
 AssignmentNode:
-	OccurrenceUsagePrefix AssignmentNodeDeclaration ActionBody
+	prefix=OccurrenceUsagePrefix declaration=AssignmentNodeDeclaration body=ActionBody
 ;
 
 AssignmentNodeDeclaration:
-	ActionNodeUsageDeclaration? 'assign'
-	ownedRelationship += FeatureChainMember ':='
-	ownedRelationship += NodeParameterMember
+	declaration=ActionNodeUsageDeclaration? 'assign'
+	ownedRelationship1 = FeatureChainMember ':='
+	ownedRelationship2 = NodeParameterMember
 ;
 
 TargetBinding:
@@ -1707,7 +1707,7 @@ ConstraintDefKeyword:
 ;
 
 ConstraintDefinition:
-	OccurrenceDefinitionPrefix ConstraintDefKeyword DefinitionDeclaration CalculationBody
+	prefix=OccurrenceDefinitionPrefix ConstraintDefKeyword declaration=DefinitionDeclaration body=CalculationBody
 ;
 
 ConstraintUsageKeyword:
@@ -1715,7 +1715,7 @@ ConstraintUsageKeyword:
 ;
 
 ConstraintUsage:
-	OccurrenceUsagePrefix ConstraintUsageKeyword CalculationUsageDeclaration CalculationBody
+	prefix=OccurrenceUsagePrefix ConstraintUsageKeyword declaration=CalculationUsageDeclaration body=CalculationBody
 ;
 
 AssertConstraintUsage:
@@ -2824,10 +2824,15 @@ XorOperator:
 	'xor'
 ;
 
+AndOperand:
+  (operator = AndOperator operand = EqualityExpression)
+  |
+  (operator = ConditionalAndOperator operand = EqualityExpressionReference)
+;
+
 AndExpression:
-	equality=EqualityExpression (
-		( operator = AndOperator operand += EqualityExpression
-		| operator = ConditionalAndOperator operand += EqualityExpressionReference ) )*
+	equality=EqualityExpression
+  (operation+=AndOperand)*
 ;
 
 AndOperator:
@@ -2839,17 +2844,20 @@ ConditionalAndOperator:
 ;
 
 EqualityExpressionReference:
-	ownedRelationship += EqualityExpressionMember
+	ownedRelationship = EqualityExpressionMember
 ;
 
 EqualityExpressionMember:
-	ownedRelatedElement += EqualityExpression
+	ownedRelatedElement = EqualityExpression
+;
+
+EqualityOperand:
+  operator=EqualityOperator operand=ClassificationExpression
 ;
 
 EqualityExpression:
-	classification=ClassificationExpression (
-		operator = EqualityOperator operand += ClassificationExpression )*
-
+	classification=ClassificationExpression
+  (operation+=EqualityOperand)*
 ;
 
 EqualityOperator:
@@ -3013,8 +3021,8 @@ FunctionReference:
 ;
 
 FeatureChainMember:
-	  memberElement = QualifiedName
-	|  ownedRelatedElement += OwnedFeatureChain
+	  ownedRelatedElement = OwnedFeatureChain
+	|  memberElement = QualifiedName
 ;
 
 BaseExpression:
@@ -3043,8 +3051,14 @@ BodyParameter:
 	declaredName = Name
 ;
 
+SequenceOperand:
+  (',' operand = OwnedExpression)
+  |
+  ','
+;
+
 SequenceExpression:
-	ownedRelationship=OwnedExpression ( ',' |  operator = ',' operand += SequenceExpression)?
+	ownedRelationship=OwnedExpression operation+=SequenceOperand*
 ;
 
 FeatureReferenceExpression:
@@ -3068,8 +3082,7 @@ OwnedFeatureChain:
 ;
 
 FeatureChain:
-	ownedRelationship += OwnedFeatureChaining '.' ownedRelationship += OwnedFeatureChaining
-	( '.' ownedRelationship += OwnedFeatureChaining )*
+	ownedRelationship += OwnedFeatureChaining['.']
 ;
 
 OwnedFeatureChaining:
@@ -3153,7 +3166,9 @@ LiteralInfinity:
 ;
 
 ReservedKeyword:
-  'about' | /to[\s]/ | 'connect' | 'connection' | 'from' | /of[\s]/ | 'then' | 'entry' | /accept[\s]/ | /do[\s]/ | /exit[\s]/ | /action[\s]/
+  'about' | /to[\s]/ | 'connect' | 'connection' | 'from' | /of[\s]/ | 'then' |
+  'entry' | /accept[\s]/ | /do[\s]/ | /exit[\s]/ | /action[\s]/ | /at[\s]/ |
+  /assign[\s]/
 ;
 
 Name:
@@ -3169,7 +3184,7 @@ QualifiedName:
 ;
 
 DECIMAL_VALUE:
-   /[0-9]*/;
+   /[0-9]+/;
 
 EXP_VALUE:
 	DECIMAL_VALUE ('e' | 'E') ('+' | '-')? DECIMAL_VALUE;

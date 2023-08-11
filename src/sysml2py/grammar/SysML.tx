@@ -530,7 +530,7 @@ StructureUsageMember :
 ;
 
 BehaviorUsageMember :
-	prefix=MemberPrefix ownedRelatedElement += BehaviorUsageElement
+	prefix=MemberPrefix ownedRelatedElement = BehaviorUsageElement
 ;
 
 /* Usages */
@@ -1412,7 +1412,7 @@ ActionNode :
 ;
 
  ActionNodeUsageDeclaration :
-	ActionUsageKeyword UsageDeclaration?
+	ActionUsageKeyword declaration=UsageDeclaration?
 ;
 
  ActionNodePrefix :
@@ -1487,25 +1487,25 @@ SendNode :
 ;
 
 NodeParameterMember :
-	ownedRelatedElement += NodeParameter
+	ownedRelatedElement = NodeParameter
 ;
 
 NodeParameter :
-	 ownedRelationship += FeatureBinding
+	 ownedRelationship = FeatureBinding
 ;
 
 FeatureBinding :
-	ownedRelatedElement += OwnedExpression
+	ownedRelatedElement = OwnedExpression
 ;
 
 AssignmentNode :
-	OccurrenceUsagePrefix AssignmentNodeDeclaration ActionBody
+	prefix=OccurrenceUsagePrefix declaration=AssignmentNodeDeclaration body=ActionBody
 ;
 
  AssignmentNodeDeclaration :
-	ActionNodeUsageDeclaration? 'assign'
-	ownedRelationship += FeatureChainMember ':='
-	ownedRelationship += NodeParameterMember
+	declaration=ActionNodeUsageDeclaration? 'assign'
+	ownedRelationship1 = FeatureChainMember ':='
+	ownedRelationship2 = NodeParameterMember
 ;
 
 TargetBinding :
@@ -1912,7 +1912,7 @@ ConstraintDefKeyword :
 ;
 
 ConstraintDefinition :
-	OccurrenceDefinitionPrefix ConstraintDefKeyword DefinitionDeclaration CalculationBody
+	prefix=OccurrenceDefinitionPrefix ConstraintDefKeyword declaration=DefinitionDeclaration body=CalculationBody
 ;
 
 /* Constraint Usages */
@@ -1922,7 +1922,7 @@ ConstraintUsageKeyword :
 ;
 
 ConstraintUsage :
-	OccurrenceUsagePrefix ConstraintUsageKeyword CalculationUsageDeclaration CalculationBody
+	prefix=OccurrenceUsagePrefix ConstraintUsageKeyword declaration=CalculationUsageDeclaration body=CalculationBody
 ;
 
 AssertConstraintUsage :
