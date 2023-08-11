@@ -100,7 +100,7 @@ def load_grammar(fp, debug=False, enforce=False):
 
     from sysml2py.formatting import reformat
 
-    if enforce:
+    if enforce: # pragma: no cover
         # This can only be run in development mode.
         from textx import metamodel_from_str, TextXSyntaxError
 
