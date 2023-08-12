@@ -43,18 +43,6 @@ jobs:
         python -m pip install coveralls pytest pyyaml textx
         python -m coverage run --source=src -m pytest tests/ && coverage report
         coveralls
-    - name: Test ${{ github.event.push.head }} docstring coverage
-      run: |
-        pip install docstr-coverage
-        docstr-coverage src/sysml2py --badge=doc-cov --fail-under=0 -e ".*/(textx|tests)"
-    - name: Commit changes
-      uses: EndBug/add-and-commit@v4
-      with:
-        author_name: ${{ github.actor }}
-        author_email: ${{ github.actor }}@users.noreply.github.com
-        message: ":robot: Add coverage badge"
-        add: "doc-cov.svg"
-        branch: ${{ github.ref }}
 
   versioning:
     name: Semantic Versioning
