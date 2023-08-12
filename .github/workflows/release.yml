@@ -60,12 +60,12 @@ jobs:
         repository_username: __token__
         repository_password: ${{ secrets.PYPI_API_TOKEN }}
     - name: Publish package to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        if: ${{ steps.release.outputs.released }} == 'true'
+      uses: pypa/gh-action-pypi-publish@release/v1
+      if: ${{ steps.release.outputs.released }} == 'true'
 
-      - name: Publish package to GitHub Release
-        uses: python-semantic-release/upload-to-gh-release@main
-        if: ${{ steps.release.outputs.released }} == 'true'
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ steps.release.outputs.tag }}
+    - name: Publish package to GitHub Release
+      uses: python-semantic-release/upload-to-gh-release@main
+      if: ${{ steps.release.outputs.released }} == 'true'
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        tag: ${{ steps.release.outputs.tag }}
