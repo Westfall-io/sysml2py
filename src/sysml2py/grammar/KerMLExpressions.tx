@@ -250,8 +250,7 @@ RelationalOperator :
 // Range Expressions
 
 RangeExpression :
-	additive=AdditiveExpression (
-		operator = '..' operand += AdditiveExpression )?
+	additive=AdditiveExpression ('..' operand = AdditiveExpression )?
 ;
 
 // Arithmetic Expressions
@@ -316,7 +315,7 @@ PrimaryExpression :
 	(
     ( operator += '#' '(' operand += SequenceExpression ')'
       | operator += '[' operand += SequenceExpression ']'
-      | operator += '->' ownedRelationship += ReferenceTyping
+      | operator += '->' ownedRelationship = ReferenceTyping
         ( operand += BodyExpression | operand += FunctionReferenceExpression | operand+= ArgumentList )
       |  operator += '.' operand += BodyExpression
       |  operator += '.?' operand += BodyExpression

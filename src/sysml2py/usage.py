@@ -409,8 +409,7 @@ class Attribute(Usage):
                 }
                 package_units = {
                     "name": "RangeExpression",
-                    "operand": [],
-                    "operator": "",
+                    "operand": None,
                     "additive": package_units,
                 }
                 package_units = {
@@ -521,8 +520,7 @@ class Attribute(Usage):
             }
             package = {
                 "name": "RangeExpression",
-                "operand": [],
-                "operator": "",
+                "operand": None,
                 "additive": package,
             }
             package = {
