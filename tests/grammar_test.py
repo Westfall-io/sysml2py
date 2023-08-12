@@ -1594,3 +1594,151 @@ def test_Training_Constraints_Time_Constraints():
 
 
 # 31. Requirements
+def test_Training_Requirements_Requirement_Definitions():
+    text = """package 'Requirement Definitions' {
+    	import ISQ::*;
+    	import SI::*;
+
+    	requirement def MassLimitationRequirement {
+    		doc /* The actual mass shall be less than or equal to the required mass. */
+    		
+    		attribute massActual: MassValue;
+    		attribute massReqd: MassValue;
+    		
+    		require constraint { massActual <= massReqd }
+    	}
+    	
+    	part def Vehicle {
+    		attribute dryMass: MassValue;
+    		attribute fuelMass: MassValue;
+    		attribute fuelFullMass: MassValue;
+    	}
+    	
+    	requirement def <'1'> VehicleMassLimitationRequirement :> MassLimitationRequirement {
+    		doc /* The total mass of a vehicle shall be less than or equal to the required mass. */
+    		
+    		subject vehicle : Vehicle;
+    		
+    		attribute redefines massActual = vehicle.dryMass + vehicle.fuelMass;
+    		
+    		assume constraint { vehicle.fuelMass > 0[kg] }
+    	}
+    	
+    	port def ClutchPort;
+    	action def GenerateTorque;
+    	
+    	requirement def <'2'> DrivePowerInterface {
+    		doc /* The engine shall transfer its generated torque to the transmission via the clutch interface. */
+    		subject clutchPort: ClutchPort;
+    	}
+    		
+    	requirement def <'3'> TorqueGeneration {
+    		doc /* The engine shall generate torque as a function of RPM as shown in Table 1. */
+    		subject generateTorque: GenerateTorque;
+    	}
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+
+
+def test_Training_Requirements_Requirement_Groups():
+    text = """package 'Requirement Groups' {
+    	import 'Requirement Definitions'::*;
+    	import 'Requirement Usages'::*;
+    	
+    	part def Engine {
+    		port clutchPort: ClutchPort;
+    		perform action generateTorque: GenerateTorque;
+    	}
+    	
+    	requirement vehicleSpecification {
+    		doc /* Overall vehicle requirements group */
+    		
+    		subject vehicle : Vehicle;
+    		
+    		require fullVehicleMassLimit;
+    		require emptyVehicleMassLimit;
+    	}
+    	
+    	requirement engineSpecification {
+    		doc /* Engine power requirements group */
+    		
+    		subject engine : Engine;
+    		
+    		requirement drivePowerInterface : DrivePowerInterface {
+    			subject = engine.clutchPort;
+    		}
+    		
+    		requirement torqueGeneration : TorqueGeneration {
+    			subject = engine.generateTorque;	
+    		}
+    	}
+    	
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+
+
+def test_Training_Requirements_Requirement_Satisfaction():
+    text = """package 'Requirement Satisfaction' {
+    	import 'Requirement Groups'::*;
+    	
+    	action 'provide power' {
+    		action 'generate torque';
+    	}
+    	
+    	part vehicle_c1 : Vehicle {
+    		perform 'provide power';
+    			
+    		part engine_v1: Engine {
+    			port :>> clutchPort;
+    			perform 'provide power'.'generate torque' :>> generateTorque;
+    		}	
+    	}
+    	
+    	part 'Vehicle c1 Design Context' {
+    		
+    		ref vehicle_design :> vehicle_c1;
+    	
+    		satisfy vehicleSpecification by vehicle_design;
+    		satisfy engineSpecification by vehicle_design.engine_v1;
+    	
+    	}
+    	
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+
+
+def test_Training_Requirements_Requirement_Usages():
+    text = """package 'Requirement Usages' {
+    	import SI::*;
+    	import 'Requirement Definitions'::*;
+    	
+    	requirement <'1.1'> fullVehicleMassLimit : VehicleMassLimitationRequirement {
+    		subject vehicle : Vehicle;
+    		attribute :>> massReqd = 2000[kg];
+    		
+    		assume constraint {
+    			doc /* Full tank is full. */
+    			vehicle.fuelMass == vehicle.fuelFullMass
+    		}
+    	}
+    	
+    	requirement <'1.2'> emptyVehicleMassLimit : VehicleMassLimitationRequirement {
+    		subject vehicle : Vehicle;
+    		attribute :>> massReqd = 1500[kg];
+    		
+    		assume constraint {
+    			doc /* Full tank is empty. */
+    			vehicle.fuelMass == 0[kg]
+    		}
+    	}
+    	
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
