@@ -2107,25 +2107,23 @@ CaseDefinition :
 
  CaseBody :
 	    ';'
-	  | '{' CaseBodyItem*
-	        ( ownedRelationship += ResultExpressionMember )?
+	  | '{' item+=CaseBodyItem* ( ownedRelationship = ResultExpressionMember )?
 	    '}'
 ;
 
  CaseBodyItem :
-	  CalculationBodyItem
-	| ownedRelationship += SubjectMember
-	| ownedRelationship += ActorMember
-	| ownedRelationship += ObjectiveMember
-
+	  ownedRelationship = CalculationBodyItem
+	| ownedRelationship = SubjectMember
+	| ownedRelationship = ActorMember
+	| ownedRelationship = ObjectiveMember
 ;
 
 ObjectiveMember :
-	MemberPrefix 'objective' ownedRelatedElement += ObjectiveRequirementUsage
+	prefix=MemberPrefix 'objective' ownedRelatedElement=ObjectiveRequirementUsage
 ;
 
 ObjectiveRequirementUsage :
-	UsageExtensionKeyword* CalculationUsageDeclaration RequirementBody
+	keyword+=UsageExtensionKeyword* declaration=CalculationUsageDeclaration body=RequirementBody
 ;
 
 /* Case Usages */
@@ -2153,11 +2151,13 @@ AnalysisCaseUsageKeyword :
 ;
 
 AnalysisCaseDefinition :
-	OccurrenceDefinitionPrefix AnalysisCaseDefKeyword DefinitionDeclaration CaseBody
+	prefix=OccurrenceDefinitionPrefix AnalysisCaseDefKeyword
+  declaration=DefinitionDeclaration body=CaseBody
 ;
 
 AnalysisCaseUsage :
-	OccurrenceUsagePrefix AnalysisCaseUsageKeyword CalculationUsageDeclaration CaseBody
+	prefix=OccurrenceUsagePrefix AnalysisCaseUsageKeyword
+  declaration=CalculationUsageDeclaration body=CaseBody
 ;
 
 /* VERIFICATION CASES */

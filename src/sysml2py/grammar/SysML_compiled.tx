@@ -1886,25 +1886,23 @@ CaseDefinition:
 
 CaseBody:
 	    ';'
-	  | '{' CaseBodyItem*
-	        ( ownedRelationship += ResultExpressionMember )?
+	  | '{' item+=CaseBodyItem* ( ownedRelationship = ResultExpressionMember )?
 	    '}'
 ;
 
 CaseBodyItem:
-	  CalculationBodyItem
-	| ownedRelationship += SubjectMember
-	| ownedRelationship += ActorMember
-	| ownedRelationship += ObjectiveMember
-
+	  ownedRelationship = CalculationBodyItem
+	| ownedRelationship = SubjectMember
+	| ownedRelationship = ActorMember
+	| ownedRelationship = ObjectiveMember
 ;
 
 ObjectiveMember:
-	MemberPrefix 'objective' ownedRelatedElement += ObjectiveRequirementUsage
+	prefix=MemberPrefix 'objective' ownedRelatedElement=ObjectiveRequirementUsage
 ;
 
 ObjectiveRequirementUsage:
-	UsageExtensionKeyword* CalculationUsageDeclaration RequirementBody
+	keyword+=UsageExtensionKeyword* declaration=CalculationUsageDeclaration body=RequirementBody
 ;
 
 CaseUsageKeyword:
@@ -1928,11 +1926,13 @@ AnalysisCaseUsageKeyword:
 ;
 
 AnalysisCaseDefinition:
-	OccurrenceDefinitionPrefix AnalysisCaseDefKeyword DefinitionDeclaration CaseBody
+	prefix=OccurrenceDefinitionPrefix AnalysisCaseDefKeyword
+  declaration=DefinitionDeclaration body=CaseBody
 ;
 
 AnalysisCaseUsage:
-	OccurrenceUsagePrefix AnalysisCaseUsageKeyword CalculationUsageDeclaration CaseBody
+	prefix=OccurrenceUsagePrefix AnalysisCaseUsageKeyword
+  declaration=CalculationUsageDeclaration body=CaseBody
 ;
 
 VerificationCaseKeyword:
@@ -2949,8 +2949,7 @@ RelationalOperator:
 ;
 
 RangeExpression:
-	additive=AdditiveExpression (
-		operator = '..' operand += AdditiveExpression )?
+	additive=AdditiveExpression ('..' operand = AdditiveExpression )?
 ;
 
 AdditiveOperand:
@@ -3007,7 +3006,7 @@ PrimaryExpression:
 	(
     ( operator += '#' '(' operand += SequenceExpression ')'
       | operator += '[' operand += SequenceExpression ']'
-      | operator += '->' ownedRelationship += ReferenceTyping
+      | operator += '->' ownedRelationship = ReferenceTyping
         ( operand += BodyExpression | operand += FunctionReferenceExpression | operand+= ArgumentList )
       |  operator += '.' operand += BodyExpression
       |  operator += '.?' operand += BodyExpression

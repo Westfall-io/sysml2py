@@ -1742,3 +1742,176 @@ def test_Training_Requirements_Requirement_Usages():
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
+    
+#32. Analysis
+def test_Training_Analysis_Analysis_Case_Definition_Example():
+    text = """package 'Analysis Case Definition Example' {
+    	import 'Calculation Definitions'::*;
+    	import 'Analytical Constraints'::*;
+    	import USCustomaryUnits::*;
+    	import SequenceFunctions::size;
+    	import Quantities::ScalarQuantityValue;
+    	import ControlFunctions::*;
+    	import ScalarValues::Positive;
+    	
+    	attribute def DistancePerVolumeValue :> ScalarQuantityValue;
+    
+    	part def Vehicle {
+            attribute mass : MassValue;
+            attribute cargoMass : MassValue;
+            
+            attribute wheelDiameter : LengthValue;
+            attribute driveTrainEfficiency : Real;
+            
+            attribute fuelEconomy_city : DistancePerVolumeValue;
+            attribute fuelEconomy_highway : DistancePerVolumeValue;
+        }
+        
+        attribute def WayPoint {
+    		time : TimeValue;
+    		position : LengthValue;
+    		speed : SpeedValue;    	
+    	}
+        
+    	analysis def FuelEconomyAnalysis {
+    		subject vehicle : Vehicle;
+    		return fuelEconomyResult : DistancePerVolumeValue;
+    		
+    		objective fuelEconomyAnalysisObjective {
+    			/*
+    			 * The objective of this analysis is to determine whether the
+    			 * subject vehicle can satisfy the fuel economy requirement.
+    			 */
+    			
+    			assume constraint {
+    				vehicle.wheelDiameter == 33 ['in'] &
+    				vehicle.driveTrainEfficiency == 0.4
+    			}
+    			
+    			require constraint {
+    				fuelEconomyResult > 30 [mi / gal]
+    			}
+    		}
+    		in attribute scenario : WayPoint[*];
+    	
+    		action solveForPower {
+    			out power : PowerValue[*];
+    			out acceleration : AccelerationValue[*];
+    		
+    			/*
+    			 * Solve for the required engine power as a function of time
+    			 * to support the scenario.
+    			 */
+    			assert constraint {
+    				(1..size(scenario)-1)->forAll {in i: Positive;
+    					StraightLineDynamicsEquations (
+    						power#(i),
+    						vehicle.mass,
+    						scenario.time#(i+1) - scenario.time#(i),
+    						scenario.position#(i),
+    						scenario.speed#(i),
+    						scenario.position#(i+1),
+    						scenario.speed#(i+1),
+    						acceleration#(i+1)                    
+    					)
+    				}
+    			}
+    		}
+    		
+    		then action solveForFuelConsumption {
+    			in power : PowerValue[*] = solveForPower.power;
+    			out fuelEconomy : DistancePerVolumeValue = fuelEconomyResult;
+    		
+    			/*
+    			 * Solve the engine equations to determine how much fuel is
+    			 * consumed.
+    			 */
+    		}
+    	}
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+    
+def test_Training_Analysis_Analysis_Case_Usage_Example():
+    text = """package 'Analysis Case Usage Example' {
+    	import 'Analysis Case Definition Example'::*;
+    	
+    	part vehicleFuelEconomyAnalysisContext {
+    		requirement vehicleFuelEconomyRequirements {
+    			subject vehicle : Vehicle;
+    		}
+    		
+    		attribute cityScenario : WayPoint[*];
+    		attribute highwayScenario : WayPoint[*];
+    		
+    		analysis cityAnalysis : FuelEconomyAnalysis {
+    			subject vehicle = vehicle_c1;
+    			in scenario = cityScenario;
+    		}
+    		
+    		analysis highwayAnalysis : FuelEconomyAnalysis {
+    			subject vehicle = vehicle_c1;
+    			in scenario = highwayScenario;
+    		}
+    		
+    		part vehicle_c1 : Vehicle {
+    			
+    			attribute :>> fuelEconomy_city = cityAnalysis.fuelEconomyResult;
+    			attribute :>> fuelEconomy_highway = highwayAnalysis.fuelEconomyResult;
+    		}
+    		
+    		satisfy vehicleFuelEconomyRequirements by vehicle_c1;
+    	}
+
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
+    
+def test_Training_Analysis_Trade_Study_Analysis_Example():
+    text = """package 'Trade Study Analysis Example' {
+    	import ScalarValues::Real;
+    	import TradeStudies::*;
+    	
+    	part def Engine;
+    	part engine4cyl : Engine;
+    	part engine6cyl : Engine;
+    	
+    	calc def PowerRollup { in engine : Engine; return : ISQ::PowerValue; }
+    	calc def MassRollup { in engine : Engine; return : ISQ::MassValue; }
+    	calc def EfficiencyRollup { in engine : Engine; return : Real; }
+    	calc def CostRollup { in engine : Engine; return : Real; }
+    	
+    	calc def EngineEvaluation { 
+    		in power : ISQ::PowerValue;
+    		in mass : ISQ::MassValue;
+    		in efficiency : Real;
+    		in cost : Real;
+    		return evaluation : Real;
+    	}
+    		
+    	analysis engineTradeStudy : TradeStudy {
+    		subject : Engine = (engine4cyl, engine6cyl);
+    		objective : MaximizeObjective;
+
+    		calc :>> evaluationFunction {
+    			in part anEngine :>> alternative : Engine;
+    			
+    			calc powerRollup: PowerRollup { in engine = anEngine; return power; }
+    			calc massRollup: MassRollup { in engine = anEngine; return mass; }
+    			calc efficiencyRollup: EfficiencyRollup { in engine = anEngine; return efficiency; }
+    			calc costRollup: CostRollup { in engine = anEngine; return cost; }
+    			
+    			return :>> result : Real = EngineEvaluation(
+    				powerRollup.power, massRollup.mass, efficiencyRollup.efficiency, costRollup.cost
+    			);
+    		}
+    		
+    		return part :>> selectedAlternative : Engine;
+    	}
+    	
+    }"""
+    a = loads(text)
+    b = classtree(a)
+    assert strip_ws(text) == strip_ws(b.dump())
