@@ -2,6 +2,15 @@
 
 
 
+## v0.5.2 (2023-08-12)
+
+### :ambulance:
+
+* :ambulance: Permissions fix ([`8c5ea13`](https://github.com/Westfall-io/sysml2py/commit/8c5ea13b9d28aa2f846fc9f1e7f985eeae7e615d))
+
+* :ambulance: Added configuration to workflow ([`e8b932b`](https://github.com/Westfall-io/sysml2py/commit/e8b932b9ab4e3e16ff43cf4549c571e70a5cd218))
+
+
 ## v0.5.1 (2023-08-12)
 
 ### :ambulance:
