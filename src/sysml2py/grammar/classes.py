@@ -156,9 +156,10 @@ class DefinitionElement:
                 self.children.append(
                     ConstraintDefinition(definition["ownedRelatedElement"])
                 )
-            elif de == 'RequirementDefinition':
+            elif de == "RequirementDefinition":
                 self.children.append(
-                    RequirementDefinition(definition['ownedRelatedElement']))
+                    RequirementDefinition(definition["ownedRelatedElement"])
+                )
             else:
                 print(de)
                 raise NotImplementedError
@@ -177,22 +178,23 @@ class DefinitionElement:
             output["ownedRelatedElement"] = item.get_definition()
         return output
 
+
 class RequirementDefinition:
     # RequirementDefinition :
-    # 	prefix=OccurrenceDefinitionPrefix RequirementDefKeyword 
+    # 	prefix=OccurrenceDefinitionPrefix RequirementDefKeyword
     #   declaration=DefinitionDeclaration body=RequirementBody
     # ;
     def __init__(self, definition):
         self.prefix = None
-        self.keyword = 'requirement def'
+        self.keyword = "requirement def"
         self.declaration = None
         if valid_definition(definition, self.__class__.__name__):
-            if definition['prefix'] is not None:
-                self.prefix = OccurrenceDefinitionPrefix(definition['prefix'])
-            if definition['declaration'] is not None:
-                self.declaration = DefinitionDeclaration(definition['declaration'])
-            self.body = RequirementBody(definition['body'])
-    
+            if definition["prefix"] is not None:
+                self.prefix = OccurrenceDefinitionPrefix(definition["prefix"])
+            if definition["declaration"] is not None:
+                self.declaration = DefinitionDeclaration(definition["declaration"])
+            self.body = RequirementBody(definition["body"])
+
     def dump(self):
         output = []
         if self.prefix is not None:
@@ -202,7 +204,8 @@ class RequirementDefinition:
             output.append(self.declaration.dump())
         output.append(self.body.dump())
         return " ".join(output)
-    
+
+
 class RequirementBody:
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
@@ -215,7 +218,8 @@ class RequirementBody:
             return ";"
         else:
             return "{\n" + "\n".join([child.dump() for child in self.items]) + "\n}"
-        
+
+
 class RequirementBodyItem:
     # RequirementBodyItem :
     # 	  ownedRelationship = DefinitionBodyItem
@@ -228,28 +232,29 @@ class RequirementBodyItem:
     # ;
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
-            child = definition['ownedRelationship']
-            name = child['name']
-            if name == 'DefinitionBodyItem':
+            child = definition["ownedRelationship"]
+            name = child["name"]
+            if name == "DefinitionBodyItem":
                 self.child = DefinitionBodyItem(child)
-            elif name == 'SubjectMember':
+            elif name == "SubjectMember":
                 self.child = SubjectMember(child)
-            elif name == 'RequirementConstraintMember':
+            elif name == "RequirementConstraintMember":
                 self.child = RequirementConstraintMember(child)
-            elif name == 'FramedConcernMember':
+            elif name == "FramedConcernMember":
                 self.child = FramedConcernMember(child)
-            elif name == 'RequirementVerificationMember':
+            elif name == "RequirementVerificationMember":
                 self.child = RequirementVerificationMember(child)
-            elif name == 'ActorMember':
+            elif name == "ActorMember":
                 self.child = ActorMember(child)
-            elif name == 'StakeholderMember':
+            elif name == "StakeholderMember":
                 self.child = StakeholderMember(child)
-            else: # pragma: no cover
-                raise ValueError('Invalid child name')
+            else:  # pragma: no cover
+                raise ValueError("Invalid child name")
 
     def dump(self):
         return self.child.dump()
-    
+
+
 class SubjectMember:
     # SubjectMember :
     # 	prefix=MemberPrefix ownedRelatedElement = SubjectUsage
@@ -257,31 +262,35 @@ class SubjectMember:
     def __init__(self, definition):
         self.prefix = None
         if valid_definition(definition, self.__class__.__name__):
-            if definition['prefix'] is not None:
-                self.prefix = MemberPrefix(definition['prefix'])
-            self.child = SubjectUsage(definition['ownedRelatedElement'])
+            if definition["prefix"] is not None:
+                self.prefix = MemberPrefix(definition["prefix"])
+            self.child = SubjectUsage(definition["ownedRelatedElement"])
 
     def dump(self):
         if self.prefix is None:
             return self.child.dump()
         else:
             return " ".join([self.prefix.dump(), self.child.dump()])
-        
+
+
 class SubjectUsage:
     # SubjectUsage :
     # 	'subject' keyword+=UsageExtensionKeyword* usage=Usage
     # ;
     def __init__(self, definition):
-        self.subject = 'subject'
+        self.subject = "subject"
         self.keyword = []
         if valid_definition(definition, self.__class__.__name__):
-            for keyword in definition['keyword']:
+            for keyword in definition["keyword"]:
                 self.keyword.append(UsageExtensionKeyword(keyword))
-            self.child = Usage(definition['usage'])
+            self.child = Usage(definition["usage"])
 
     def dump(self):
-        return " ".join([self.subject]+[x.dump() for x in self.keyword]+[self.child.dump()])
-    
+        return " ".join(
+            [self.subject] + [x.dump() for x in self.keyword] + [self.child.dump()]
+        )
+
+
 class RequirementConstraintMember:
     # RequirementConstraintMember :
     # 	prefix=MemberPrefix kind = RequirementConstraintKind
@@ -290,11 +299,11 @@ class RequirementConstraintMember:
     def __init__(self, definition):
         self.prefix = None
         if valid_definition(definition, self.__class__.__name__):
-            if definition['prefix'] is not None:
-                self.prefix = MemberPrefix(definition['prefix'])
-            self.kind = RequirementConstraintKind(definition['kind'])
-            self.child = RequirementConstraintUsage(definition['ownedRelatedElement'])
-            
+            if definition["prefix"] is not None:
+                self.prefix = MemberPrefix(definition["prefix"])
+            self.kind = RequirementConstraintKind(definition["kind"])
+            self.child = RequirementConstraintUsage(definition["ownedRelatedElement"])
+
     def dump(self):
         output = []
         if self.prefix is not None:
@@ -302,7 +311,8 @@ class RequirementConstraintMember:
         output.append(self.kind.dump())
         output.append(self.child.dump())
         return " ".join(output)
-    
+
+
 class RequirementConstraintKind:
     #  RequirementConstraintKind :
     # 	assumption = 'assume' | requirement = 'require'
@@ -310,23 +320,30 @@ class RequirementConstraintKind:
     def __init__(self, definition):
         self.requirement = None
         if valid_definition(definition, self.__class__.__name__):
-            if definition['assumption'] == 'assume' and definition['requirement'] == '':
+            if definition["assumption"] == "assume" and definition["requirement"] == "":
                 self.requirement = False
-            elif definition['assumption'] == '' and definition['requirement']=='require':
+            elif (
+                definition["assumption"] == ""
+                and definition["requirement"] == "require"
+            ):
                 self.requirement = True
-            else: #pragma: no cover
-                print(definition['assumption'] == '' and definition['requirement']=='require')
+            else:  # pragma: no cover
+                print(
+                    definition["assumption"] == ""
+                    and definition["requirement"] == "require"
+                )
                 raise ValueError
-            
+
     def dump(self):
         if self.requirement is not None:
             if self.requirement:
-                return 'require'
+                return "require"
             else:
-                return 'assume'
-        else: # pragma: no cover
+                return "assume"
+        else:  # pragma: no cover
             raise ValueError
-            
+
+
 class RequirementConstraintUsage:
     # RequirementConstraintUsage :
     #     (
@@ -346,29 +363,33 @@ class RequirementConstraintUsage:
     def __init__(self, definition):
         self.reference = None
         if valid_definition(definition, self.__class__.__name__):
-            if definition['ownedRelationship'] is not None:
+            if definition["ownedRelationship"] is not None:
                 # Type 1
-                self.reference = OwnedReferenceSubsetting(definition['ownedRelationship'])
+                self.reference = OwnedReferenceSubsetting(
+                    definition["ownedRelationship"]
+                )
                 self.fs = []
-                for child in definition['fs']:
+                for child in definition["fs"]:
                     self.fs.append(FeatureSpecialization(child))
-                self.body = RequirementBody(definition['body'])
-                
+                self.body = RequirementBody(definition["body"])
+
             else:
                 self.keyword = []
                 self.declaration = None
-                if len(definition['keyword2']) == 0:
-                    for keyword in definition['keyword1']:
+                if len(definition["keyword2"]) == 0:
+                    for keyword in definition["keyword1"]:
                         self.keyword.append(UsageExtensionKeyword(keyword))
-                    self.constraint = 'constraint'
+                    self.constraint = "constraint"
                 else:
-                    for keyword in definition['keyword2']:
+                    for keyword in definition["keyword2"]:
                         self.keyword.append(UsageExtensionKeyword(keyword))
                     self.constraint = None
-                if definition['declaration'] is not None:
-                    self.declaration = CalculationUsageDeclaration(definition['declaration'])
-                self.body = CalculationBody(definition['body'])
-                
+                if definition["declaration"] is not None:
+                    self.declaration = CalculationUsageDeclaration(
+                        definition["declaration"]
+                    )
+                self.body = CalculationBody(definition["body"])
+
     def dump(self):
         output = []
         if self.reference is not None:
@@ -384,8 +405,7 @@ class RequirementConstraintUsage:
                 output.append(self.declaration.dump())
             output.append(self.body.dump())
         return " ".join(filter(None, output))
-    
-    
+
 
 class ConstraintDefinition:
     # ConstraintDefinition :
@@ -1627,19 +1647,20 @@ class BehaviorUsageElement:
     def dump(self):
         return self.children.dump()
 
+
 class RequirementUsage:
     # RequirementUsage :
     # 	prefix=OccurrenceUsagePrefix RequirementUsageKeyword declaration=CalculationUsageDeclaration body=RequirementBody
     # ;
     def __init__(self, definition):
         self.prefix = None
-        self.keyword = 'requirement'
+        self.keyword = "requirement"
         if valid_definition(definition, self.__class__.__name__):
-            if definition['prefix'] is not None:
-                self.prefix = OccurrenceUsagePrefix(definition['prefix'])
-            self.declaration = CalculationUsageDeclaration(definition['declaration'])
-            self.body = RequirementBody(definition['body'])
-            
+            if definition["prefix"] is not None:
+                self.prefix = OccurrenceUsagePrefix(definition["prefix"])
+            self.declaration = CalculationUsageDeclaration(definition["declaration"])
+            self.body = RequirementBody(definition["body"])
+
     def dump(self):
         output = []
         if self.prefix is not None:
@@ -1648,20 +1669,20 @@ class RequirementUsage:
         output.append(self.declaration.dump())
         output.append(self.body.dump())
         return " ".join(output)
-    
-    
+
+
 class PerformActionUsage:
     # PerformActionUsage :
     # 	prefix=OccurrenceUsagePrefix 'perform' declaration=PerformActionUsageDeclaration body=ActionBody
     # ;
     def __init__(self, definition):
         self.prefix = None
-        self.keyword = 'perform'
+        self.keyword = "perform"
         if valid_definition(definition, self.__class__.__name__):
-            if definition['prefix'] is not None:
-                self.prefix = OccurrenceUsagePrefix(definition['prefix'])
-            self.declaration = PerformActionUsageDeclaration(definition['declaration'])
-            self.body = ActionBody(definition['body'])
+            if definition["prefix"] is not None:
+                self.prefix = OccurrenceUsagePrefix(definition["prefix"])
+            self.declaration = PerformActionUsageDeclaration(definition["declaration"])
+            self.body = ActionBody(definition["body"])
 
     def dump(self):
         output = []
@@ -2612,6 +2633,7 @@ class NonOccurrenceUsageElement:
         output["ownedRelatedElement"] = self.children.get_definition()
         return output
 
+
 class ReferenceUsage:
     # ReferenceUsage :
     # 	prefix=RefPrefix ReferenceUsageKeyword usage=Usage
@@ -2621,8 +2643,8 @@ class ReferenceUsage:
         self.keyword = "ref"
         if valid_definition(definition, self.__class__.__name__):
             if definition["prefix"] is not None:
-                self.prefix = RefPrefix(definition['prefix'])
-            self.child = Usage(definition['usage'])
+                self.prefix = RefPrefix(definition["prefix"])
+            self.child = Usage(definition["usage"])
 
     def dump(self):
         output = []
@@ -2631,7 +2653,8 @@ class ReferenceUsage:
         output.append(self.keyword)
         output.append(self.child.dump())
         return " ".join(output)
-    
+
+
 class SatisfyRequirementUsage:
     # SatisfyRequirementUsage :
     # 	prefix=OccurrenceUsagePrefix (isAssert ?= 'assert')? ( isNegated ?= 'not' )? 'satisfy'
@@ -2643,42 +2666,42 @@ class SatisfyRequirementUsage:
     # ;
     def __init__(self, definition):
         self.prefix = None
-        self.keyword = ['satisfy']
+        self.keyword = ["satisfy"]
         self.ors = None
         self.valuepart = None
         if valid_definition(definition, self.__class__.__name__):
-            if definition['prefix'] is not None:
-                self.prefix = OccurrenceUsagePrefix(definition['prefix'])
-            if definition['isAssert']:
-                self.keyword.append('assert')
+            if definition["prefix"] is not None:
+                self.prefix = OccurrenceUsagePrefix(definition["prefix"])
+            if definition["isAssert"]:
+                self.keyword.append("assert")
             else:
                 self.keyword.append(None)
-            
-            if definition['isNegated']:
-                self.keyword.append('not')
+
+            if definition["isNegated"]:
+                self.keyword.append("not")
             else:
                 self.keyword.append(None)
-                
-            if definition['declaration'] is not None:
-                self.keyword.append('requirement')
-                self.declaration = UsageDeclaration(definition['declaration'])
+
+            if definition["declaration"] is not None:
+                self.keyword.append("requirement")
+                self.declaration = UsageDeclaration(definition["declaration"])
             else:
                 self.keyword.append(None)
-                self.ors = OwnedReferenceSubsetting(definition['ors'])
-                if definition['fsp'] is not None:
-                    self.fsp = FeatureSpecializationPart(definition['fsp'])
+                self.ors = OwnedReferenceSubsetting(definition["ors"])
+                if definition["fsp"] is not None:
+                    self.fsp = FeatureSpecializationPart(definition["fsp"])
                 else:
                     self.fsp = None
-            if definition['valuepart'] is not None:
-                self.valuepart = ValuePart(definition['valuepart'])
-            if definition['ssm'] is not None:
-                self.keyword.append('by')
-                self.ssm = SatisfactionSubjectMember(definition['ssm'])
+            if definition["valuepart"] is not None:
+                self.valuepart = ValuePart(definition["valuepart"])
+            if definition["ssm"] is not None:
+                self.keyword.append("by")
+                self.ssm = SatisfactionSubjectMember(definition["ssm"])
             else:
                 self.keyword.append(None)
                 self.ssm = None
-            self.body = RequirementBody(definition['body'])
-            
+            self.body = RequirementBody(definition["body"])
+
     def dump(self):
         output = []
         if self.prefix is not None:
@@ -2702,27 +2725,30 @@ class SatisfyRequirementUsage:
         output.append(self.body.dump())
         return " ".join(filter(None, output))
 
+
 class SatisfactionSubjectMember:
     # SatisfactionSubjectMember :
     # 	ownedRelatedElement = SatisfactionParameter
     # ;
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
-            self.child = SatisfactionParameter(definition['ownedRelatedElement'])
-            
+            self.child = SatisfactionParameter(definition["ownedRelatedElement"])
+
     def dump(self):
         return self.child.dump()
-    
+
+
 class SatisfactionParameter:
     # SatisfactionParameter :
     # 	ownedRelationship = SatisfactionFeatureValue
     # ;
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
-            self.child = SatisfactionFeatureValue(definition['ownedRelationship'])
-            
+            self.child = SatisfactionFeatureValue(definition["ownedRelationship"])
+
     def dump(self):
         return self.child.dump()
+
 
 class SatisfactionFeatureValue:
     # SatisfactionFeatureValue :
@@ -2730,10 +2756,13 @@ class SatisfactionFeatureValue:
     # ;
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
-            self.child = SatisfactionReferenceExpression(definition['ownedRelatedElement'])
-            
+            self.child = SatisfactionReferenceExpression(
+                definition["ownedRelatedElement"]
+            )
+
     def dump(self):
         return self.child.dump()
+
 
 class SatisfactionReferenceExpression:
     # SatisfactionReferenceExpression :
@@ -2741,10 +2770,11 @@ class SatisfactionReferenceExpression:
     # ;
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
-            self.child = FeatureChainMember(definition['ownedRelatedElement'])
-            
+            self.child = FeatureChainMember(definition["ownedRelatedElement"])
+
     def dump(self):
         return self.child.dump()
+
 
 class Succession:
     def __init__(self, definition):

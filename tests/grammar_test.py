@@ -1640,7 +1640,8 @@ def test_Training_Requirements_Requirement_Definitions():
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
-    
+
+
 def test_Training_Requirements_Requirement_Groups():
     text = """package 'Requirement Groups' {
     	import 'Requirement Definitions'::*;
@@ -1678,7 +1679,8 @@ def test_Training_Requirements_Requirement_Groups():
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
-    
+
+
 def test_Training_Requirements_Requirement_Satisfaction():
     text = """package 'Requirement Satisfaction' {
     	import 'Requirement Groups'::*;
@@ -1709,7 +1711,8 @@ def test_Training_Requirements_Requirement_Satisfaction():
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
-    
+
+
 def test_Training_Requirements_Requirement_Usages():
     text = """package 'Requirement Usages' {
     	import SI::*;
