@@ -524,7 +524,7 @@ DefaultReferenceUsage:
 ;
 
 ReferenceUsage:
-	RefPrefix ReferenceUsageKeyword Usage
+	prefix=RefPrefix ReferenceUsageKeyword usage=Usage
 ;
 
 VariantReference:
@@ -612,7 +612,7 @@ ExtendedDefinition:
 ;
 
 ExtendedUsage:
-	BasicUsagePrefix UsageExtensionKeyword+ Usage
+	prefix=BasicUsagePrefix keyword+=UsageExtensionKeyword+ usage=Usage
 ;
 
 AttributeKeyword:
@@ -1735,34 +1735,34 @@ RequirementDefKeyword:
 ;
 
 RequirementDefinition:
-	OccurrenceDefinitionPrefix RequirementDefKeyword DefinitionDeclaration RequirementBody
+	prefix=OccurrenceDefinitionPrefix RequirementDefKeyword declaration=DefinitionDeclaration body=RequirementBody
 ;
 
 RequirementBody:
-	  ';' | '{' RequirementBodyItem* '}'
+	  ';' | '{' item+=RequirementBodyItem* '}'
 ;
 
 RequirementBodyItem:
-	  DefinitionBodyItem
-	| ownedRelationship += SubjectMember
-	| ownedRelationship += RequirementConstraintMember
-	| ownedRelationship += FramedConcernMember
-	| ownedRelationship += RequirementVerificationMember
-	| ownedRelationship += ActorMember
-	| ownedRelationship += StakeholderMember
+	  ownedRelationship = DefinitionBodyItem
+	| ownedRelationship = SubjectMember
+	| ownedRelationship = RequirementConstraintMember
+	| ownedRelationship = FramedConcernMember
+	| ownedRelationship = RequirementVerificationMember
+	| ownedRelationship = ActorMember
+	| ownedRelationship = StakeholderMember
 ;
 
 SubjectMember:
-	MemberPrefix ownedRelatedElement += SubjectUsage
+	prefix=MemberPrefix ownedRelatedElement = SubjectUsage
 ;
 
 SubjectUsage:
-	'subject' UsageExtensionKeyword* Usage
+	'subject' keyword+=UsageExtensionKeyword* usage=Usage
 ;
 
 RequirementConstraintMember:
-	MemberPrefix kind = RequirementConstraintKind
-	ownedRelatedElement += RequirementConstraintUsage
+	prefix=MemberPrefix kind = RequirementConstraintKind
+	ownedRelatedElement = RequirementConstraintUsage
 ;
 
 RequirementConstraintKind:
@@ -1770,10 +1770,19 @@ RequirementConstraintKind:
 ;
 
 RequirementConstraintUsage:
-      ownedRelationship += OwnedReferenceSubsetting FeatureSpecialization*
-      RequirementBody
-    | ( UsageExtensionKeyword* ConstraintUsageKeyword | UsageExtensionKeyword+ )
-      CalculationUsageDeclaration CalculationBody
+    (
+      ownedRelationship = OwnedReferenceSubsetting fs+=FeatureSpecialization*
+      body=RequirementBody
+    )
+    |
+    (
+      (
+        keyword1+=UsageExtensionKeyword* ConstraintUsageKeyword
+        |
+        keyword2+=UsageExtensionKeyword+
+      )
+      declaration=CalculationUsageDeclaration body=CalculationBody
+    )
 ;
 
 FramedConcernMember:
@@ -1815,33 +1824,32 @@ RequirementUsageKeyword:
 ;
 
 RequirementUsage:
-	OccurrenceUsagePrefix RequirementUsageKeyword CalculationUsageDeclaration RequirementBody
+	prefix=OccurrenceUsagePrefix RequirementUsageKeyword declaration=CalculationUsageDeclaration body=RequirementBody
 ;
 
 SatisfyRequirementUsage:
-	OccurrenceUsagePrefix 'assert'? ( isNegated ?= 'not' )? 'satisfy'
-	( ownedRelationship += OwnedReferenceSubsetting FeatureSpecializationPart?
-    | RequirementUsageKeyword UsageDeclaration?
-    )
-    ValuePart?
-    ( 'by' ownedRelationship += SatisfactionSubjectMember )?
-     RequirementBody
+	prefix=OccurrenceUsagePrefix (isAssert ?= 'assert')? ( isNegated ?= 'not' )? 'satisfy'
+	( ors = OwnedReferenceSubsetting fsp=FeatureSpecializationPart?
+    | RequirementUsageKeyword declaration=UsageDeclaration?
+  )
+  valuepart=ValuePart? ( 'by' ssm = SatisfactionSubjectMember )?
+  body=RequirementBody
 ;
 
 SatisfactionSubjectMember:
-	ownedRelatedElement += SatisfactionParameter
+	ownedRelatedElement = SatisfactionParameter
 ;
 
 SatisfactionParameter:
-	ownedRelationship += SatisfactionFeatureValue
+	ownedRelationship = SatisfactionFeatureValue
 ;
 
 SatisfactionFeatureValue:
-	ownedRelatedElement += SatisfactionReferenceExpression
+	ownedRelatedElement = SatisfactionReferenceExpression
 ;
 
 SatisfactionReferenceExpression:
-	ownedRelationship += FeatureChainMember
+	ownedRelationship = FeatureChainMember
 ;
 
 ConcernKeyword:
