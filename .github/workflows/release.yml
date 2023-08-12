@@ -47,6 +47,11 @@ jobs:
   versioning:
     name: Semantic Versioning
     runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/sysml2py
+    permissions:
+      id-token: write
     needs: [documentation, codecoverage]
     steps:
     - uses: actions/checkout@v3
@@ -62,7 +67,8 @@ jobs:
     - name: Publish package to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       if: ${{ steps.release.outputs.released }} == 'true'
-
+      with:
+        password: ${{ secrets.PYPI_API_TOKEN }}
     - name: Publish package to GitHub Release
       uses: python-semantic-release/upload-to-gh-release@main
       if: ${{ steps.release.outputs.released }} == 'true'
