@@ -1742,8 +1742,9 @@ def test_Training_Requirements_Requirement_Usages():
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
-    
-#32. Analysis
+
+
+# 32. Analysis
 def test_Training_Analysis_Analysis_Case_Definition_Example():
     text = """package 'Analysis Case Definition Example' {
     	import 'Calculation Definitions'::*;
@@ -1832,7 +1833,8 @@ def test_Training_Analysis_Analysis_Case_Definition_Example():
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
-    
+
+
 def test_Training_Analysis_Analysis_Case_Usage_Example():
     text = """package 'Analysis Case Usage Example' {
     	import 'Analysis Case Definition Example'::*;
@@ -1868,7 +1870,8 @@ def test_Training_Analysis_Analysis_Case_Usage_Example():
     a = loads(text)
     b = classtree(a)
     assert strip_ws(text) == strip_ws(b.dump())
-    
+
+
 def test_Training_Analysis_Trade_Study_Analysis_Example():
     text = """package 'Trade Study Analysis Example' {
     	import ScalarValues::Real;

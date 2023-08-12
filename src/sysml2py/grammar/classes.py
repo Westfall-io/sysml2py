@@ -185,7 +185,8 @@ class DefinitionElement:
         for item in self.children:
             output["ownedRelatedElement"] = item.get_definition()
         return output
-    
+
+
 class AnalysisCaseDefinition:
     # AnalysisCaseDefinition :
     # 	prefix=OccurrenceDefinitionPrefix AnalysisCaseDefKeyword
@@ -211,16 +212,17 @@ class AnalysisCaseDefinition:
             output.append(self.declaration.dump())
         output.append(self.body.dump())
         return " ".join(output)
-    
+
+
 class CaseBody:
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
             self.items = []
             for item in definition["item"]:
                 self.items.append(CaseBodyItem(item))
-                
-            if definition['ownedRelationship'] is not None:
-                self.child = ResultExpressionMember(definition['ownedRelationship'])
+
+            if definition["ownedRelationship"] is not None:
+                self.child = ResultExpressionMember(definition["ownedRelationship"])
             else:
                 self.child = None
 
@@ -232,8 +234,15 @@ class CaseBody:
                 output = [self.child.dump()]
             else:
                 output = [None]
-            return "{\n" + "\n".join(filter(None,[child.dump() for child in self.items]+output)) + "\n}"
-        
+            return (
+                "{\n"
+                + "\n".join(
+                    filter(None, [child.dump() for child in self.items] + output)
+                )
+                + "\n}"
+            )
+
+
 class CaseBodyItem:
     #  CaseBodyItem :
     # 	  ownedRelationship = CalculationBodyItem
@@ -258,14 +267,15 @@ class CaseBodyItem:
 
     def dump(self):
         return self.child.dump()
-    
+
+
 class ObjectiveMember:
     # ObjectiveMember :
     # 	prefix=MemberPrefix 'objective' ownedRelatedElement=ObjectiveRequirementUsage
     # ;
     def __init__(self, definition):
         self.prefix = None
-        self.keyword = 'objective'
+        self.keyword = "objective"
         if valid_definition(definition, self.__class__.__name__):
             if definition["prefix"] is not None:
                 self.prefix = MemberPrefix(definition["prefix"])
@@ -273,10 +283,11 @@ class ObjectiveMember:
 
     def dump(self):
         if self.prefix is None:
-            return " ".join([self.keyword,self.child.dump()])
+            return " ".join([self.keyword, self.child.dump()])
         else:
             return " ".join([self.prefix.dump(), self.keyword, self.child.dump()])
-        
+
+
 class ObjectiveRequirementUsage:
     # ObjectiveRequirementUsage :
     # 	keyword+=UsageExtensionKeyword* declaration=CalculationUsageDeclaration body=RequirementBody
@@ -287,7 +298,7 @@ class ObjectiveRequirementUsage:
             for keyword in definition["keyword"]:
                 self.keyword.append(UsageExtensionKeyword(keyword))
             self.declaration = CalculationUsageDeclaration(definition["declaration"])
-            self.body = RequirementBody(definition['body'])
+            self.body = RequirementBody(definition["body"])
 
     def dump(self):
         output = []
@@ -296,7 +307,6 @@ class ObjectiveRequirementUsage:
         output.append(self.declaration.dump())
         output.append(self.body.dump())
         return " ".join(output)
-    
 
 
 class RequirementDefinition:
@@ -1756,6 +1766,7 @@ class ResultExpressionMember:
         output.append(self.children.dump())
         return "".join(output)
 
+
 class AnalysisCaseUsage:
     # AnalysisCaseUsage :
     # 	prefix=OccurrenceUsagePrefix AnalysisCaseUsageKeyword
@@ -1778,8 +1789,7 @@ class AnalysisCaseUsage:
         output.append(self.declaration.dump())
         output.append(self.body.dump())
         return " ".join(output)
-    
-    
+
 
 class BehaviorUsageElement:
     def __init__(self, definition):
@@ -2334,6 +2344,7 @@ class CommentSysML:
                 return "comment " + self.identification.dump() + " " + self.body
             else:
                 import re
+
                 return re.sub("\n[\s]*", "\n", self.body)
 
 
@@ -3423,8 +3434,8 @@ class RangeExpression:
     def __init__(self, definition):
         if valid_definition(definition, self.__class__.__name__):
             self.additive = AdditiveExpression(definition["additive"])
-            self.operator = '..'
-            if definition['operand'] is not None:
+            self.operator = ".."
+            if definition["operand"] is not None:
                 self.operand = AdditiveExpression(definition["operand"])
             else:
                 self.operand = None
@@ -3598,6 +3609,7 @@ class ExtentExpression:
         }
         return output
 
+
 class ReferenceTyping:
     # ReferenceTyping :
     # 	  type = QualifiedName
@@ -3608,7 +3620,7 @@ class ReferenceTyping:
 
     def dump(self):
         return self.child.dump()
-    
+
 
 class PrimaryExpression:
     def __init__(self, definition):
@@ -3628,18 +3640,19 @@ class PrimaryExpression:
             self.operand = []
 
             if not (definition["operand"] == [] and definition["operator"] == []):
-                for k,child in enumerate(definition["operator"]):
+                for k, child in enumerate(definition["operator"]):
                     self.operator.append(child)
-                    if child == '->':
-                        self.reference = ReferenceTyping(definition['ownedRelationship'][k])
-                    operand = definition['operand'][k]
+                    if child == "->":
+                        self.reference = ReferenceTyping(
+                            definition["ownedRelationship"][k]
+                        )
+                    operand = definition["operand"][k]
                     if operand["name"] == "SequenceExpression":
                         self.operand.append(SequenceExpression(operand))
                     elif operand["name"] == "BodyExpression":
                         self.operand.append(BodyExpression(operand))
                     elif operand["name"] == "ArgumentList":
                         self.operand.append(ArgumentList(operand))
-                        
 
     def dump(self):
         output = [self.base.dump()]
@@ -3654,9 +3667,11 @@ class PrimaryExpression:
 
             if v == "." or v == ".?":
                 output.append("{}{}".format(v, self.operand[k].dump()))
-            
-            if v == '->':
-                output.append("{}{}{}".format(v, self.reference.dump(), self.operand[k].dump()))
+
+            if v == "->":
+                output.append(
+                    "{}{}{}".format(v, self.reference.dump(), self.operand[k].dump())
+                )
 
         if self.children2 is not None:
             output.append("." + self.children2.dump())
@@ -4614,7 +4629,7 @@ class AttributeUsage:
         if definition is not None:
             if valid_definition(definition, self.__class__.__name__):
                 if definition["prefix"] is not None:
-                    self.prefix = UsagePrefix(definition['prefix'])
+                    self.prefix = UsagePrefix(definition["prefix"])
                 else:
                     self.prefix = None
                 self.usage = Usage(definition["usage"])
@@ -4623,9 +4638,9 @@ class AttributeUsage:
 
     def dump(self):
         if self.prefix is None:
-            return " ".join([self.keyword,self.usage.dump()])
+            return " ".join([self.keyword, self.usage.dump()])
         else:
-            return " ".join([self.prefix.dump(), self.keyword,self.usage.dump()])
+            return " ".join([self.prefix.dump(), self.keyword, self.usage.dump()])
 
     def get_definition(self):
         output = {"name": self.__class__.__name__, "prefix": None}
@@ -4635,7 +4650,8 @@ class AttributeUsage:
         output["usage"] = self.usage.get_definition()
 
         return output
-    
+
+
 class UsagePrefix:
     #  UsagePrefix :
     # 	prefix=BasicUsagePrefix usageKeyword += UsageExtensionKeyword*
@@ -4644,18 +4660,16 @@ class UsagePrefix:
         self.prefix = None
         self.keyword = []
         if valid_definition(definition, self.__class__.__name__):
-            if definition['prefix'] is not None:
-                self.prefix = BasicUsagePrefix(definition['prefix'])
-            for keyword in definition['usageKeyword']:
+            if definition["prefix"] is not None:
+                self.prefix = BasicUsagePrefix(definition["prefix"])
+            for keyword in definition["usageKeyword"]:
                 self.keyword.append(UsageExtensionKeyword(keyword))
 
     def dump(self):
         if self.prefix is not None:
-            return " ".join([self.prefix.dump()]+[x.dump() for x in self.keyword])    
+            return " ".join([self.prefix.dump()] + [x.dump() for x in self.keyword])
         else:
-            return " ".join([x.dump() for x in self.keyword])    
-        
-    
+            return " ".join([x.dump() for x in self.keyword])
 
 
 class PartUsage:
