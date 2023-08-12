@@ -50,8 +50,6 @@ jobs:
     environment:
       name: pypi
       url: https://pypi.org/p/sysml2py
-    permissions:
-      id-token: write
     needs: [documentation, codecoverage]
     steps:
     - uses: actions/checkout@v3
