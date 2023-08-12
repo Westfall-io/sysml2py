@@ -2,6 +2,15 @@
 
 
 
+## v0.5.1 (2023-08-12)
+
+### :ambulance:
+
+* :ambulance: Correct workflow yaml ([`8c410ee`](https://github.com/Westfall-io/sysml2py/commit/8c410ee7e486b7624e31d19faf94c6692b110f88))
+
+* :ambulance: Fix to upload to pypi ([`3309eb5`](https://github.com/Westfall-io/sysml2py/commit/3309eb5641f3671e6690bd61ac04b986c5d0a0c8))
+
+
 ## v0.5.0 (2023-08-12)
 
 ### :ambulance:
