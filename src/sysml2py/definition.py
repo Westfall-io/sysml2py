@@ -166,16 +166,16 @@ class Package:
             v = abc._get_definition(child="PackageBody")
             if isinstance(v, list):
                 for subchild in v:
-                    if subchild['name'] == 'PackageMember':
+                    if subchild["name"] == "PackageMember":
                         body.append(PackageMember(subchild).get_definition())
-                    elif subchild['name'] == 'AliasMember':
+                    elif subchild["name"] == "AliasMember":
                         body.append(AliasMember(subchild).get_definition())
             else:
-                if v['name'] == 'PackageMember':
+                if v["name"] == "PackageMember":
                     body.append(PackageMember(v).get_definition())
-                elif v['name'] == 'AliasMember':
+                elif v["name"] == "AliasMember":
                     body.append(AliasMember(v).get_definition())
-                    
+
         if len(body) > 0:
             self.grammar.body = PackageBody(
                 {"name": "PackageBody", "ownedRelationship": body}

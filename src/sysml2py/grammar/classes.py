@@ -9,7 +9,8 @@ Created on Sat Jun  3 12:37:27 2023
 import json
 import uuid as uuidlib
 
-UNDEFINED_NAME = 'UNDEFINED'
+UNDEFINED_NAME = "UNDEFINED"
+
 
 def valid_definition(definition, name):
     if isinstance(definition, dict):
@@ -5643,17 +5644,21 @@ class AliasMember:
             if valid_definition(definition, "AliasMember"):
                 if definition["prefix"] is not None:
                     self.prefix = MemberPrefix(definition["prefix"])
-    
+
                 self.body = RelationshipBody(definition["body"])
-    
+
                 self.memberShortName = definition["memberShortName"]
                 self.memberName = definition["memberName"]
                 self.memberElement = QualifiedName(definition["memberElement"])
         else:
-            self.body = RelationshipBody({'name':'RelationshipBody', 'ownedRelationship': []})
+            self.body = RelationshipBody(
+                {"name": "RelationshipBody", "ownedRelationship": []}
+            )
             self.memberShortName = None
             self.memberName = UNDEFINED_NAME
-            self.memberElement = QualifiedName({'name': 'QualifiedName', 'names': [UNDEFINED_NAME]})
+            self.memberElement = QualifiedName(
+                {"name": "QualifiedName", "names": [UNDEFINED_NAME]}
+            )
 
     def dump(self):
         if self.memberShortName is None:
@@ -5675,18 +5680,20 @@ class AliasMember:
             + self.memberElement.dump()
             + self.body.dump()
         )
-    
+
     def get_definition(self):
-        output = {"name": self.__class__.__name__,
-                  "memberShortName": self.memberShortName,
-                  "memberName": self.memberName,
-                  "memberElement": self.memberElement.get_definition(),
-                  "body": self.body.get_definition()}
+        output = {
+            "name": self.__class__.__name__,
+            "memberShortName": self.memberShortName,
+            "memberName": self.memberName,
+            "memberElement": self.memberElement.get_definition(),
+            "body": self.body.get_definition(),
+        }
         if self.prefix is not None:
             output["prefix"] = self.prefix.get_definition()
         else:
             output["prefix"] = None
-        
+
         return output
 
 
@@ -5702,13 +5709,12 @@ class RelationshipBody:
             return ";"
         else:
             return "{" + "\n".join([child.dump() for child in self.children]) + "}"
-        
+
     def get_definition(self):
-        output = {"name": self.__class__.__name__,
-                  "ownedRelationship": []}
+        output = {"name": self.__class__.__name__, "ownedRelationship": []}
         for child in self.children:
-            output['ownedRelationship'].append(child.get_definition())
-        
+            output["ownedRelationship"].append(child.get_definition())
+
         return output
 
 

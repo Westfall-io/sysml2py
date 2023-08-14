@@ -564,51 +564,55 @@ def test_attribute_nounits():
     q = classtree(loads(text))
 
     assert a.dump() == q.dump()
-    
+
+
 def test_alias_blank():
     a = Alias()
-    text = '''alias UNDEFINED for UNDEFINED;'''
-    
+    text = """alias UNDEFINED for UNDEFINED;"""
+
     q = classtree(loads(text))
 
     assert a.dump() == q.dump()
-    
+
+
 def test_alias_set_name():
-    a = Alias().set_name('Torque')
-    text = '''alias Torque for UNDEFINED;'''
-    
+    a = Alias().set_name("Torque")
+    text = """alias Torque for UNDEFINED;"""
+
     q = classtree(loads(text))
 
     assert a.dump() == q.dump()
-    
+
+
 def test_alias_set_alias_element():
-    a = Alias().set_name('Torque').set_alias_element("ISQ::TorqueValue")
-    text = '''alias Torque for ISQ::TorqueValue;'''
-    
+    a = Alias().set_name("Torque").set_alias_element("ISQ::TorqueValue")
+    text = """alias Torque for ISQ::TorqueValue;"""
+
     q = classtree(loads(text))
 
     assert a.dump() == q.dump()
-    
+
+
 def test_alias_get_name():
-    name = 'Torque'
+    name = "Torque"
     a = Alias().set_name(name)
 
     assert a.get_name() == name
-    
+
+
 def test_alias_package_member():
     p = Package()
-    a1 = Alias().set_name('Torque').set_alias_element("ISQ::TorqueValue")
-    p1 = Part(definition=True)._set_name('Automobile')
-    a2 = Alias().set_name('Car').set_alias_element("Automobile")
+    a1 = Alias().set_name("Torque").set_alias_element("ISQ::TorqueValue")
+    p1 = Part(definition=True)._set_name("Automobile")
+    a2 = Alias().set_name("Car").set_alias_element("Automobile")
     p._set_child(a1)._set_child(p1)._set_child(a2)
-    
-    text = '''package  {
+
+    text = """package  {
        alias Torque for ISQ::TorqueValue;
        part def Automobile ;
        alias Car for Automobile;
-    }'''
-    
+    }"""
+
     q = classtree(loads(text))
 
     assert p.dump() == q.dump()
-    

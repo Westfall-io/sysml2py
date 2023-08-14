@@ -8,12 +8,18 @@ Created on Sun Aug 13 22:02:57 2023
 import uuid as uuidlib
 
 from sysml2py.formatting import classtree
-from sysml2py.grammar.classes import AliasMember, OwnedAnnotation, RelationshipBody, QualifiedName
+from sysml2py.grammar.classes import (
+    AliasMember,
+    OwnedAnnotation,
+    RelationshipBody,
+    QualifiedName,
+)
+
 
 class Alias:
-    """ Alias used to indicate other names for members of this or
+    """Alias used to indicate other names for members of this or
     imported packages.
-    
+
     Attributes
     ----------
     name : str
@@ -22,7 +28,7 @@ class Alias:
         A list of child members for this object.
     grammar : AliasMember
         The main grammar member for this class
-        
+
     Methods
     -------
     dump(child=None)
@@ -33,13 +39,14 @@ class Alias:
         Get the long name of the alias
     set_alias_element()
         Set the element name that will have an alias.
-    
+
     """
+
     def __init__(self):
         self.name = str(uuidlib.uuid4())
         self.children = []
         self.grammar = AliasMember()
-        
+
     def _ensure_body(self):
         # Add children
         body = []
@@ -55,13 +62,12 @@ class Alias:
                 {"name": "RelationshipBody", "ownedRelationship": body}
             )
         return self
-    
+
     def _get_definition(self, child=None):
         self._ensure_body()
         package = self.grammar.get_definition()
-            
+
         if child is None:
-            
             package = {
                 "name": "PackageBodyElement",
                 "ownedRelationship": [package],
@@ -69,15 +75,15 @@ class Alias:
             }
 
         return package
-    
+
     def dump(self, child=None):
         """
         Output the text based version of this model.
-        
+
         Parameters
         ----------
         child : str, optional
-            Determines whether this object is a child or primary 
+            Determines whether this object is a child or primary
             element when outputting text. The default is None.
 
         Returns
@@ -87,11 +93,11 @@ class Alias:
 
         """
         return classtree(self._get_definition(child)).dump()
-    
-    def set_name(self, name:str, short=False):
+
+    def set_name(self, name: str, short=False):
         """
         Sets the name of this element which is an alias for another to
-        be named with the :func:`~sysml2py.Alias.set_alias_element` 
+        be named with the :func:`~sysml2py.Alias.set_alias_element`
         function.
 
         Parameters
@@ -128,8 +134,8 @@ class Alias:
 
         """
         return self.grammar.memberName
-    
-    def set_alias_element(self, name:str):
+
+    def set_alias_element(self, name: str):
         """
         Sets the name of the aliased element.
 
@@ -145,9 +151,6 @@ class Alias:
             be set.
 
         """
-        definition = {'name': "QualifiedName",
-                      'names': name.split('::')}
+        definition = {"name": "QualifiedName", "names": name.split("::")}
         self.grammar.memberElement = QualifiedName(definition)
         return self
-    
-    
