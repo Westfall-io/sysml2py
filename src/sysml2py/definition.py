@@ -15,6 +15,7 @@ from sysml2py.formatting import classtree
 from sysml2py.grammar.classes import (
     Identification,
     PackageMember,
+    AliasMember,
     PackageBody,
     RootNamespace,
 )
@@ -165,9 +166,16 @@ class Package:
             v = abc._get_definition(child="PackageBody")
             if isinstance(v, list):
                 for subchild in v:
-                    body.append(PackageMember(subchild).get_definition())
+                    if subchild['name'] == 'PackageMember':
+                        body.append(PackageMember(subchild).get_definition())
+                    elif subchild['name'] == 'AliasMember':
+                        body.append(AliasMember(subchild).get_definition())
             else:
-                body.append(PackageMember(v).get_definition())
+                if v['name'] == 'PackageMember':
+                    body.append(PackageMember(v).get_definition())
+                elif v['name'] == 'AliasMember':
+                    body.append(AliasMember(v).get_definition())
+                    
         if len(body) > 0:
             self.grammar.body = PackageBody(
                 {"name": "PackageBody", "ownedRelationship": body}

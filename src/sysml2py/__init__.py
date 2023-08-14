@@ -12,6 +12,7 @@ __version__ = "0.1.0"
 
 from sysml2py.usage import Item, Attribute, Part, Port
 from sysml2py.definition import Model, Package
+from sysml2py.member import Alias
 
 
 def enforce_grammar():  # pragma: no cover
