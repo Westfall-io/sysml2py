@@ -10,11 +10,20 @@ __all__ = ["load", "loads", "load_grammar"]
 __author__ = "Christopher Cox"
 __version__ = "0.1.0"
 
+# These are interchangable
 from sysml2py.usage import Item, Attribute, Part, Port
+# These are definition only
 from sysml2py.definition import Model, Package
 
 
 def enforce_grammar():  # pragma: no cover
+    """ Enforce grammar compiles the language for xtext
+
+    This opens each of the files: KerMLExpressions, KerML, and SysML and
+    makes a superfile with all of the definitions and strips the comments. This
+    includes changes made to shift from java textx to the python xtext library.
+
+    """
     import re
 
     comments_strip_rule = r"(?:(?:(?<!\\)(\/\/.*\n))|(?:\/\*(?:.|\n)*?\*\/))"
@@ -158,4 +167,11 @@ def load(fp):
 
 
 def loads(s: str):
+    """ Loads a model from string.
+
+    This shortcut function allows a user to build a model from a string by
+    first instantiating a base model class which builds out a default namespace
+    and then that model loads all elements underneath.
+
+    """
     return Model().load(s)
