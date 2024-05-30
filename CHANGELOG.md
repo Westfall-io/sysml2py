@@ -2,6 +2,25 @@
 
 
 
+## v0.5.3 (2024-05-30)
+
+### :memo:
+
+* :memo: Added full docstrings to init ([`0e06f1d`](https://github.com/Westfall-io/sysml2py/commit/0e06f1d73b476706eae4dddf02ff3e3b3c052ada))
+
+### Other
+
+* :green_heart: Updating release workflow as well ([`8c72ce9`](https://github.com/Westfall-io/sysml2py/commit/8c72ce97d613b4d59d0773bb8498cdeb8bbc992d))
+
+* :green_heart: Removing distribute ([`2dd552e`](https://github.com/Westfall-io/sysml2py/commit/2dd552e55097193d3cf6d181015c51a6b1fd795f))
+
+* :green_heart: Updating test script to ensure available resources for pytest ([`6a9c297`](https://github.com/Westfall-io/sysml2py/commit/6a9c29790e53f06e382d74f3b5e36bbfc1ed9de9))
+
+* :arrow_up: Fixing issue with dependencies for astropy ([`ac3b2ee`](https://github.com/Westfall-io/sysml2py/commit/ac3b2ee6965e899854d4e0f4f1946a61bd4f9e67))
+
+* :arrow_up: Fixing issue with dependencies and cython3 failing ([`bb4feb6`](https://github.com/Westfall-io/sysml2py/commit/bb4feb6b4227c40a6f4b0f3d6cb6d87e43ec3565))
+
+
 ## v0.5.2 (2023-08-12)
 
 ### :ambulance:
