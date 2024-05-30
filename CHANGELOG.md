@@ -10,6 +10,8 @@
 
 ### Other
 
+* :green_heart: Deployment fix and updates for pypi ([`ee89465`](https://github.com/Westfall-io/sysml2py/commit/ee894656417cdf5be5f2126f0374d15377bd12c6))
+
 * :green_heart: Updating release workflow as well ([`8c72ce9`](https://github.com/Westfall-io/sysml2py/commit/8c72ce97d613b4d59d0773bb8498cdeb8bbc992d))
 
 * :green_heart: Removing distribute ([`2dd552e`](https://github.com/Westfall-io/sysml2py/commit/2dd552e55097193d3cf6d181015c51a6b1fd795f))
