@@ -2559,9 +2559,9 @@ class DefinitionDeclaration:
             output["identification"] = self.identification.get_definition()
 
         if self.subclassificationpart is not None:
-            output[
-                "subclassificationpart"
-            ] = self.subclassificationpart.get_definition()
+            output["subclassificationpart"] = (
+                self.subclassificationpart.get_definition()
+            )
 
         return output
 
