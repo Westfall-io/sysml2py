@@ -7,12 +7,13 @@ build-backend = "poetry.core.masonry.api"
 [project]
 name = "sysml2py"
 version = "0.5.2"
+description = "SysML v2.0 Parser"
 authors = [
   { name="Christopher Cox", email="chris.cox@westfall.io" },
 ]
-description = "SysML v2.0 Parser"
 readme = "README.md"
 requires-python = ">=3.7"
+license = {text = "MIT License"}
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Programming Language :: Python :: 3",
