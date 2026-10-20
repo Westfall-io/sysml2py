@@ -2,12 +2,12 @@
 
 **A pure-Python library for building SysML v2 models — generated, not handcrafted.**
 
-`sysml2py` is a drop-in Python API for constructing SysML v2 textual models.
+`sysml2py` is a pure-Python API for constructing SysML v2 textual models.
 You write Python; it emits spec-correct `.sysml` notation. Its AST node
-classes, builder API, and printer are **deterministically generated** from the
-SysML v2 grammar by a companion project (`sysml2py-lab`) — so the library
-stays in lockstep with the language instead of drifting behind a hand-written
-parser.
+classes, builder API, and printer are **deterministically generated** by a
+companion project (`sysml2py-lab`) from the SysML v2 grammar + relationship
+model + corpus — so the library stays in lockstep with the language instead
+of drifting behind a hand-written parser.
 
 ```python
 from sysml2py import PackageBuilder, Part, Attribute
@@ -66,10 +66,10 @@ language or the corpus changes, we regenerate.
   relationship-model, and corpus SHAs plus the generator version that
   produced the wheel — you can always prove *which* inputs your library came
   from.
-- **A cast that stays true.** Generated output is re-parsed and compared
-  element-for-element against the model that produced it, and validated
-  against an independent SysML v2 oracle — **if it doesn't round-trip, it
-  doesn't ship.**
+- **A cast that stays true (during generation).** Output the generator
+  produces is re-parsed and compared element-for-element against the model
+  that produced it, and validated against an independent SysML v2 oracle —
+  **if it doesn't round-trip, it doesn't ship.**
 
 ### Why generate instead of handcrafting it ourselves?
 
@@ -134,29 +134,44 @@ names (`PartUsageBuilder`, ...) remain available if you prefer them.
 
 ## Units
 
-Value-bearing attributes are first-class. Pass a value and a unit and the
-unit is imported automatically as a `public import` (KERML-74 requires an
-explicit visibility modifier):
+Value-bearing attributes are first-class. Pass a value and a unit; inside a
+container the library renders the SysML `[unit]` syntax and imports the unit
+automatically as a `public import` (KERML-74 requires an explicit visibility
+modifier):
 
 ```python
->>> Attribute('mass', value=1000, unit='kg').dump()
-'attribute mass = 1000[kg];'
+from sysml2py import PackageBuilder, Attribute
+
+pkg = PackageBuilder('Rocket')
+pkg.add(Attribute('mass', value=1000, unit='kg'))
+print(pkg.dump())
 ```
 
 ```sysml
-public import SI::kg;
-attribute mass = 1000[kg];
+package Rocket
+{
+   public import SI::kg;
+   attribute mass = 1000[kg];
+}
 ```
+
+> Note: a bare, childless attribute dumps without the import — the import is
+> hosted in a container's body, so the container form above is the one that
+> emits it:
+> `Attribute('mass', value=1000, unit='kg').dump()` → `attribute mass = 1000[kg];`
 
 You can also pass an astropy `Quantity` and the unit is derived from it:
 
 ```python
 import astropy.units as u
-Attribute('mass', value=1000 * u.kg)
+Attribute('mass', value=1000 * u.kg).dump()
 ```
 
-Since the runtime itself stays pure-stdlib, astropy is **not** bundled — add
-`import astropy.units as u` yourself if you use this form.
+The `unit='kg'` string path above is **pure standard library** — no astropy
+needed for that. Only the `Quantity` form requires astropy, and then you must
+**install** it (`pip install astropy`; it ships only in the `dev` extra) and
+`import astropy.units as u` yourself, since the sysml2py runtime stays
+pure-stdlib.
 
 ## Provenance & reproducibility
 
@@ -170,30 +185,46 @@ print(provenance.PROVENANCE)
 ```python
 {'grammar_sha256': '...', 'spec_sha256': '...',
  'children_sha256': '...', 'modifiers_sha256': '...',
- 'corpus_manifest_sha256': '...', 'generator_version': '1.0.0'}
+ 'corpus_manifest_sha256': '...', 'generator_version': '1.0.0',
+ 'generated_at': '...'}
 ```
 
 ## Also in the package
 
 The generated AST classes and helpers are all public: `Node` and its
 hundreds of subclasses, `walk` / `walk_preorder` / `walk_postorder` /
-`find_all` traversal, `printer` / `beautify`, `normalize_text`,
+`find_all` traversal, `print_model` / `beautify`, `normalize_text`,
 `canonical_equals` for structure-aware comparison, and the `*Builder`
 classes. See the [wiki](https://github.com/Westfall-io/sysml2py/wiki) for
 tutorials and deeper examples.
 
 ## Compatibility & migrating from 0.5.x
 
-This is the **1.x** line. The builder API *shape* you remember is preserved
-(`Part`, `Attribute`, `Item`, `Port`, `_set_name`, `_set_child`,
-`get_definition`, `dump()`), but there are deliberate breaking changes:
+This is the **1.x** line. The builder names you remember — `Part`,
+`Attribute`, `Item`, `Port` — are preserved (0.5.x already exported them),
+and `_set_name` / `_set_child` / `dump()` still work. But 1.0.0 is a
+ground-up rewrite, so several things changed deliberately:
 
-- **No runtime deps** — 0.5.x bundled astropy; 1.0.0 does not. Add
-  `import astropy.units as u` yourself where you use units.
-- **Usage vs. definition chosen at creation** via `kind=` (0.5.x inferred it
-  differently); friendly names drop the `Builder`/`Usage`/`Definition`
-  suffixes.
-- `set_value` is gone — pass `value=` / `unit=` to the builder constructor.
+- **No text parser / no `Model`.** 0.5.x's headline feature was parsing text
+  into a model (`load`, `loads`, `load_grammar`). 1.0.0 is a **builder
+  library** — it constructs models in Python and dumps them to text; it does
+  not parse text back. `Model` is gone.
+- **No runtime deps.** 0.5.x bundled astropy; 1.0.0 pulls nothing beyond the
+  stdlib. Add astropy to your own project only if you use the `Quantity`
+  convenience for units.
+- **`Package` changed meaning.** In 0.5.x `from sysml2py import Package` was
+  a package *builder*; in 1.0.0 it is the generated AST **node** class. For a
+  builder use `PackageBuilder`.
+- **Usage vs. definition chosen at creation** via `kind=`. (In 0.5.x the
+  first positional argument was a `definition` boolean, so `Part('X')` bound
+  `'X'` to that boolean rather than to the name — a silent break.)
+- **Friendly names drop the** `Builder`/`Usage`/`Definition` **suffixes**
+  (`PartUsageBuilder` is now just `Part`, etc.). Container names that collide
+  with AST node classes keep `*Builder` (`PackageBuilder`, ...).
+- **`set_value` / `get_value` / `set_direction` are gone** — pass `value=` /
+  `unit=` to the builder constructor instead.
+- **`get_definition` moved to `Node`** — on a builder it is
+  `build_node().get_definition()`.
 
 For the full step-by-step migration guide, see
 [**migration-0.5-to-1.0.md**](https://github.com/Westfall-io/sysml2py-lab/blob/main/docs/migration-0.5-to-1.0.md)
