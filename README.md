@@ -160,18 +160,28 @@ package Rocket
 > emits it:
 > `Attribute('mass', value=1000, unit='kg').dump()` → `attribute mass = 1000[kg];`
 
-You can also pass an astropy `Quantity` and the unit is derived from it:
+You can also pass a **pint** or **astropy** `Quantity` and the unit is derived
+from it — either integrates as a drop-in convenience:
 
 ```python
+# pint
+import pint
+ureg = pint.UnitRegistry()
+Attribute('mass', value=1000 * ureg.kg).dump()      # attribute mass = 1000[kg];
+
+# astropy (the original Quantity integration, still supported)
 import astropy.units as u
-Attribute('mass', value=1000 * u.kg).dump()
+Attribute('mass', value=1000 * u.kg).dump()          # attribute mass = 1000[kg];
 ```
 
-The `unit='kg'` string path above is **pure standard library** — no astropy
-needed for that. Only the `Quantity` form requires astropy, and then you must
-**install** it (`pip install astropy`; it ships only in the `dev` extra) and
-`import astropy.units as u` yourself, since the sysml2py runtime stays
-pure-stdlib.
+Both derive the unit from the quantity object and render composite units
+faithfully (e.g. `9.8 * ureg.m / ureg.s**2` → `attribute accel = 9.8[m/s**2];`).
+
+The `unit='kg'` string path above is **pure standard library** — no
+astropy or pint needed for that. Only the `Quantity` forms require you to
+**install** the respective library (`pip install pint` or
+`pip install astropy`; both ship only in the `dev` extra) and import it
+yourself, since the sysml2py runtime stays pure-stdlib.
 
 ## Provenance & reproducibility
 

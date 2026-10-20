@@ -1296,6 +1296,90 @@ _UNIT_SYSML_NAME: dict[str, str] = {
     "gallon": "gal",  # astropy imperial.gallon base name -> `gal` (corpus `[mi / gal]`)
 }
 
+# pint full-name -> the SysML MEMBER name (W2-5).  pint's `_units` dict keys
+# are FULL names (`kilogram`, `meter`, `second`) with no aliases to strip;
+# this is the pint analogue of `_UNIT_SYSML_NAME`.  Names absent here use the
+# full name unchanged (e.g. `minute` -> `minute` is NOT what SysML wants —
+# see `_PINT_UNIT_NAMESPACE`; we map the SI/imperial set explicitly).
+_PINT_UNIT_SYSML_NAME: dict[str, str] = {
+    # SI base + derived — pint full name -> compact SysML member name
+    "kilogram": "kg",
+    "gram": "g",
+    "metric_ton": "t",
+    "meter": "m",
+    "kilometer": "km",
+    "centimeter": "cm",
+    "millimeter": "mm",
+    "second": "s",
+    "minute": "min",
+    "hour": "h",
+    "millisecond": "ms",
+    "microsecond": "us",
+    "nanosecond": "ns",
+    "day": "d",
+    "newton": "N",
+    "pascal": "Pa",
+    "joule": "J",
+    "watt": "W",
+    "volt": "V",
+    "ampere": "A",
+    "kelvin": "K",
+    "mole": "mol",
+    "candela": "cd",
+    "radian": "rad",
+    "steradian": "sr",
+    "hertz": "Hz",
+    "coulomb": "C",
+    "farad": "F",
+    "ohm": "Ohm",
+    "siemens": "S",
+    "tesla": "T",
+    "henry": "H",
+    "lumen": "lm",
+    "lux": "lx",
+    "becquerel": "Bq",
+    "gray": "Gy",
+    "sievert": "Sv",
+    "katal": "kat",
+    "percent": "%",
+    # imperial / US customary
+    "mile": "mi",
+    "foot": "ft",
+    "yard": "yd",
+    "inch": "in",  # SysML keyword -> quoted
+    "gallon": "gal",
+    "pound": "lb",
+    "ounce": "oz",
+}
+
+# pint full-name -> SysML namespace owning it (Option A import target).
+# This mirrors `_UNIT_NAMESPACE` for pint's full-name keys.  Names absent
+# here raise (fail-loud, same as the astropy path — never emit a silently
+# wrong model).
+_PINT_UNIT_NAMESPACE: dict[str, str] = {
+    "kilogram": "SI", "gram": "SI", "metric_ton": "SI",
+    "meter": "SI", "kilometer": "SI", "centimeter": "SI", "millimeter": "SI",
+    "second": "SI", "minute": "SI", "hour": "SI", "millisecond": "SI",
+    "microsecond": "SI", "nanosecond": "SI", "day": "SI",
+    "newton": "SI", "pascal": "SI", "joule": "SI", "watt": "SI",
+    "volt": "SI", "ampere": "SI", "kelvin": "SI", "mole": "SI",
+    "candela": "SI", "radian": "SI", "steradian": "SI", "hertz": "SI",
+    "coulomb": "SI", "farad": "SI", "ohm": "SI", "siemens": "SI",
+    "tesla": "SI", "henry": "SI", "lumen": "SI", "lux": "SI",
+    "becquerel": "SI", "gray": "SI", "sievert": "SI", "katal": "SI",
+    "percent": "SI",
+    "mile": "USCustomaryUnits", "foot": "USCustomaryUnits",
+    "yard": "USCustomaryUnits", "inch": "USCustomaryUnits",
+    "gallon": "USCustomaryUnits", "pound": "USCustomaryUnits",
+    "ounce": "USCustomaryUnits",
+}
+
+# Distinguish a pint Quantity from an astropy Quantity WITHOUT importing
+# either: pint exposes `.units` (not `.unit`), and its Unit exposes `._units`
+# (a dict of full-name -> exponent).  astropy exposes `.unit` + `.unit.bases`.
+_PINT_UNITS_ATTR = "_units"
+_PINT_QUANTITY_ATTR = "units"
+
 # SysML keywords that are NOT valid bare IDs and so must be 'quoted' when used
 # as a member name in a unit bracket / import (W2-4).
 _UNIT_KEYWORD_NAMES = frozenset(
@@ -1706,6 +1790,48 @@ class Builder:
             return "true" if value else "false", None
         if isinstance(value, (int, float)):
             return str(value).removesuffix(".0"), None
+        # duck-typed pint Quantity (has ``.magnitude``, ``.units``, and its
+        # Unit exposes ``._units`` — a dict of FULL unit name -> exponent).
+        # pint folds any scale into the magnitude, so there is no separate
+        # ``.scale`` to fail on (unlike astropy).  Map pint's full names to
+        # SysML member names + namespaces, then reuse the SAME bracket builder
+        # as the string/astropy paths so all three render identically.
+        if hasattr(value, "units") and hasattr(value.units, _PINT_UNITS_ATTR):
+            pint_dict = getattr(value.units, _PINT_UNITS_ATTR)
+            if not isinstance(pint_dict, dict):
+                pint_dict = dict(pint_dict)
+            bases: list[str] = []
+            powers: list[int] = []
+            for full_name, exponent in pint_dict.items():
+                full_name = str(full_name)
+                # fail-loud: an unknown pint unit has no SysML namespace —
+                # never emit a silently-wrong model (same rule as astropy)
+                if full_name not in _PINT_UNIT_NAMESPACE:
+                    raise ValueError(
+                        f"pint unit {full_name!r} has no known SysML namespace; "
+                        f"decompose to base units (e.g. q.to_base_units()) or "
+                        f"pass a named unit the library knows"
+                    )
+                power = exponent
+                if int(power) != power:
+                    raise ValueError(
+                        f"pint unit power {power!r} on {full_name!r} is not an "
+                        f"integer; fractional powers cannot be rendered "
+                        f"faithfully in SysML"
+                    )
+                bases.append(_PINT_UNIT_SYSML_NAME.get(full_name, full_name))
+                powers.append(int(power))
+            raw = value.magnitude
+            if hasattr(raw, "shape") and getattr(raw, "shape", None):
+                raise ValueError(
+                    f"value= Quantity is non-scalar (shape="
+                    f"{raw.shape}); only scalar quantities are supported"
+                )
+            bracket = _build_unit_bracket(bases, powers)
+            if not bases:
+                # dimensionless pint Quantity (empty _units) -> no unit
+                return str(raw).removesuffix(".0"), None
+            return str(raw).removesuffix(".0"), (bracket, bases)
         # duck-typed astropy Quantity
         if (
             hasattr(value, "value")
