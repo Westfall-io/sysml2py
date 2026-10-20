@@ -150,6 +150,50 @@ def test_attribute_value_unit_derived_from_quantity():
     assert "attribute mass = 1000[kg];" in out
 
 
+def test_attribute_value_unit_derived_from_pint_quantity():
+    """pint Quantity support (parallel to astropy): unit derived from pint."""
+    pytest.importorskip("pint")
+    import pint
+
+    ureg = pint.UnitRegistry()
+    sysml2py = _package()
+
+    # simple SI unit
+    p = sysml2py.PackageBuilder("R")
+    p.add(sysml2py.Attribute("mass", value=1000 * ureg.kg))
+    out = p.dump()
+    assert "attribute mass = 1000[kg];" in out
+    assert "public import SI::kg;" in out
+
+    # composite unit (m/s**2) — pint folds scale into magnitude
+    p2 = sysml2py.PackageBuilder("R2")
+    p2.add(sysml2py.Attribute("accel", value=9.8 * ureg.m / ureg.s**2))
+    out2 = p2.dump()
+    assert "attribute accel = 9.8[m/s**2];" in out2
+
+    # imperial unit namespacing
+    p3 = sysml2py.PackageBuilder("R3")
+    p3.add(sysml2py.Attribute("vol", value=2 * ureg.gallon))
+    out3 = p3.dump()
+    assert "attribute vol = 2[gal];" in out3
+    assert "public import USCustomaryUnits::gal;" in out3
+
+    # dimensionless pint Quantity carries no unit
+    a = sysml2py.Attribute("cnt", value=3 * ureg.dimensionless)
+    assert a.dump() == "attribute cnt = 3;"
+
+
+def test_pint_quantity_matches_explicit_unit():
+    """pint Quantity + matching explicit unit= is accepted (no conflict)."""
+    pytest.importorskip("pint")
+    import pint
+
+    ureg = pint.UnitRegistry()
+    sysml2py = _package()
+    a = sysml2py.Attribute("x", value=5 * ureg.m, unit="m")
+    assert a.dump() == "attribute x = 5[m];"
+
+
 # ---------------------------------------------------------------------------
 # Provenance + self-containment (issue #13, AC8)
 # ---------------------------------------------------------------------------
@@ -198,7 +242,7 @@ def test_import_graph_has_no_forbidden_runtime_deps():
         "import sys\n"
         "import sysml2py\n"
         "loaded = {m.split('.')[0] for m in sys.modules}\n"
-        "forbidden = {'textx', 'astropy', 'yaml', 'sysml2py_lab'}\n"
+        "forbidden = {'textx', 'astropy', 'yaml', 'pint', 'sysml2py_lab'}\n"
         "bad = sorted(forbidden & loaded)\n"
         "assert not bad, f'forbidden runtime deps: {bad}'\n"
         "print('OK', sysml2py.__version__)\n"
