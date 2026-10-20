@@ -5,7 +5,7 @@ dependency at runtime — AC8 of the generation epic: the distributed library
 must not import lab code or the corpus).
 
 The deep emit -> parse-back casting lives in the lab's suite
-(sysml2py2py-lab tests/test_ast_codegen.py, 268 tests + regress harness).
+(sysml2py-lab tests/test_ast_codegen.py, 268 tests + regress harness).
 Here we verify the shipped guarantees:
   - friendly builder API (issue #27)
   - import visibility emission (KERML-74, issue #23)
@@ -37,11 +37,25 @@ def _package():
 # ---------------------------------------------------------------------------
 
 
-def test_friendly_names_are_builders():
+def test_friendly_names_emit_expected_keyword():
+    """Issue #27: friendly names exist and emit the correct SysML keyword.
+    This catches the `use_case S;` class of bug (wrong keyword for the kind).
+    """
     sysml2py = _package()
-    for name in ("Part", "Attribute", "Item", "Port", "Requirement", "Reference"):
+    expected = {
+        "Part": "part",
+        "Attribute": "attribute",
+        "Item": "item",
+        "Port": "port",
+        "Requirement": "requirement",
+        "Reference": "reference",
+    }
+    for name, keyword in expected.items():
         cls = getattr(sysml2py, name)
         assert issubclass(cls, sysml2py.Builder), f"{name} not a Builder"
+        assert (
+            cls("S").dump().lstrip().startswith(keyword)
+        ), f"{name} emitted wrong keyword: {cls('S').dump()!r}"
 
 
 def test_kind_selection_usage_vs_definition():
@@ -163,8 +177,16 @@ def sysml2py_version():
     return sysml2py.__version__
 
 
-def test_version_is_100():
-    assert sysml2py_version() == "1.0.0"
+def test_version_matches_metadata():
+    # derive from the packaged metadata, not a hard-coded string, so a v1.1.0
+    # tag doesn't fail the release suite
+    from importlib.metadata import PackageNotFoundError, version
+
+    try:
+        installed = version("sysml2py")
+    except PackageNotFoundError:
+        installed = sysml2py_version()
+    assert sysml2py_version() == installed
 
 
 def test_import_graph_has_no_forbidden_runtime_deps():
@@ -187,19 +209,19 @@ def test_import_graph_has_no_forbidden_runtime_deps():
         cwd=PKG_ROOT,
     )
     assert proc.returncode == 0, proc.stderr
-    assert "OK 1.0.0" in proc.stdout
+    assert f"OK {sysml2py_version()}" in proc.stdout
 
 
-def test_wheel_ships_grammar_and_provenance():
-    """A built wheel must carry the .tx grammar resources + provenance."""
+def test_wheel_ships_provenance_only():
+    """A built wheel must carry provenance (and no dead .tx grammar)."""
     import glob
 
     wheels = glob.glob(str(PKG_ROOT / "dist" / "*.whl"))
     if not wheels:
-        pytest.skip("no wheel in dist/; run `python -m build` to test packaging")
+        pytest.skip("no wheel in dist/; branch CI builds to /tmp/ci-dist")
     names = set(zipfile.ZipFile(wheels[0]).namelist())
-    assert any(n.endswith(".tx") for n in names), "grammar .tx missing"
     assert any(n.endswith("provenance.py") for n in names), "provenance missing"
+    assert all(not n.endswith(".tx") for n in names), "unexpected .tx in wheel"
 
 
 # ---------------------------------------------------------------------------
@@ -215,7 +237,8 @@ def test_readme_example_casts_syntactically():
     stage.add(sysml2py.Attribute("thrust"))
     pkg.add(stage)
     out = pkg.dump()
-    assert "package MyModel {" in out or "package MyModel" in out
+    # the actual emission: braces on their own line, 3-space indent
+    assert "package MyModel\n{" in out, out
     assert "part Stage_1" in out
     assert "attribute mass;" in out
     assert "attribute thrust;" in out

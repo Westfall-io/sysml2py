@@ -8,8 +8,7 @@ Capabilities:
 - Membership-dispatch table from children.json
 - `dump()` / `get_definition()` on every node (loss-minimizing)
 - `Unsupported` nodes carry raw text (zero NotImplementedError)
-- Compiled grammar shipped as package data; provenance in
-  `sysml2py.provenance`
+- Provenance stamp in `sysml2py.provenance`
 
 ## Building a model (friendly builder API)
 
@@ -30,11 +29,13 @@ print(pkg.dump())
 ```
 
 ```
-package MyModel {
-  part Stage_1 {
-    attribute mass;
-    attribute thrust;
-  }
+package MyModel
+{
+   part Stage_1
+   {
+      attribute mass;
+      attribute thrust;
+   }
 }
 ```
 
