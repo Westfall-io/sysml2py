@@ -1,31 +1,27 @@
 name: Format code
 
+# The library is DETERMINISTICALLY GENERATED — byte-identity with the lab's
+# `sysml2py-lab generate` output is a hard contract, so this job only
+# VERIFIES formatting (never auto-commits rewritten bytes, which would break
+# the determinism guarantee).
+#
+# The generated src/ is guaranteed ruff-clean by the lab's own gate
+# (test_generated_code_passes_ruff); black's defaults differ from the
+# generator's emission preferences, so black --check applies to tests/ only.
+
 on:
   push:
     branches:
       - '*'
       - '!main'
 
-permissions: write-all
-
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: ":robot: Format code with black"
+      - uses: actions/checkout@v4
+      - name: Verify formatting (no rewrite)
         run: |
-          pip install black
-          black .
-      - name: Test ${{ github.event.push.head }} docstring coverage
-        run: |
-          pip install docstr-coverage
-          docstr-coverage src/sysml2py --badge=doc-cov --fail-under=0 -e ".*/(textx|tests)"
-      - name: Commit changes
-        uses: EndBug/add-and-commit@v4
-        with:
-          author_name: ${{ github.actor }}
-          author_email: ${{ github.actor }}@users.noreply.github.com
-          message: ":robot: Format code with black"
-          add: "."
-          branch: ${{ github.ref }}
+          pip install black ruff
+          black --check tests/
+          ruff check src/sysml2py tests/

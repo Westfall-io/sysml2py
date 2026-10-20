@@ -1,578 +1,297 @@
-/*****************************************************************************
- * SysML 2 Pilot Implementation
- * Copyright (c) 2018-2023 Model Driven Solutions, Inc.
- * Copyright (c) 2018 IncQuery Labs Ltd.
- * Copyright (c) 2019 Maplesoft (Waterloo Maple, Inc.)
- * Copyright (c) 2019 Mgnite Inc.
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *
- * @license LGPL-3.0-or-later <http://spdx.org/licenses/LGPL-3.0-or-later>
- *
- * Contributors:
- *  Ed Seidewitz, MDS
- *  Zoltan Kiss, IncQuery
- *  Balazs Grill, IncQuery
- *  Hisashi Miyashita, Maplesoft/Mgnite
- *
- *****************************************************************************/
-
-/* EXPRESSIONS */
-
-/* Operator Expressions */
-
-OwnedExpressionMember :
-	ownedRelatedElement = OwnedExpression
+OwnedExpressionMember:
+	ownedRelatedElement+=OwnedExpression
 ;
-
-OwnedExpression :
-	 expression=ConditionalExpression
+OwnedExpression:
+	ConditionalExpression
 ;
-
-// Conditional Test Expressions
-
-OwnedExpressionReference :
-	ownedRelationship += OwnedExpressionMember
+OwnedExpressionReference:
+	ownedRelationship+=OwnedExpressionMember
 ;
-
-ConditionalExpression :
-	  operand = NullCoalescingExpression
-	|  operator = ConditionalOperator operand += NullCoalescingExpression
-		  '?' operand += OwnedExpressionReference 'else' operand += OwnedExpressionReference
+ConditionalExpression:
+	NullCoalescingExpression |  operator=ConditionalOperator operand+=NullCoalescingExpression '?' operand+=OwnedExpressionReference 'else' operand+=OwnedExpressionReference
 ;
-
-ConditionalOperator :
+ConditionalOperator:
 	'if'
 ;
-
-// Null Coalescing Expressions
-
-NullCoalescingExpression :
-	implies = ImpliesExpression (
-		operator = NullCoalescingOperator operand += ImpliesExpressionReference )*
+NullCoalescingExpression:
+	ImpliesExpression ( operator=NullCoalescingOperator operand+=ImpliesExpressionReference)*
 ;
-
-NullCoalescingOperator :
+NullCoalescingOperator:
 	'??'
 ;
-
-// Logical Expressions
-
-ImpliesExpressionReference :
-	ownedRelationship += ImpliesExpressionMember
+ImpliesExpressionReference:
+	ownedRelationship+=ImpliesExpressionMember
 ;
-
-ImpliesExpressionMember :
-	ownedRelatedElement += ImpliesExpression
+ImpliesExpressionMember:
+	ownedRelatedElement+=ImpliesExpression
 ;
-
-ImpliesExpression :
-	or = OrExpression (
-		operator = ImpliesOperator operand += OrExpressionReference )*
+ImpliesExpression:
+	OrExpression ( operator=ImpliesOperator operand+=OrExpressionReference)*
 ;
-
-ImpliesOperator :
+ImpliesOperator:
 	'implies'
 ;
-
-OrExpressionReference :
-	ownedRelationship += OrExpressionMember
+OrExpressionReference:
+	ownedRelationship+=OrExpressionMember
 ;
-
-OrExpressionMember :
-	ownedRelatedElement += OrExpression
+OrExpressionMember:
+	ownedRelatedElement+=OrExpression
 ;
-
-OrExpression :
-	xor=XorExpression (
-		( operator = OrOperator operand += XorExpression
-		| operator = ConditionalOrOperator operand += XorExpressionReference ) )*
+OrExpression:
+	XorExpression ( (operator=OrOperator operand+=XorExpression | operator=ConditionalOrOperator operand+=XorExpressionReference))*
 ;
-
-OrOperator :
+OrOperator:
 	'|'
 ;
-
-ConditionalOrOperator :
+ConditionalOrOperator:
 	'or'
 ;
-
-XorExpressionReference :
-	ownedRelationship += XorExpressionMember
+XorExpressionReference:
+	ownedRelationship+=XorExpressionMember
 ;
-
-XorExpressionMember :
-	ownedRelatedElement += XorExpression
+XorExpressionMember:
+	ownedRelatedElement+=XorExpression
 ;
-
-XorExpression :
-	and=AndExpression (
-		operator = XorOperator operand += AndExpression )*
+XorExpression:
+	AndExpression ( operator=XorOperator operand+=AndExpression)*
 ;
-
-XorOperator :
+XorOperator:
 	'xor'
 ;
-
-AndOperand :
-  (operator = AndOperator operand = EqualityExpression)
-  |
-  (operator = ConditionalAndOperator operand = EqualityExpressionReference)
+AndExpression:
+	EqualityExpression ( (operator=AndOperator operand+=EqualityExpression | operator=ConditionalAndOperator operand+=EqualityExpressionReference))*
 ;
-
-AndExpression :
-	equality=EqualityExpression
-  (operation+=AndOperand)*
+AndOperator:
+	'&'
 ;
-
-AndOperator :
-    '&'
-;
-
-ConditionalAndOperator :
+ConditionalAndOperator:
 	'and'
 ;
-
-// Equality Expressions
-
-EqualityExpressionReference :
-	ownedRelationship = EqualityExpressionMember
+EqualityExpressionReference:
+	ownedRelationship+=EqualityExpressionMember
 ;
-
-EqualityExpressionMember :
-	ownedRelatedElement = EqualityExpression
+EqualityExpressionMember:
+	ownedRelatedElement+=EqualityExpression
 ;
-
-EqualityOperand:
-  operator=EqualityOperator operand=ClassificationExpression
+EqualityExpression:
+	ClassificationExpression ( operator=EqualityOperator operand+=ClassificationExpression)*
 ;
-
-EqualityExpression :
-	classification=ClassificationExpression
-  (operation+=EqualityOperand)*
-;
-
-EqualityOperator :
+EqualityOperator:
 	'==' | '!=' | '===' | '!=='
 ;
-
-// Classification Expressions
-
-ClassificationExpression :
-	  relational=RelationalExpression
-	  (
-	  	operator = ClassificationTestOperator ownedRelationship += TypeReferenceMember
-	  |
-	    operator = CastOperator ownedRelationship += TypeResultMember
-	  )?
-	|  operand += SelfReferenceExpression
-	  operator = ClassificationTestOperator ownedRelationship += TypeReferenceMember
-	|  operand += MetadataReference
-	  operator = MetaClassificationTestOperator ownedRelationship += TypeReferenceMember
-	|  operand += SelfReferenceExpression
-	  operator = CastOperator ownedRelationship += TypeResultMember
-	|  operand += MetadataReference
-	  operator = MetaCastOperator ownedRelationship += TypeResultMember
+ClassificationExpression:
+	RelationalExpression ( operator=ClassificationTestOperator ownedRelationship+=TypeReferenceMember |  operator=CastOperator ownedRelationship+=TypeResultMember)? |  operand+=SelfReferenceExpression operator=ClassificationTestOperator ownedRelationship+=TypeReferenceMember |  operand+=MetadataReference operator=MetaClassificationTestOperator ownedRelationship+=TypeReferenceMember |  operand+=SelfReferenceExpression operator=CastOperator ownedRelationship+=TypeResultMember |  operand+=MetadataReference operator=MetaCastOperator ownedRelationship+=TypeResultMember
 ;
-
-ClassificationTestOperator :
+ClassificationTestOperator:
 	'hastype' | 'istype' | '@'
 ;
-
-MetaClassificationTestOperator :
+MetaClassificationTestOperator:
 	'@@'
 ;
-
-CastOperator :
-    'as'
+CastOperator:
+	'as'
 ;
-
-MetaCastOperator :
+MetaCastOperator:
 	'meta'
 ;
-
-MetadataReference :
-	referencedElement = QualifiedName
+MetadataReference:
+	referencedElement=[SysML::Element|QualifiedName]
 ;
-
-TypeReferenceMember :
-	ownedRelatedElement += TypeReference
+TypeReferenceMember:
+	ownedRelatedElement+=TypeReference
 ;
-
-TypeResultMember :
-	ownedRelatedElement += TypeReference
+TypeResultMember:
+	ownedRelatedElement+=TypeReference
 ;
-
-TypeReference :
-	ownedRelationship += ReferenceTyping
+TypeReference:
+	ownedRelationship+=ReferenceTyping
 ;
-
-ReferenceTyping :
-	  type = QualifiedName
+ReferenceTyping:
+	type=[SysML::Type|QualifiedName]
 ;
-
-SelfReferenceExpression :
-	ownedRelationship += SelfReferenceMember
+SelfReferenceExpression:
+	ownedRelationship+=SelfReferenceMember
 ;
-
-SelfReferenceMember :
-	ownedRelatedElement += EmptyFeature
+SelfReferenceMember:
+	ownedRelatedElement+=EmptyFeature
 ;
-
-EmptyFeature ://This doesn't work.
-	'emptyfeature'
+EmptyFeature:
+		'empty feature'
 ;
-
-// Relational Expressions
-RelationalOperand:
-  operator=RelationalOperator operand=RangeExpression
+RelationalExpression:
+	RangeExpression ( operator=RelationalOperator operand+=RangeExpression)*
 ;
-
-RelationalExpression :
-	range=RangeExpression operation+=RelationalOperand*
+RelationalOperator:
+	'<' | '>' | '<=' | '>='
 ;
-
-RelationalOperator :
-	'<=' | '>=' | '<' | '>'
+RangeExpression:
+	AdditiveExpression ( operator='..' operand+=AdditiveExpression)?
 ;
-
-// Range Expressions
-
-RangeExpression :
-	additive=AdditiveExpression ('..' operand = AdditiveExpression )?
+AdditiveExpression:
+	MultiplicativeExpression ( operator=AdditiveOperator operand+=MultiplicativeExpression)*
 ;
-
-// Arithmetic Expressions
-
-AdditiveOperand:
-  operator=AdditiveOperator operand=MultiplicativeExpression
-;
-
-AdditiveExpression :
-	multiplicitive=MultiplicativeExpression
-  (operation+=AdditiveOperand)*
-;
-
-AdditiveOperator :
+AdditiveOperator:
 	'+' | '-'
 ;
-
-MultiplicativeOperand:
-  operator=MultiplicativeOperator operand=ExponentiationExpression
+MultiplicativeExpression:
+	ExponentiationExpression ( operator=MultiplicativeOperator operand+=ExponentiationExpression)*
 ;
-
-MultiplicativeExpression :
-	exponential=ExponentiationExpression operation+=MultiplicativeOperand*
-;
-
-MultiplicativeOperator :
+MultiplicativeOperator:
 	'*' | '/' | '%'
 ;
-
-ExponentiationExpression :
-	unary=UnaryExpression (
-		operator = ExponentiationOperator operand += UnaryExpression )*
+ExponentiationExpression:
+	UnaryExpression ( operator=ExponentiationOperator operand+=UnaryExpression)*
 ;
-
-ExponentiationOperator :
+ExponentiationOperator:
 	'**' | '^'
 ;
-
-// Unary Expressions
-
-UnaryExpression :
-	   operator = UnaryOperator operand += ExtentExpression
-	| extent=ExtentExpression
+UnaryExpression:
+	 operator=UnaryOperator operand+=ExtentExpression | ExtentExpression
 ;
-
-UnaryOperator :
+UnaryOperator:
 	'+' | '-' | '~' | 'not'
 ;
-
-// Extent Expressions
-
-ExtentExpression :
-	   operator = 'all' ownedRelationship += TypeResultMember
-	| primary=PrimaryExpression
+ExtentExpression:
+	 operator='all' ownedRelationship+=TypeResultMember | PrimaryExpression
 ;
-
-/* Primary Expressions */
-
-PrimaryExpression :
-	base=BaseExpression
-	(  '.' ownedRelationship1 += FeatureChainMember )?
-	(
-    ( operator += '#' '(' operand += SequenceExpression ')'
-      | operator += '[' operand += SequenceExpression ']'
-      | operator += '->' ownedRelationship = ReferenceTyping
-        ( operand += BodyExpression | operand += FunctionReferenceExpression | operand+= ArgumentList )
-      |  operator += '.' operand += BodyExpression
-      |  operator += '.?' operand += BodyExpression
-	  )
-	  (  '.' ownedRelationship2 += FeatureChainMember )?
-	)*
+PrimaryExpression:
+	BaseExpression ( '.' ownedRelationship+=FeatureChainMember)? (( operator='#' '(' operand+=SequenceExpression ')' |  operator='[' operand+=SequenceExpression ']' |  '->' ownedRelationship+=ReferenceTyping (operand+=BodyExpression | operand+=FunctionReferenceExpression | '(' (ownedRelationship+=ArgumentMember (',' ownedRelationship+=ArgumentMember)* | ownedRelationship+=NamedArgumentMember (',' ownedRelationship+=NamedArgumentMember)*)? ')') |  '.' operand+=BodyExpression |  '.?' operand+=BodyExpression) ( '.' ownedRelationship+=FeatureChainMember)?)*
 ;
-
-FunctionReferenceExpression :
-	ownedRelationship += FunctionReferenceMember
+FunctionReferenceExpression:
+	ownedRelationship+=FunctionReferenceMember
 ;
-
-FunctionReferenceMember :
-	ownedRelatedElement += FunctionReference
+FunctionReferenceMember:
+	ownedRelatedElement+=FunctionReference
 ;
-
-FunctionReference :
-	ownedRelationship += ReferenceTyping
+FunctionReference:
+	ownedRelationship+=ReferenceTyping
 ;
-
-FeatureChainMember :
-	  ownedRelatedElement = OwnedFeatureChain
-	|  memberElement = QualifiedName
+FeatureChainMember:
+	memberElement=[SysML::Feature|QualifiedName] |  ownedRelatedElement+=OwnedFeatureChain
 ;
-
-/* Base Expressions */
-
-BaseExpression :
-	  ownedRelationship=NullExpression
-	| ownedRelationship=LiteralExpression
-	| ownedRelationship=InvocationExpression
-  | ownedRelationship=FeatureReferenceExpression
-	| ownedRelationship=MetadataAccessExpression
-	| ownedRelationship=BodyExpression
-	| '(' ownedRelationship=SequenceExpression ')'
+BaseExpression:
+	NullExpression | LiteralExpression | FeatureReferenceExpression | MetadataAccessExpression | InvocationExpression | BodyExpression | '(' SequenceExpression ')'
 ;
-
-// Expression Bodies
-
-BodyExpression :
-	ownedRelationship = ExpressionBodyMember
+BodyExpression:
+	ownedRelationship+=ExpressionBodyMember
 ;
-
-ExpressionBodyMember :
-	ownedRelatedElement = ExpressionBody
+ExpressionBodyMember:
+	ownedRelatedElement+=ExpressionBody
 ;
-
-// This default production is overridden in the KerML and SysML grammars.
-ExpressionBody :
-	'{' ( ownedRelationship += BodyParameterMember ';' )*
-	    ownedRelationship += ResultExpressionMember '}'
+ExpressionBody:
+	'{' (ownedRelationship+=BodyParameterMember ';')* ownedRelationship+=ResultExpressionMember '}'
 ;
-
-ResultExpressionMember :
-	ownedRelatedElement += OwnedExpression
+ResultExpressionMember:
+	ownedRelatedElement+=OwnedExpression
 ;
-
-BodyParameterMember :
-	'in' ownedRelatedElement += BodyParameter
+BodyParameterMember:
+	'in' ownedRelatedElement+=BodyParameter
 ;
-
-BodyParameter :
-	declaredName = Name
+BodyParameter:
+	declaredName=Name
 ;
-
-// Sequence Expressions
-
-SequenceOperand:
-  (',' operand = OwnedExpression)
-  |
-  ','
+SequenceExpression:
+	OwnedExpression (',' |  operator=',' operand+=SequenceExpression)?
 ;
-
-SequenceExpression :
-	ownedRelationship=OwnedExpression operation+=SequenceOperand*
+FeatureReferenceExpression:
+	ownedRelationship+=FeatureReferenceMember
 ;
-
-// Feature Reference Expressions
-
-FeatureReferenceExpression :
-	ownedRelationship += FeatureReferenceMember
+FeatureReferenceMember:
+	memberElement=[SysML::Feature|QualifiedName]
 ;
-
-FeatureReferenceMember :
-	memberElement = QualifiedName
+MetadataAccessExpression:
+	referencedElement=[SysML::Element|QualifiedName] '.' 'metadata'
 ;
-
-// Metadata Access Expressions
-
-MetadataAccessExpression :
-	referencedElement = QualifiedName '.' 'metadata'
+InvocationExpression:
+	ownedRelationship+=OwnedFeatureTyping '(' (ownedRelationship+=ArgumentMember (',' ownedRelationship+=ArgumentMember)* | ownedRelationship+=NamedArgumentMember (',' ownedRelationship+=NamedArgumentMember)*)? ')'
 ;
-
-// Invocation Expressions
-
-InvocationExpression :
-	ownedRelationship=OwnedFeatureTyping arg_list=ArgumentList
+OwnedFeatureTyping:
+	type=[SysML::Type|QualifiedName] | ownedRelatedElement+=OwnedFeatureChain
 ;
-
-OwnedFeatureTyping :
-	  type = QualifiedName
-	| ownedRelatedElement += OwnedFeatureChain
+OwnedFeatureChain:
+	ownedRelationship+=OwnedFeatureChaining ('.' ownedRelationship+=OwnedFeatureChaining)+
 ;
-
-OwnedFeatureChain :
-	feature=FeatureChain
+OwnedFeatureChaining:
+	chainingFeature=[SysML::Feature|QualifiedName]
 ;
-
-// For use in KerML and SysML grammars
- FeatureChain :
-	ownedRelationship += OwnedFeatureChaining['.']
+ArgumentMember:
+	ownedRelatedElement+=Argument
 ;
-
-OwnedFeatureChaining :
-	chainingFeature = QualifiedName
+Argument:
+	ownedRelationship+=ArgumentValue
 ;
-
- ArgumentList :
-	'(' ( pos_list=PositionalArgumentList | named_list=NamedArgumentList )? ')'
+NamedArgumentMember:
+	ownedRelatedElement+=NamedArgument
 ;
-
- PositionalArgumentList :
-	ownedRelationship += ArgumentMember[',']
+NamedArgument:
+	ownedRelationship+=ParameterRedefinition '=' ownedRelationship+=ArgumentValue
 ;
-
-ArgumentMember :
-	ownedRelatedElement = Argument
+ParameterRedefinition:
+	redefinedFeature=[SysML::Feature|QualifiedName]
 ;
-
-Argument :
-	ownedRelationship = ArgumentValue
+ArgumentValue:
+	ownedRelatedElement+=OwnedExpression
 ;
-
- NamedArgumentList :
-	ownedRelationship += NamedArgumentMember[',']
+NullExpression:
+	 ('null' | '(' ')')
 ;
-
-NamedArgumentMember :
-	ownedRelatedElement = NamedArgument
+LiteralExpression:
+	LiteralBoolean | LiteralString | LiteralInteger | LiteralReal | LiteralInfinity
 ;
-
-NamedArgument :
-	redefinition = ParameterRedefinition '=' value = ArgumentValue
+LiteralBoolean:
+	value=BooleanValue
 ;
-
-ParameterRedefinition :
-	redefinedFeature = QualifiedName
-;
-
-ArgumentValue :
-	ownedRelatedElement = OwnedExpression
-;
-
-// Null Expressions
-
-NullExpression :
-	 ( 'null' | '(' ')' )
-;
-
-/* Literal Expressions */
-
-LiteralExpression :
-	  LiteralBoolean
-	| LiteralString
-	| LiteralReal
-	| LiteralInteger
-	| LiteralInfinity
-;
-
-LiteralBoolean :
-	value = BooleanValue
-;
-
-BooleanValue :
+BooleanValue:
 	'true' | 'false'
 ;
-
-LiteralString :
-	value = STRING_VALUE
+LiteralString:
+	value=STRING_VALUE
 ;
-
-LiteralInteger :
-	value = DECIMAL_VALUE
+LiteralInteger:
+	value=DECIMAL_VALUE
 ;
-
-LiteralReal :
-	value = RealValue
+LiteralReal:
+	value=RealValue
 ;
-
-RealValue :
-	DECIMAL_VALUE? '.' ( DECIMAL_VALUE | EXP_VALUE ) | EXP_VALUE
+RealValue:
+	DECIMAL_VALUE? '.' (DECIMAL_VALUE | EXP_VALUE) | EXP_VALUE
 ;
-
-LiteralInfinity :
-	 value='*'
+LiteralInfinity:
+	 '*'
 ;
-
-/* NAMES */
-
-ReservedKeyword:
-  'about' | /to[\s]/ | 'connect' | 'connection' | 'from' | /of[\s]/ | 'then' |
-  'entry' | /accept[\s]/ | /do[\s]/ | /exit[\s]/ | /action[\s]/ | /at[\s]/ |
-  /assign[\s]/
-;
-
 Name:
-	!ReservedKeyword ID | UNRESTRICTED_NAME
+	ID | UNRESTRICTED_NAME
 ;
-
-Qualification :
-	( '::' Name )+
+Qualification:
+	(Name '::')+
 ;
-
 QualifiedName:
-	//name1=Name ( '::' names+=Name )*
-  names+=Name['::']
+	Qualification? Name
 ;
-
-/* TERMINALS */
-
-DECIMAL_VALUE :
-   /[0-9]+/;
-
+DECIMAL_VALUE:
+	'0' .. '9' ( '0' .. '9' ) *
+;
 EXP_VALUE:
-	DECIMAL_VALUE ('e' | 'E') ('+' | '-')? DECIMAL_VALUE;
-
-ID :
-   /[a-zA-Z_][a-zA-Z_0-9]*/;
-
-UNRESTRICTED_NAME :
-  /* Old format?
-  /''' ('\' ('b' | 't' | 'n' | 'f' | 'r' | '"' | "'" | '\') | !('\' | '''))* '''/;
-  */
-  /[\'].*[\']/;
-
-STRING_VALUE :
-	/*/'"' ('\' ('b' | 't' | 'n' | 'f' | 'r' | '"' | "'" | '\') | !('\' | '"'))* '"'/;*/
-  /[\"].*[\"]/;
-
+	DECIMAL_VALUE ( 'e' | 'E' ) ( '+' | '-' ) ? DECIMAL_VALUE
+;
+ID:
+	( 'a' .. 'z' | 'A' .. 'Z' | '_' ) ( 'a' .. 'z' | 'A' .. 'Z' | '_' | '0' .. '9' ) *
+;
+UNRESTRICTED_NAME:
+	'\'' ( '\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '"' | '\'' | '\\' ) | ! ( '\\' | '\'' ) ) * '\''
+;
+STRING_VALUE:
+	'"' ( '\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '"' | '\'' | '\\' ) | ! ( '\\' | '"' ) ) * '"'
+;
 REGULAR_COMMENT:
-  /\/\*(.|\n)*?\*\//
+	'/*' -> '*/'
 ;
-
-Comment:
-// Reserved for textx, but in the model
-  /\/\/.*$/
-;
-
 ML_NOTE:
-	/'\/*'->'*\/'/;
-
+	'//*' -> '*/'
+;
 SL_NOTE:
-	/'\/\/' (!('
-' | '') !('
-' | '')*)? (''? '
-')?/;
-
+	'//' ( ! ( '\n' | '\r' ) ! ( '\n' | '\r' ) * ) ? ( '\r' ? '\n' ) ?
+;
 WS:
-	/(' ' | '	' | '' | '
-')+/;
+	( ' ' | '\t' | '\r' | '\n' ) +
+;

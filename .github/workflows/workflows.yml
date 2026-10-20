@@ -8,45 +8,36 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.11"]
+        python-version: ["3.11", "3.12"]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
-      - name: Install dependencies
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install the generated library (editable) + dev deps
         run: |
           python -m pip install --upgrade pip
-          pip install --upgrade setuptools
-          pip install -r requirements.txt
-      - name: Test ${{ github.event.push.head }} coverage
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          python -m pip install coveralls pytest
-          python -m coverage run --source=src -m pytest tests && coverage report
-          coveralls
+          pip install -e ".[dev]"
+
       - name: Test with pytest
         run: |
-          pip install pytest-timeout pytest-html
-          pytest --timeout=300 tests --doctest-modules --html=report-${{ matrix.python-version }}.html --self-contained-html --junitxml=junit/test-results-${{ matrix.python-version }}.xml
-      - name: Upload pytest test results
-        uses: actions/upload-artifact@v3
-        with:
-          name: pytest-junit-results-${{ matrix.python-version }}
-          path: junit/test-results-${{ matrix.python-version }}.xml
-        # Use always() to always run this step to publish test results when there are test failures
-        if: ${{ always() }}
-      - name: Upload pytest test results
-        uses: actions/upload-artifact@v3
-        with:
-          name: pytest-html-results-${{ matrix.python-version }}
-          path: report-${{ matrix.python-version }}.html
-        # Use always() to always run this step to publish test results when there are test failures
-        if: ${{ always() }}
+          pytest tests/ -q
+
+      - name: Import-graph purity smoke (no textx/astropy/yaml/lab)
+        run: |
+          python - <<'EOF'
+          import sys
+          import sysml2py
+          loaded = {m.split('.')[0] for m in sys.modules}
+          forbidden = {'textx', 'astropy', 'yaml', 'sysml2py_lab'}
+          bad = sorted(forbidden & loaded)
+          assert not bad, f"forbidden runtime deps: {bad}"
+          print("clean import OK:", sysml2py.__version__)
+          EOF
