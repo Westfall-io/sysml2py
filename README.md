@@ -134,10 +134,10 @@ names (`PartUsageBuilder`, ...) remain available if you prefer them.
 
 ## Units
 
-Value-bearing attributes are first-class. Pass a value and a unit; inside a
-container the library renders the SysML `[unit]` syntax and imports the unit
-automatically as a `public import` (KERML-74 requires an explicit visibility
-modifier):
+Value-bearing attributes are first-class. Pass a value and a unit and the
+library renders the SysML `[unit]` syntax; inside a container it also imports
+the unit automatically as a `public import` (KERML-74 requires an explicit
+visibility modifier):
 
 ```python
 from sysml2py import PackageBuilder, Attribute
@@ -223,7 +223,7 @@ ground-up rewrite, so several things changed deliberately:
   with AST node classes keep `*Builder` (`PackageBuilder`, ...).
 - **`set_value` / `get_value` / `set_direction` are gone** — pass `value=` /
   `unit=` to the builder constructor instead.
-- **`get_definition` moved to `Node`** — on a builder it is
+- **`get_definition` is on `Node`, not the builder** — use
   `build_node().get_definition()`.
 
 For the full step-by-step migration guide, see
