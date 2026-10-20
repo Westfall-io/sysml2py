@@ -13,6 +13,14 @@ name: Release Workflow
 #   - version tag `v1.0.0`, `v1.1.0`, ...  -> ALWAYS publishes
 #   - manual workflow_dispatch             -> build/verify only by default;
 #     `publish_to_pypi: true` publishes (owner action)
+#
+# Artifact layout: everything stays inside the workspace.  `python -m build`
+# defaults to ./dist, and gh-action-pypi-publish is a DOCKER container action
+# — the runner only bind-mounts $GITHUB_WORKSPACE into the container, so a
+# packages-dir outside the workspace (the first attempt used /tmp/dist) is
+# invisible inside the container and yields "no packages to publish".
+# Wheel and sdist go up as two single-file artifacts and merge back into
+# ./dist via download-artifact@v4 (distinct filenames, no clobber).
 
 on:
   push:
@@ -50,7 +58,7 @@ jobs:
           pytest tests/ -q
 
       - name: Build the wheel + sdist
-        run: python -m build --outdir /tmp/dist .
+        run: python -m build .
 
       - name: Assert wheel contents (provenance + version)
         env:
@@ -58,7 +66,7 @@ jobs:
         run: |
           python - <<'EOF'
           import glob, os, zipfile
-          wheels = glob.glob("/tmp/dist/*.whl")
+          wheels = glob.glob("dist/*.whl")
           assert wheels, "no wheel built"
           w = wheels[0]
           names = set(zipfile.ZipFile(w).namelist())
@@ -77,7 +85,7 @@ jobs:
           EXPECTED_VERSION: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || '1.0.0' }}
         run: |
           python -m venv /tmp/rel-venv
-          /tmp/rel-venv/bin/pip install --quiet /tmp/dist/*.whl
+          /tmp/rel-venv/bin/pip install --quiet dist/*.whl
           /tmp/rel-venv/bin/python - <<'EOF'
           import os, sys
           import sysml2py
@@ -92,11 +100,19 @@ jobs:
           print("clean import OK:", sysml2py.__version__)
           EOF
 
-      - name: Upload wheel + sdist artifacts
+      - name: Upload wheel artifact
         uses: actions/upload-artifact@v4
         with:
-          name: dist
-          path: /tmp/dist/*
+          name: wheel
+          path: dist/*.whl
+          if-no-files-found: error
+
+      - name: Upload sdist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdist
+          path: dist/*.tar.gz
+          if-no-files-found: error
 
   publish:
     name: Publish to PyPI
@@ -109,10 +125,26 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: dist
-          path: /tmp/dist
+          name: wheel
+          path: dist
+      - uses: actions/download-artifact@v4
+        with:
+          name: sdist
+          path: dist
+      - name: Verify dist contents before publish
+        run: |
+          echo "dist/ contents:"
+          ls -la dist/
+          test -n "$(ls dist/*.whl 2>/dev/null)" || { echo "no wheel!"; exit 1; }
+          test -n "$(ls dist/*.tar.gz 2>/dev/null)" || { echo "no sdist!"; exit 1; }
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
-          packages-dir: /tmp/dist
+          packages-dir: dist
+          # token auth, not Trusted Publishing — attestations need OIDC
+          # (id-token: write) which contents: read does not grant, and
+          # release/v1 is a moving ref; pin it off so behavior is stable.
+          attestations: false
+          # idempotent retry on any partial-upload edge case
+          skip-existing: true
