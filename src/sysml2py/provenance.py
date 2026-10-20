@@ -17,7 +17,7 @@ PROVENANCE = {
     "children_sha256": "3a9637c2521166fe70289e27cf9e03e2c7a0c021f14ff8e02294c86e4d9fe5c7",
     "modifiers_sha256": "a2c2c038bf12e13a0c3de5f368202d606195eebbb93a5d97717e2004b4c3cb00",
     "corpus_manifest_sha256": "23b19c60b4b64d441c262b924315295d2691a2f5fc1424563dc4e63aa73a79c5",
-    "generator_version": "1.0.0",
+    "generator_version": "1.0.1",
     "generated_at": "1970-01-01T00:00:00Z",
 }
 

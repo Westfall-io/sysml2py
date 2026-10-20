@@ -185,7 +185,7 @@ print(provenance.PROVENANCE)
 ```python
 {'grammar_sha256': '...', 'spec_sha256': '...',
  'children_sha256': '...', 'modifiers_sha256': '...',
- 'corpus_manifest_sha256': '...', 'generator_version': '1.0.0',
+ 'corpus_manifest_sha256': '...', 'generator_version': '1.0.1',
  'generated_at': '...'}
 ```
 
