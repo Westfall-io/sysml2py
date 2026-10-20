@@ -179,14 +179,17 @@ def sysml2py_version():
 
 def test_version_matches_metadata():
     # derive from the packaged metadata, not a hard-coded string, so a v1.1.0
-    # tag doesn't fail the release suite
+    # tag doesn't fail the release suite.  When the dist isn't installed
+    # (plain `pytest tests/` via pythonpath), skip honestly rather than
+    # tautologically comparing the module version to itself.
     from importlib.metadata import PackageNotFoundError, version
 
     try:
         installed = version("sysml2py")
     except PackageNotFoundError:
-        installed = sysml2py_version()
-    assert sysml2py_version() == installed
+        pytest.skip("sysml2py distribution not installed")
+    else:
+        assert sysml2py_version() == installed
 
 
 def test_import_graph_has_no_forbidden_runtime_deps():
@@ -213,12 +216,19 @@ def test_import_graph_has_no_forbidden_runtime_deps():
 
 
 def test_wheel_ships_provenance_only():
-    """A built wheel must carry provenance (and no dead .tx grammar)."""
-    import glob
+    """A built wheel must carry provenance (and no dead .tx grammar).
 
-    wheels = glob.glob(str(PKG_ROOT / "dist" / "*.whl"))
+    Run with SYML2PY_DIST_DIR set (CI builds to a temp dir); point the
+    workflow at the built artifacts so THIS assertion is the single source
+    of truth for wheel contents, rather than a YAML copy.
+    """
+    import glob
+    import os
+
+    dist_dir = os.environ.get("SYML2PY_DIST_DIR", str(PKG_ROOT / "dist"))
+    wheels = glob.glob(os.path.join(dist_dir, "*.whl"))
     if not wheels:
-        pytest.skip("no wheel in dist/; branch CI builds to /tmp/ci-dist")
+        pytest.skip(f"no wheel in {dist_dir}")
     names = set(zipfile.ZipFile(wheels[0]).namelist())
     assert any(n.endswith("provenance.py") for n in names), "provenance missing"
     assert all(not n.endswith(".tx") for n in names), "unexpected .tx in wheel"

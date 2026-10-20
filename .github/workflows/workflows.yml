@@ -5,6 +5,9 @@ on:
     branches: ['**']
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -19,6 +22,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          cache: pip
 
       - name: Install the generated library (editable) + dev deps
         run: |
@@ -30,24 +34,12 @@ jobs:
           pytest tests/ -q
 
       - name: Build wheel + sdist and assert contents
+        env:
+          SYML2PY_DIST_DIR: /tmp/ci-dist
         run: |
           pip install build
           python -m build --outdir /tmp/ci-dist .
-          python - <<'EOF'
-          import glob, zipfile
-          from importlib.metadata import version
-          wheels = glob.glob("/tmp/ci-dist/*.whl")
-          assert wheels, "no wheel built"
-          names = set(zipfile.ZipFile(wheels[0]).namelist())
-          assert any(n.endswith("provenance.py") for n in names), "provenance missing"
-          assert all(not n.endswith(".tx") for n in names), "unexpected .tx in wheel"
-          expected = f"sysml2py-{version('sysml2py')}"
-          fname = wheels[0].split("/")[-1]
-          assert fname.replace("-", "").startswith(expected.replace("-", "")), (
-              f"{fname} != expected {expected}"
-          )
-          print("wheel ok:", fname)
-          EOF
+          pytest tests/test_library.py::test_wheel_ships_provenance_only -q
 
       - name: Import-graph purity smoke (no textx/astropy/yaml/lab)
         run: |

@@ -40,9 +40,9 @@ include = ["src/sysml2py/**", "README.md", "pyproject.toml", "LICENSE"]
 [tool.hatch.build.targets.wheel]
 packages = ["src/sysml2py"]
 # NOTE: do NOT add an `include` filter here.  `packages = ["src/sysml2py"]`
-# selects EVERYTHING under that dir (the AST .py modules AND grammar/*.tx).
-# An `include` list on the wheel target is RESTRICTIVE and silently empties
-# the wheel; keep package-data selection implicit.
+# selects EVERYTHING under that dir.  An `include` list on the wheel target
+# is RESTRICTIVE and silently empties the wheel; keep package-data selection
+# implicit.
 
 # Formatting config is pinned here (NOT discovered by walking up), so ruff /
 # black agree with `_ruff_format` regardless of where the tree is generated.
