@@ -242,7 +242,7 @@ def test_import_graph_has_no_forbidden_runtime_deps():
         "import sys\n"
         "import sysml2py\n"
         "loaded = {m.split('.')[0] for m in sys.modules}\n"
-        "forbidden = {'textx', 'astropy', 'yaml', 'sysml2py_lab'}\n"
+        "forbidden = {'textx', 'astropy', 'yaml', 'pint', 'sysml2py_lab'}\n"
         "bad = sorted(forbidden & loaded)\n"
         "assert not bad, f'forbidden runtime deps: {bad}'\n"
         "print('OK', sysml2py.__version__)\n"

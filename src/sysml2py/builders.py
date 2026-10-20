@@ -1342,6 +1342,9 @@ _PINT_UNIT_SYSML_NAME: dict[str, str] = {
     "sievert": "Sv",
     "katal": "kat",
     "percent": "%",
+    # volume
+    "liter": "l",
+    "litre": "l",
     # imperial / US customary
     "mile": "mi",
     "foot": "ft",
@@ -1368,6 +1371,7 @@ _PINT_UNIT_NAMESPACE: dict[str, str] = {
     "tesla": "SI", "henry": "SI", "lumen": "SI", "lux": "SI",
     "becquerel": "SI", "gray": "SI", "sievert": "SI", "katal": "SI",
     "percent": "SI",
+    "liter": "SI", "litre": "SI",
     "mile": "USCustomaryUnits", "foot": "USCustomaryUnits",
     "yard": "USCustomaryUnits", "inch": "USCustomaryUnits",
     "gallon": "USCustomaryUnits", "pound": "USCustomaryUnits",
@@ -1769,10 +1773,10 @@ class Builder:
         ``bracket_str`` is the normalized ``[ ]`` spelling (``'m/s2'``) and
         the base list drives Option-A imports.  ``None``/``""`` ->
         ``(None, None)``.  A plain ``str``/``int``/``float`` has no unit.  A
-        duck-typed astropy Quantity (has ``.value``, ``.unit``, and
-        ``.unit.bases`` / ``.unit.powers``) yields its numeric ``.value``
-        plus the structured unit.  Anything else raises ``TypeError`` (fail
-        fast — must be representable in the IR or it cannot cast).
+        duck-typed pint or astropy Quantity (pint: ``.magnitude``/``.units``;
+        astropy: ``.value``/``.unit``) yields its numeric value plus the
+        structured unit.  Anything else raises ``TypeError`` (fail fast —
+        must be representable in the IR or it cannot cast).
 
         The bracket spelling and import bases are BOTH derived from the
         structured ``bases``/``powers`` (not ``to_string()`` string-splitting),
@@ -1796,8 +1800,12 @@ class Builder:
         # ``.scale`` to fail on (unlike astropy).  Map pint's full names to
         # SysML member names + namespaces, then reuse the SAME bracket builder
         # as the string/astropy paths so all three render identically.
-        if hasattr(value, "units") and hasattr(value.units, _PINT_UNITS_ATTR):
-            pint_dict = getattr(value.units, _PINT_UNITS_ATTR)
+        if (
+            hasattr(value, _PINT_QUANTITY_ATTR)
+            and hasattr(value, "magnitude")
+            and hasattr(getattr(value, _PINT_QUANTITY_ATTR), _PINT_UNITS_ATTR)
+        ):
+            pint_dict = getattr(getattr(value, _PINT_QUANTITY_ATTR), _PINT_UNITS_ATTR)
             if not isinstance(pint_dict, dict):
                 pint_dict = dict(pint_dict)
             bases: list[str] = []
@@ -1875,7 +1883,7 @@ class Builder:
                 return str(raw).removesuffix(".0"), None
             return str(raw).removesuffix(".0"), (bracket, bases)
         raise TypeError(
-            f"value= must be str/int/float or an astropy Quantity, got {type(value).__name__}"
+            f"value= must be str/int/float or a pint/astropy Quantity, got {type(value).__name__}"
         )
 
     # -- unit handling -------------------------------------------------
