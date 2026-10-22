@@ -34,7 +34,7 @@ on:
         type: boolean
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-and-verify:
@@ -157,3 +157,24 @@ jobs:
           attestations: false
           # idempotent retry on any partial-upload edge case
           skip-existing: true
+
+      - name: Create GitHub Release
+        # Cut a GitHub Release for the tag, attaching the wheel + sdist.
+        # (Tags alone don't make a Release; the Releases page showed nothing
+        # past v0.5.3 until this step was added.)  Only on tag pushes — a
+        # manual dispatch has no tag to release.
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          body: |
+            sysml2py ${{ github.ref_name }} — generated SysML v2 builder library.
+
+            Published to PyPI as `sysml2py ${{ github.ref_name }}`.
+            See README for the full changelog.
+          files: |
+            dist/*.whl
+            dist/*.tar.gz
+          draft: false
+          prerelease: false
