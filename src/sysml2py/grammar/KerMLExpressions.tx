@@ -1,0 +1,297 @@
+OwnedExpressionMember:
+	ownedRelatedElement+=OwnedExpression
+;
+OwnedExpression:
+	ConditionalExpression
+;
+OwnedExpressionReference:
+	ownedRelationship+=OwnedExpressionMember
+;
+ConditionalExpression:
+	NullCoalescingExpression |  operator=ConditionalOperator operand+=NullCoalescingExpression '?' operand+=OwnedExpressionReference 'else' operand+=OwnedExpressionReference
+;
+ConditionalOperator:
+	'if'
+;
+NullCoalescingExpression:
+	ImpliesExpression ( operator=NullCoalescingOperator operand+=ImpliesExpressionReference)*
+;
+NullCoalescingOperator:
+	'??'
+;
+ImpliesExpressionReference:
+	ownedRelationship+=ImpliesExpressionMember
+;
+ImpliesExpressionMember:
+	ownedRelatedElement+=ImpliesExpression
+;
+ImpliesExpression:
+	OrExpression ( operator=ImpliesOperator operand+=OrExpressionReference)*
+;
+ImpliesOperator:
+	'implies'
+;
+OrExpressionReference:
+	ownedRelationship+=OrExpressionMember
+;
+OrExpressionMember:
+	ownedRelatedElement+=OrExpression
+;
+OrExpression:
+	XorExpression ( (operator=OrOperator operand+=XorExpression | operator=ConditionalOrOperator operand+=XorExpressionReference))*
+;
+OrOperator:
+	'|'
+;
+ConditionalOrOperator:
+	'or'
+;
+XorExpressionReference:
+	ownedRelationship+=XorExpressionMember
+;
+XorExpressionMember:
+	ownedRelatedElement+=XorExpression
+;
+XorExpression:
+	AndExpression ( operator=XorOperator operand+=AndExpression)*
+;
+XorOperator:
+	'xor'
+;
+AndExpression:
+	EqualityExpression ( (operator=AndOperator operand+=EqualityExpression | operator=ConditionalAndOperator operand+=EqualityExpressionReference))*
+;
+AndOperator:
+	'&'
+;
+ConditionalAndOperator:
+	'and'
+;
+EqualityExpressionReference:
+	ownedRelationship+=EqualityExpressionMember
+;
+EqualityExpressionMember:
+	ownedRelatedElement+=EqualityExpression
+;
+EqualityExpression:
+	ClassificationExpression ( operator=EqualityOperator operand+=ClassificationExpression)*
+;
+EqualityOperator:
+	'==' | '!=' | '===' | '!=='
+;
+ClassificationExpression:
+	RelationalExpression ( operator=ClassificationTestOperator ownedRelationship+=TypeReferenceMember |  operator=CastOperator ownedRelationship+=TypeResultMember)? |  operand+=SelfReferenceExpression operator=ClassificationTestOperator ownedRelationship+=TypeReferenceMember |  operand+=MetadataReference operator=MetaClassificationTestOperator ownedRelationship+=TypeReferenceMember |  operand+=SelfReferenceExpression operator=CastOperator ownedRelationship+=TypeResultMember |  operand+=MetadataReference operator=MetaCastOperator ownedRelationship+=TypeResultMember
+;
+ClassificationTestOperator:
+	'hastype' | 'istype' | '@'
+;
+MetaClassificationTestOperator:
+	'@@'
+;
+CastOperator:
+	'as'
+;
+MetaCastOperator:
+	'meta'
+;
+MetadataReference:
+	referencedElement=[SysML::Element|QualifiedName]
+;
+TypeReferenceMember:
+	ownedRelatedElement+=TypeReference
+;
+TypeResultMember:
+	ownedRelatedElement+=TypeReference
+;
+TypeReference:
+	ownedRelationship+=ReferenceTyping
+;
+ReferenceTyping:
+	type=[SysML::Type|QualifiedName]
+;
+SelfReferenceExpression:
+	ownedRelationship+=SelfReferenceMember
+;
+SelfReferenceMember:
+	ownedRelatedElement+=EmptyFeature
+;
+EmptyFeature:
+		'empty feature'
+;
+RelationalExpression:
+	RangeExpression ( operator=RelationalOperator operand+=RangeExpression)*
+;
+RelationalOperator:
+	'<' | '>' | '<=' | '>='
+;
+RangeExpression:
+	AdditiveExpression ( operator='..' operand+=AdditiveExpression)?
+;
+AdditiveExpression:
+	MultiplicativeExpression ( operator=AdditiveOperator operand+=MultiplicativeExpression)*
+;
+AdditiveOperator:
+	'+' | '-'
+;
+MultiplicativeExpression:
+	ExponentiationExpression ( operator=MultiplicativeOperator operand+=ExponentiationExpression)*
+;
+MultiplicativeOperator:
+	'*' | '/' | '%'
+;
+ExponentiationExpression:
+	UnaryExpression ( operator=ExponentiationOperator operand+=UnaryExpression)*
+;
+ExponentiationOperator:
+	'**' | '^'
+;
+UnaryExpression:
+	 operator=UnaryOperator operand+=ExtentExpression | ExtentExpression
+;
+UnaryOperator:
+	'+' | '-' | '~' | 'not'
+;
+ExtentExpression:
+	 operator='all' ownedRelationship+=TypeResultMember | PrimaryExpression
+;
+PrimaryExpression:
+	BaseExpression ( '.' ownedRelationship+=FeatureChainMember)? (( operator='#' '(' operand+=SequenceExpression ')' |  operator='[' operand+=SequenceExpression ']' |  '->' ownedRelationship+=ReferenceTyping (operand+=BodyExpression | operand+=FunctionReferenceExpression | '(' (ownedRelationship+=ArgumentMember (',' ownedRelationship+=ArgumentMember)* | ownedRelationship+=NamedArgumentMember (',' ownedRelationship+=NamedArgumentMember)*)? ')') |  '.' operand+=BodyExpression |  '.?' operand+=BodyExpression) ( '.' ownedRelationship+=FeatureChainMember)?)*
+;
+FunctionReferenceExpression:
+	ownedRelationship+=FunctionReferenceMember
+;
+FunctionReferenceMember:
+	ownedRelatedElement+=FunctionReference
+;
+FunctionReference:
+	ownedRelationship+=ReferenceTyping
+;
+FeatureChainMember:
+	memberElement=[SysML::Feature|QualifiedName] |  ownedRelatedElement+=OwnedFeatureChain
+;
+BaseExpression:
+	NullExpression | LiteralExpression | FeatureReferenceExpression | MetadataAccessExpression | InvocationExpression | BodyExpression | '(' SequenceExpression ')'
+;
+BodyExpression:
+	ownedRelationship+=ExpressionBodyMember
+;
+ExpressionBodyMember:
+	ownedRelatedElement+=ExpressionBody
+;
+ExpressionBody:
+	'{' (ownedRelationship+=BodyParameterMember ';')* ownedRelationship+=ResultExpressionMember '}'
+;
+ResultExpressionMember:
+	ownedRelatedElement+=OwnedExpression
+;
+BodyParameterMember:
+	'in' ownedRelatedElement+=BodyParameter
+;
+BodyParameter:
+	declaredName=Name
+;
+SequenceExpression:
+	OwnedExpression (',' |  operator=',' operand+=SequenceExpression)?
+;
+FeatureReferenceExpression:
+	ownedRelationship+=FeatureReferenceMember
+;
+FeatureReferenceMember:
+	memberElement=[SysML::Feature|QualifiedName]
+;
+MetadataAccessExpression:
+	referencedElement=[SysML::Element|QualifiedName] '.' 'metadata'
+;
+InvocationExpression:
+	ownedRelationship+=OwnedFeatureTyping '(' (ownedRelationship+=ArgumentMember (',' ownedRelationship+=ArgumentMember)* | ownedRelationship+=NamedArgumentMember (',' ownedRelationship+=NamedArgumentMember)*)? ')'
+;
+OwnedFeatureTyping:
+	type=[SysML::Type|QualifiedName] | ownedRelatedElement+=OwnedFeatureChain
+;
+OwnedFeatureChain:
+	ownedRelationship+=OwnedFeatureChaining ('.' ownedRelationship+=OwnedFeatureChaining)+
+;
+OwnedFeatureChaining:
+	chainingFeature=[SysML::Feature|QualifiedName]
+;
+ArgumentMember:
+	ownedRelatedElement+=Argument
+;
+Argument:
+	ownedRelationship+=ArgumentValue
+;
+NamedArgumentMember:
+	ownedRelatedElement+=NamedArgument
+;
+NamedArgument:
+	ownedRelationship+=ParameterRedefinition '=' ownedRelationship+=ArgumentValue
+;
+ParameterRedefinition:
+	redefinedFeature=[SysML::Feature|QualifiedName]
+;
+ArgumentValue:
+	ownedRelatedElement+=OwnedExpression
+;
+NullExpression:
+	 ('null' | '(' ')')
+;
+LiteralExpression:
+	LiteralBoolean | LiteralString | LiteralInteger | LiteralReal | LiteralInfinity
+;
+LiteralBoolean:
+	value=BooleanValue
+;
+BooleanValue:
+	'true' | 'false'
+;
+LiteralString:
+	value=STRING_VALUE
+;
+LiteralInteger:
+	value=DECIMAL_VALUE
+;
+LiteralReal:
+	value=RealValue
+;
+RealValue:
+	DECIMAL_VALUE? '.' (DECIMAL_VALUE | EXP_VALUE) | EXP_VALUE
+;
+LiteralInfinity:
+	 '*'
+;
+Name:
+	ID | UNRESTRICTED_NAME
+;
+Qualification:
+	(Name '::')+
+;
+QualifiedName:
+	Qualification? Name
+;
+DECIMAL_VALUE:
+	'0' .. '9' ( '0' .. '9' ) *
+;
+EXP_VALUE:
+	DECIMAL_VALUE ( 'e' | 'E' ) ( '+' | '-' ) ? DECIMAL_VALUE
+;
+ID:
+	( 'a' .. 'z' | 'A' .. 'Z' | '_' ) ( 'a' .. 'z' | 'A' .. 'Z' | '_' | '0' .. '9' ) *
+;
+UNRESTRICTED_NAME:
+	'\'' ( '\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '"' | '\'' | '\\' ) | ! ( '\\' | '\'' ) ) * '\''
+;
+STRING_VALUE:
+	'"' ( '\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '"' | '\'' | '\\' ) | ! ( '\\' | '"' ) ) * '"'
+;
+REGULAR_COMMENT:
+	'/*' -> '*/'
+;
+ML_NOTE:
+	'//*' -> '*/'
+;
+SL_NOTE:
+	'//' ( ! ( '\n' | '\r' ) ! ( '\n' | '\r' ) * ) ? ( '\r' ? '\n' ) ?
+;
+WS:
+	( ' ' | '\t' | '\r' | '\n' ) +
+;

@@ -745,6 +745,10 @@ from .printer import (
     print_model,
     canonical,
 )
+from .reader import (
+    read_model,
+    ReadModel,
+)
 from . import printer as printer_module
 
 __all__ = [
@@ -1467,4 +1471,6 @@ __all__ = [
     "printer_module",
     "print_model",
     "canonical",
+    "read_model",
+    "ReadModel",
 ]
