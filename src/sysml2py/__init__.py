@@ -8,7 +8,7 @@ relationship model + corpus.  Provides generated AST node classes, a
 membership-dispatch table, and the canonical normalizer.
 """
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 
 # ruff: noqa: I001, RUF022  (generated 700-name re-export — alphabetical
 # sorting of the import block / __all__ is not meaningful for generated code)
