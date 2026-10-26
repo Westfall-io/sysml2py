@@ -1,16 +1,15 @@
 """read_model: load a .sysml file, edit it, emit lossless SysML.
 
-This is the read side of the read-modify-write loop.  A user script does::
+This is the read side of the read-modify-write loop.  It is part of the
+user-facing baseline: ``read_model`` is exported from ``sysml2py`` (the
+distributable) and re-exported by ``sysml2py_lab`` (the factory).  A user
+script does::
 
-    from sysml2py_lab import read_model
-    from sysml2py import PackageBuilder
+    from sysml2py import read_model, PackageBuilder
 
     model = read_model("file.sysml")        # -> an editable model (ReadModel)
     model.add(PackageBuilder("C"))          # edit with the normal builder API
     open("out.sysml", "w").write(model.dump())
-
-The parser lives HERE (the lab), per the agreed design (B): the distributable
-``sysml2py`` stays builder-only.
 
 Fidelity (cast-true): ``dump()`` is LOSSLESS at the *model* level.  The model
 wraps the parsed IR tree, and ``dump()`` renders it via ``render_ir`` — which
@@ -132,7 +131,9 @@ def read_model(
     Args:
         file: Path to the ``.sysml`` file to read.
         model_path: Optional path to the issue-6 ``children.json`` used to
-            classify kind/fidelity (default: repo spec relationships model).
+            refine kind classification.  If omitted, the embedded kind vocab
+            is used (always available, including in an installed distributable
+            where no ``spec/`` tree exists).
 
     Returns:
         A ``ReadModel`` whose ``dump()`` emits the lossless SysML text and
